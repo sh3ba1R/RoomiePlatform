@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">List Your Room</h2>
+    <p class="text-center">Fill out the details to list your room for potential roommates.</p>
+
+    <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
+        <form>
+            <div class="mb-3">
+                <label for="title" class="form-label">Room Title</label>
+                <input type="text" id="title" class="form-control" placeholder="E.g., Cozy Apartment in Riyadh" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="location" class="form-label">Location</label>
+                <input type="text" id="location" class="form-control" placeholder="E.g., Riyadh, Al Olaya" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="rent" class="form-label">Monthly Rent (SAR)</label>
+                <input type="number" id="rent" class="form-control" placeholder="E.g., 2000" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Room Description</label>
+                <textarea id="description" class="form-control" rows="4" placeholder="Describe your room and what you're looking for in a roommate" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="roomType" class="form-label">Room Type</label>
+                <select id="roomType" class="form-select" required>
+                    <option value="" disabled selected>Select room type</option>
+                    <option value="private">Private Room</option>
+                    <option value="shared">Shared Room</option>
+                    <option value="studio">Studio Apartment</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Upload Room Image</label>
+                <input type="file" id="image" class="form-control">
+            </div>
+
+            <button type="button" class="btn btn-success w-100" onclick="fakeSubmit()">List Room</button>
+        </form>
+    </div>
+</div>
+
+<!-- Fake Submit Script -->
+<script>
+    function fakeSubmit() {
+        alert("Your room has been listed! (This is just a frontend demo)");
+    }
+</script>
+{% endblock %}

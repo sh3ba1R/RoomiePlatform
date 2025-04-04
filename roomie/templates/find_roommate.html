@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Find a Roommate</h2>
+    <p class="text-center">Browse available roommates and find the perfect match.</p>
+
+    <div class="row mt-4">
+        <!-- Roommate Card Example 1 -->
+        <div class="col-md-4">
+            <div class="card shadow">
+                <img src="{% static 'roomie/images/user1.jpg' %}" class="card-img-top" alt="Roommate Image">
+                <div class="card-body">
+                    <h5 class="card-title">Ahmed Al-Saif</h5>
+                    <p class="card-text"><strong>Location:</strong> Riyadh, Al Olaya</p>
+                    <p class="card-text"><strong>Budget:</strong> 2500 SAR</p>
+                    <p class="card-text"><strong>Preferred Room Type:</strong> Private Room</p>
+                    <a href="#" class="btn btn-primary w-100">Contact</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roommate Card Example 2 -->
+        <div class="col-md-4">
+            <div class="card shadow">
+                <img src="{% static 'roomie/images/user2.jpg' %}" class="card-img-top" alt="Roommate Image">
+                <div class="card-body">
+                    <h5 class="card-title">Sara Al-Fahad</h5>
+                    <p class="card-text"><strong>Location:</strong> Jeddah, Al Hamra</p>
+                    <p class="card-text"><strong>Budget:</strong> 2000 SAR</p>
+                    <p class="card-text"><strong>Preferred Room Type:</strong> Shared Room</p>
+                    <a href="#" class="btn btn-primary w-100">Contact</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roommate Card Example 3 -->
+        <div class="col-md-4">
+            <div class="card shadow">
+                <img src="{% static 'roomie/images/user3.jpg' %}" class="card-img-top" alt="Roommate Image">
+                <div class="card-body">
+                    <h5 class="card-title">Mohammed Al-Khalid</h5>
+                    <p class="card-text"><strong>Location:</strong> Dammam, Al Shati</p>
+                    <p class="card-text"><strong>Budget:</strong> 3000 SAR</p>
+                    <p class="card-text"><strong>Preferred Room Type:</strong> Studio Apartment</p>
+                    <a href="#" class="btn btn-primary w-100">Contact</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

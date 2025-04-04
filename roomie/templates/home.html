@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h1 class="display-4">Welcome to Roomie</h1>
+    <p class="lead">Find your perfect roommate or list your room today!</p>
+
+    <div class="mt-4">
+        <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Register</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Login</a>
+    </div>
+
+    <div class="mt-5 row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">List Your Room</h5>
+                    <p class="card-text">Have an extra room? List it and find a great roommate.</p>
+                    <a href="{% url 'list_room' %}" class="btn btn-success">List a Room</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Find a Roommate</h5>
+                    <p class="card-text">Looking for a roommate? Browse available rooms and profiles.</p>
+                    <a href="{% url 'find_roommate' %}" class="btn btn-info">Find a Roommate</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
