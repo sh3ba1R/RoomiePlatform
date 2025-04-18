@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'roomie.apps.RoomieConfig',
+    'core',
+    'message',
 ]
 
 MIDDLEWARE = [
@@ -55,6 +57,9 @@ ROOT_URLCONF = 'RoomiePlatform.urls'
 
 TEMPLATES = [
     {
+
+        'DIRS': [os.path.join(BASE_DIR, 'roomie/templates')],  # Point to the templates directory inside your Roomie app
+
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
         'APP_DIRS': True,
