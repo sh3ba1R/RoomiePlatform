@@ -2,16 +2,25 @@
 
 A Django-based platform for university students to find roommates and shared accommodations.
 
+# RoomiePlatform Directory Structure
+
 RoomiePlatform/
-├── core/ # Core app with models
-├── message/ # Messaging functionality
-├── roomie/ # Main application
-│ ├── forms.py # Form definitions
-│ ├── views.py # View functions
-│ ├── urls.py # URL patterns
-│ └── templates/ # HTML templates
-└── templates/ # Project-wide templates
-└── base.html # Base template
+├── core/                # Core app with models
+
+├── message/             # Messaging functionality
+
+├── roomie/              # Main application
+
+│   ├── forms.py         # Form definitions
+
+│   ├── views.py         # View functions
+
+│   ├── urls.py          # URL patterns
+
+│   └── templates/       # HTML templates
+
+└── templates/           # Project-wide templates
+    └── base.html        # Base template
 
 ## Project Overview
 
