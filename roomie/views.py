@@ -60,6 +60,25 @@ def register(request):
     return render(request, register)
 
 def user_login(request):
+    """
+    Handle user authentication process.
+
+    This view function processes user login requests. When accessed via GET, it displays
+    the login form. When submitted via POST, it validates the credentials and authenticates
+    the user.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing metadata about the request.
+
+    Returns:
+        HttpResponse: Renders the login page with the authentication form. 
+                      If credentials are valid, redirects to home page.
+
+    Notes:
+        - Uses Django's built-in AuthenticationForm for validation
+        - On failed authentication, adds an error message to the form
+        - On successful login, redirects to 'home.html'
+    """
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
@@ -76,6 +95,20 @@ def user_login(request):
     return render(request, "login.html", {'form': form})
 
 def list_room(request):
+    """
+    Handle the room listing process through form submission.
+
+    This view function manages both the display of the room listing form (GET)
+    and the processing of room data (POST). Upon successful submission, the room
+    is associated with the current user as the owner.
+
+    Args:
+        request: HttpRequest object containing metadata about the request
+
+    Returns:
+        HttpResponse: Renders list_room.html with the form for GET requests,
+                      or redirects to 'home' after successful POST submission
+    """
     if request.method == 'POST':
         form = RoomForm(request.POST)
         if form.is_valid():
@@ -88,6 +121,18 @@ def list_room(request):
     return render(request, "list_room.html", {'form': form})
 
 def find_roommate(request):
+    """
+    Handle the creation and updating of roommate profiles.
+    This view function manages the process of creating a new roommate profile or updating 
+    an existing one. It handles both GET and POST requests:
+    - GET: Displays the roommate profile form (pre-populated if profile exists)
+    - POST: Processes the submitted form, saves the profile, and redirects to home
+    Parameters:
+        request (HttpRequest): The HTTP request object containing metadata about the request
+    Returns:
+        HttpResponse: Renders the 'find_roommate.html' template with the form on GET requests
+                      or redirects to 'home' on successful POST requests
+    """
     try:
         profile = RoommateProfile.objects.get(user=request.user)
     except RoommateProfile.DoesNotExist:
