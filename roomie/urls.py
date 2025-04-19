@@ -1,4 +1,15 @@
 from django.urls import path
+"""
+URL Configuration for the Roomie Platform application.
+This module defines the URL patterns that map to view functions in the application.
+Django uses these patterns to route incoming HTTP requests to the appropriate view.
+URL Patterns:
+- '': Maps to the home view (homepage)
+- 'register/': Maps to the user registration view
+- 'login/': Maps to the user login view
+- 'list-room/': Maps to the view for listing a room
+- 'find-roommate/': Maps to the view for finding potential roommates
+"""
 from . import views
 
 urlpatterns = [

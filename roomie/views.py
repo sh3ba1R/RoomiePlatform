@@ -18,6 +18,28 @@ def home(request):
     return render(request, "home.html")
 
 def register(request):
+    """
+    Handle user registration process.
+    Renders the registration form for GET requests. For POST requests,
+    validates the submitted data, creates a new user account, and logs in
+    the user if validation passes.
+    Parameters:
+    ----------
+    request : HttpRequest
+        The HTTP request object
+    Returns:
+    -------
+    HttpResponse
+        Renders the registration page for GET requests
+        Redirects to home page after successful registration
+        Redirects back to registration page with error messages on validation failure
+    Side effects:
+    ------------
+    - Creates a new User object in the database on successful registration
+    - Logs in the user on successful registration
+    - Displays error messages for validation failures (password mismatch, username taken)
+    """
+    register = "register.html"
     if request.method == 'POST':
         username = request.POST['username']
         email = request.POST['email']
@@ -26,16 +48,16 @@ def register(request):
 
         if password != confirm:
             messages.error(request, "Passwords do not match.")
-            return redirect("register.html")
+            return redirect(register)
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username already taken.")
-            return redirect("register.html")
+            return redirect(register)
 
         user = User.objects.create_user(username=username, email=email, password=password)
         login(request, user)
         return redirect("home.html")  # Redirect to home after registering
-    return render(request, "register.html")
+    return render(request, register)
 
 def user_login(request):
     if request.method == 'POST':

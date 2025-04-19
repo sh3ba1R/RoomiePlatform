@@ -69,6 +69,19 @@ class SupportTicket(models.Model):
     
 
 class Subscription(models.Model):
+    """
+    Represents a user subscription in the system.
+    This model tracks subscription details for users, including their plan type,
+    start and end dates, and active status.
+    Attributes:
+        user (OneToOneField): Link to the User model with cascade deletion.
+        plan (CharField): Subscription plan type - 'free', 'monthly', or 'yearly'.
+        start_date (DateField): When the subscription began (auto-set on creation).
+        end_date (DateField): When the subscription ends (optional).
+        is_active (BooleanField): Whether the subscription is currently active.
+    Methods:
+        __str__: Returns a string representation of the subscription.
+    """
     PLAN_CHOICES = [
         ('free', 'Free'),
         ('monthly', 'Monthly'),

@@ -1,6 +1,13 @@
 from django.contrib import admin
-
-from .models import Room, RoommateProfile, RoomBooking, RoomContract, SupportTicket,Subscription, Review
+from .models import (
+	Room,
+	RoomBooking,
+	RoomContract,
+    RoommateProfile,
+	SupportTicket,
+	Subscription,
+	Review,
+)
 
 # Register your models here
 admin.site.register(Room)
