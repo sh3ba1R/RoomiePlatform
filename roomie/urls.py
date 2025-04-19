@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 """
 URL Configuration for the Roomie Platform application.
 This module defines the URL patterns that map to view functions in the application.
