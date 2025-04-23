@@ -11,7 +11,6 @@ URL Patterns:
 - 'list-room/': Maps to the view for listing a room
 - 'find-roommate/': Maps to the view for finding potential roommates
 """
-from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),

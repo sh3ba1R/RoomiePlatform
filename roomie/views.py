@@ -5,9 +5,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from .models import RoommateProfile
-from .forms import RoomForm, RoommateProfileForm,RoomieFormFactory
-from core.models import RoommateProfile 
+from .forms import RoomieFormFactory,RoomieForms
+ 
 
 
 
@@ -114,17 +113,17 @@ def list_room(request):
 
     Returns:
         HttpResponse: Renders list_room.html with the form for GET requests,
-                      or redirects to 'home' after successful POST submission
+        or redirects to 'home' after successful POST submission
     """
     if request.method == 'POST':
-        form = RoomForm(request.POST)
+        form = RoomieForms.RoomForm(request.POST)
         if form.is_valid():
             room = form.save(commit=False)
             room.owner = request.user
             room.save()
             return redirect('home')
     else:
-        form = RoomForm()
+        form = RoomieForms.RoomForm
     return render(request, "list_room.html", {'form': form})
 
 def find_roommate(request):
@@ -138,21 +137,21 @@ def find_roommate(request):
         request (HttpRequest): The HTTP request object containing metadata about the request
     Returns:
         HttpResponse: Renders the 'find_roommate.html' template with the form on GET requests
-                      or redirects to 'home' on successful POST requests
+        or redirects to 'home' on successful POST requests
     """
     try:
-        profile = RoommateProfile.objects.get(user=request.user)
-    except RoommateProfile.DoesNotExist:
+        profile = User.objects.get(user=request.user)
+    except User.DoesNotExist:
         profile = None
 
     if request.method == 'POST':
-        form = RoommateProfileForm(request.POST, instance=profile)
+        form = RoomieForms.UserForm(request.POST, instance=profile)
         if form.is_valid():
             roommate_profile = form.save(commit=False)
             roommate_profile.user = request.user
             roommate_profile.save()
             return redirect('home')
     else:
-        form = RoommateProfileForm(instance=profile)
+        form = RoomieForms.UserForm(instance=profile)
     
     return render(request, 'find_roommate.html', {'form': form})

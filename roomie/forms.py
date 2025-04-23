@@ -1,8 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from core.models import Room, RoommateProfile, RoomBooking, RoomContract, SupportTicket, Subscription, Review
-from message.models import Message
-
+from core.models import Room, User, RoomBooking, RoomContract, SupportTicket, Subscription, RoomReview, UserReview
 
 class RoomieForms:
     """
@@ -32,23 +30,25 @@ class RoomieForms:
         or editing room advertisements on the platform.
 
         Fields:
+            - RoomID
+            - provider
             - title: Title of the room listing
             - description: Detailed description of the room
             - location: Geographic location of the room
             - price: Monthly rent price
-            - available_from: Date when the room becomes available
+            - roomType
+            - Is available: Date when the room becomes available
+            - created at
 
         Widgets:
             - available_from: Uses a date input widget for better date selection
         """
         class Meta:
             model = Room
-            fields = ['title', 'location' , 'description', 'rent', 'available_from']
-            widgets = {
-                'available_from': forms.DateInput(attrs={'type': 'date'}),
-            }
+            fields = ['provider', 'title', 'description', 'location', 'rent', 'room_type', 'is_available', 'image']
 
-    class RoommateProfileForm(forms.ModelForm):
+
+    class UserForm(forms.ModelForm):
         """
         Form for creating or updating a roommate profile.
 
@@ -56,12 +56,10 @@ class RoomieForms:
         for basic personal information such as age, gender, occupation, and bio.
         The bio field is rendered as a text area with 4 rows for better user experience.
         """
+        email = forms.EmailField(required=True)
         class Meta:
-            model = RoommateProfile
-            fields = ['age', 'gender', 'occupation', 'bio']
-            widgets = {
-                'bio': forms.Textarea(attrs={'rows': 4}),
-            }
+            model = User
+            fields = ['username', 'email', 'gender', 'birthdate', 'bio', 'location', 'profile_photo', 'account_type']
 
     class RoomBookingForm(forms.ModelForm):
         """
@@ -71,11 +69,8 @@ class RoomieForms:
         """
         class Meta:
             model = RoomBooking
-            fields = ['room', 'start_date', 'end_date']
-            widgets = {
-                'start_date': forms.DateInput(attrs={'type': 'date'}),
-                'end_date': forms.DateInput(attrs={'type': 'date'}),
-            }
+            fields = ['room', 'seeker', 'start_date', 'end_date', 'status']
+
 
     class RoomContractForm(forms.ModelForm):
         """
@@ -85,12 +80,8 @@ class RoomieForms:
         """
         class Meta:
             model = RoomContract
-            fields = ['room', 'user', 'contract_text', 'start_date', 'end_date']
-            widgets = {
-                'start_date': forms.DateInput(attrs={'type': 'date'}),
-                'end_date': forms.DateInput(attrs={'type': 'date'}),
-                'contract_text': forms.Textarea(attrs={'rows': 6}),
-            }
+            fields = ['room', 'seeker', 'provider', 'start_date', 'end_date', 'rent_amount', 'status']
+
 
     class SupportTicketForm(forms.ModelForm):
         """
@@ -100,10 +91,8 @@ class RoomieForms:
         """
         class Meta:
             model = SupportTicket
-            fields = ['subject', 'message']
-            widgets = {
-                'message': forms.Textarea(attrs={'rows': 5}),
-            }
+            fields = ['user', 'title', 'description', 'status']
+
 
     class SubscriptionForm(forms.ModelForm):
         """
@@ -113,33 +102,30 @@ class RoomieForms:
         """
         class Meta:
             model = Subscription
-            fields = ['plan', 'payment_method']
+            fields = ['user', 'plan', 'end_date', 'is_active']
 
-    class ReviewForm(forms.ModelForm):
-        """
-        Form for submitting room reviews.
-        
-        Allows users to rate and comment on rooms they've stayed in.
-        """
+    class RoomReviewForm(forms.ModelForm):
         class Meta:
-            model = Review
-            fields = ['room', 'rating', 'comment']
-            widgets = {
-                'comment': forms.Textarea(attrs={'rows': 4}),
-            }
+            model = RoomReview
+            fields = ['booking', 'rating', 'comment']
 
-    class MessageForm(forms.ModelForm):
+    class UserReviewForm(forms.ModelForm):
+        class Meta:
+            model = UserReview
+            fields = ['reviewer', 'reviewee', 'rating', 'comment']    
+
+   # class MessageForm(forms.ModelForm):
         """
         Form for sending messages to other users.
         
         Allows communication between roommates, tenants, and landlords.
         """
-        class Meta:
-            model = Message
-            fields = ['recipient', 'content']
-            widgets = {
-                'content': forms.Textarea(attrs={'rows': 3}),
-            }
+        #class Meta:
+            #model = Message
+            #fields = ['recipient', 'content']
+            #widgets = {
+            #'content': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Type your message here...'}),
+        #}
 
     class LoginForm(AuthenticationForm):
         """
@@ -211,7 +197,7 @@ class RoomieFormFactory:
         Returns:
             An instance of the RoommateProfile form
         """
-        return RoomieForms.RoommateProfileForm(data=data, instance=instance)
+        return RoomieForms.UserForm(data=data, instance=instance)
     
     def create_booking_form(self, data=None, instance=None):
         """
@@ -265,7 +251,7 @@ class RoomieFormFactory:
         """
         return RoomieForms.SubscriptionForm(data=data, instance=instance)
     
-    def create_review_form(self, data=None, instance=None):
+    def create_User_review_form(self, data=None, instance=None):
         """
         Creates a form for reviews.
         
@@ -276,9 +262,21 @@ class RoomieFormFactory:
         Returns:
             An instance of the Review form
         """
-        return RoomieForms.ReviewForm(data=data, instance=instance)
+        return RoomieForms.UserReviewForm(data=data, instance=instance)
+    def create_Room_review_form(self, data=None, instance=None):
+        """
+        Creates a form for reviews.
+        
+        Args:
+            data: Form data for binding (optional)
+            instance: Review instance to edit (optional)
+            
+        Returns:
+            An instance of the Review form
+        """
+        return RoomieForms.RoomReviewForm(data=data, instance=instance)
     
-    def create_message_form(self, data=None, instance=None):
+    #def create_message_form(self, data=None, instance=None):
         """
         Creates a form for messages.
         
@@ -290,4 +288,4 @@ class RoomieFormFactory:
         
             An instance of the Message form
         """
-        return RoomieForms.MessageForm(data=data, instance=instance)
+        #return RoomieForms.MessageForm(data=data, instance=instance)

@@ -45,7 +45,7 @@ class Room(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     location = models.CharField(max_length=255)
-    price_per_month = models.DecimalField(max_digits=8, decimal_places=2)
+    rent = models.DecimalField(max_digits=8, decimal_places=2)
     room_type = models.CharField(max_length=20, choices=[
         ('private', 'Private Room'),
         ('shared', 'Shared Room'),
@@ -58,21 +58,6 @@ class Room(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.location}"
-
-class RoommateProfile(models.Model): # no need for this
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField()
-    preferred_location = models.CharField(max_length=100)
-    budget = models.DecimalField(max_digits=8, decimal_places=2)
-    gender = models.CharField(max_length=20, choices=[
-        ('Male', 'Male'),
-        ('Female', 'Female'),
-        ('Other', 'Other')
-    ])
-    is_smoker = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.user.username}'s Profile"
 
 # Optional: Track interest in a room
 class RoomBooking(models.Model):
@@ -186,3 +171,15 @@ class UserReview(models.Model):
     def __str__(self):
         return f"Review by {self.reviewer.username} for {self.reviewee.username} ({self.rating}/5)"
 
+# Message Model
+class Message(models.Model):
+    message_id = models.AutoField(primary_key=True)
+    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
+    subject = models.CharField(max_length=255)
+    body = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"From {self.sender} to {self.recipient}: {self.subject}"

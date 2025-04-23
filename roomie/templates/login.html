@@ -5,33 +5,29 @@
 <div class="container d-flex justify-content-center align-items-center" style="height: 80vh;">
     <div class="card shadow p-4" style="width: 400px;">
         <h2 class="text-center">Login</h2>
-        <form>
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
+        <form method="POST">
+            {% csrf_token %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p style="color: red;">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        
+            <div class="form-group">
+                {{ form.username.label_tag }}
+                {{ form.username }}
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+        
+            <div class="form-group">
+                {{ form.password.label_tag }}
+                {{ form.password }}
             </div>
-            <button type="button" class="btn btn-primary w-100" onclick="fakeLogin()">Login</button>
+        
+            <button type="submit">Login</button>
         </form>
         <p class="text-center mt-3">Don't have an account? <a href="{% url 'register' %}">Register</a></p>
     </div>
 </div>
 
-<!-- Fake Login Script -->
-<script>
-    function fakeLogin() {
-        let username = document.getElementById('username').value;
-        let password = document.getElementById('password').value;
-
-        if (username && password) {
-            alert("Login successful! (This is just a frontend demo)");
-        } else {
-            alert("Please enter both username and password.");
-        }
-    }
-</script>
 {% endblock %}
 

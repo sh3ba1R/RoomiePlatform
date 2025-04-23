@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'roomie.apps.RoomieConfig',
     'core',
-    'message',
 ]
 
 MIDDLEWARE = [
