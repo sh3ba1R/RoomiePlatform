@@ -3,51 +3,26 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center">Find a Roommate</h2>
-    <p class="text-center">Browse available roommates and find the perfect match.</p>
+    <h2 class="text-center">Available Rooms</h2>
+    <p class="text-center">Browse available rooms and find the perfect match for your needs.</p>
 
     <div class="row mt-4">
-        <!-- Roommate Card Example 1 -->
-        <div class="col-md-4">
-            <div class="card shadow">
-                <img src="{% static 'roomie/images/user1.jpg' %}" class="card-img-top" alt="Roommate Image">
-                <div class="card-body">
-                    <h5 class="card-title">Ahmed Al-Saif</h5>
-                    <p class="card-text"><strong>Location:</strong> Riyadh, Al Olaya</p>
-                    <p class="card-text"><strong>Budget:</strong> 2500 SAR</p>
-                    <p class="card-text"><strong>Preferred Room Type:</strong> Private Room</p>
-                    <a href="#" class="btn btn-primary w-100">Contact</a>
+        {% for room in rooms %}
+            <div class="col-md-4 mb-4">
+                <div class="card shadow">
+                    <img src="{{ room.image.url }}" class="card-img-top" alt="{{ room.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ room.title }}</h5>
+                        <p class="card-text"><strong>Location:</strong> {{ room.location }}</p>
+                        <p class="card-text"><strong>Rent:</strong> {{ room.rent }} SAR / month</p>
+                        <p class="card-text"><strong>Room Type:</strong> {{ room.get_room_type_display }}</p>
+                        <a href="{% url 'room_detail' room.id %}" class="btn btn-primary w-100">View Details</a>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Roommate Card Example 2 -->
-        <div class="col-md-4">
-            <div class="card shadow">
-                <img src="{% static 'roomie/images/user2.jpg' %}" class="card-img-top" alt="Roommate Image">
-                <div class="card-body">
-                    <h5 class="card-title">Sara Al-Fahad</h5>
-                    <p class="card-text"><strong>Location:</strong> Jeddah, Al Hamra</p>
-                    <p class="card-text"><strong>Budget:</strong> 2000 SAR</p>
-                    <p class="card-text"><strong>Preferred Room Type:</strong> Shared Room</p>
-                    <a href="#" class="btn btn-primary w-100">Contact</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Roommate Card Example 3 -->
-        <div class="col-md-4">
-            <div class="card shadow">
-                <img src="{% static 'roomie/images/user3.jpg' %}" class="card-img-top" alt="Roommate Image">
-                <div class="card-body">
-                    <h5 class="card-title">Mohammed Al-Khalid</h5>
-                    <p class="card-text"><strong>Location:</strong> Dammam, Al Shati</p>
-                    <p class="card-text"><strong>Budget:</strong> 3000 SAR</p>
-                    <p class="card-text"><strong>Preferred Room Type:</strong> Studio Apartment</p>
-                    <a href="#" class="btn btn-primary w-100">Contact</a>
-                </div>
-            </div>
-        </div>
+        {% empty %}
+            <p class="text-center">No rooms available at the moment. Please check back later.</p>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

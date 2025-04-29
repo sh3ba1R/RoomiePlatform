@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, HttpResponse
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 from .forms import RoomieFormFactory,RoomieForms
- 
+
 
 
 
@@ -126,32 +126,8 @@ def list_room(request):
         form = RoomieForms.RoomForm
     return render(request, "list_room.html", {'form': form})
 
-def find_roommate(request):
-    """
-    Handle the creation and updating of roommate profiles.
-    This view function manages the process of creating a new roommate profile or updating 
-    an existing one. It handles both GET and POST requests:
-    - GET: Displays the roommate profile form (pre-populated if profile exists)
-    - POST: Processes the submitted form, saves the profile, and redirects to home
-    Parameters:
-        request (HttpRequest): The HTTP request object containing metadata about the request
-    Returns:
-        HttpResponse: Renders the 'find_roommate.html' template with the form on GET requests
-        or redirects to 'home' on successful POST requests
-    """
-    try:
-        profile = User.objects.get(user=request.user)
-    except User.DoesNotExist:
-        profile = None
+User = get_user_model()  # Get the custom user model
 
-    if request.method == 'POST':
-        form = RoomieForms.UserForm(request.POST, instance=profile)
-        if form.is_valid():
-            roommate_profile = form.save(commit=False)
-            roommate_profile.user = request.user
-            roommate_profile.save()
-            return redirect('home')
-    else:
-        form = RoomieForms.UserForm(instance=profile)
-    
-    return render(request, 'find_roommate.html', {'form': form})
+def find_roommate(request):
+    roommates = User.objects.filter(account_type='seeker')  # Fetch only seekers
+    return render(request, "find_roommate.html", {'roommates': roommates})
