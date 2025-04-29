@@ -1,6 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
-from core.models import Room, User, RoomBooking, RoomContract, SupportTicket, Subscription, RoomReview, UserReview
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from core.models import Room, User, RoomBooking, RoomContract, SupportTicket, Subscription, RoomReview, UserReview, Message
 
 class RoomieForms:
     """
@@ -47,8 +47,22 @@ class RoomieForms:
             model = Room
             fields = ['provider', 'title', 'description', 'location', 'rent', 'room_type', 'is_available', 'image']
 
-
-    class UserForm(forms.ModelForm):
+    class UserForm(UserCreationForm):
+        """
+        Custom user registration form extending UserCreationForm.
+        Includes additional fields for gender, birthdate, bio, location, profile photo, and account type.
+        """
+        class Meta:
+            model = User
+            fields = ['username', 'email', 'gender', 'birthdate', 'bio', 'location', 'profile_photo', 'account_type']
+            widgets = {
+                'birthdate': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+                'bio': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+                'profile_photo': forms.FileInput(attrs={'class': 'form-control'}),
+                'account_type': forms.Select(attrs={'class': 'form-control'}),
+        }
+            
+    class UserProfileForm(forms.ModelForm):
         """
         Form for creating or updating a roommate profile.
 
@@ -151,6 +165,17 @@ class RoomieForms:
                 'placeholder': 'Enter your password'
             })
 
+    class MessageForm(forms.ModelForm):
+        """
+        Form for sending messages to other users.
+        """
+        class Meta:
+            model = Message
+            fields = ['subject', 'body']
+            widgets = {
+                'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter subject'}),
+                'body': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Type your message here...'}),
+        }
 
 class RoomieFormFactory:
     """
@@ -263,6 +288,7 @@ class RoomieFormFactory:
             An instance of the Review form
         """
         return RoomieForms.UserReviewForm(data=data, instance=instance)
+    
     def create_Room_review_form(self, data=None, instance=None):
         """
         Creates a form for reviews.

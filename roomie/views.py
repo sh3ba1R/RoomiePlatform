@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 
 from .forms import RoomieFormFactory,RoomieForms
 
-
+User = get_user_model()  # Get the custom user model
 
 
 
@@ -17,45 +17,21 @@ def home(request):
 
 def register(request):
     """
-    Handle user registration process.
-    Renders the registration form for GET requests. For POST requests,
-    validates the submitted data, creates a new user account, and logs in
-    the user if validation passes.
-    Parameters:
-    ----------
-    request : HttpRequest
-        The HTTP request object
-    Returns:
-    -------
-    HttpResponse
-        Renders the registration page for GET requests
-        Redirects to home page after successful registration
-        Redirects back to registration page with error messages on validation failure
-    Side effects:
-    ------------
-    - Creates a new User object in the database on successful registration
-    - Logs in the user on successful registration
-    - Displays error messages for validation failures (password mismatch, username taken)
+    Simplified user registration process with proper password handling.
     """
-    register = "register.html"
     if request.method == 'POST':
-        username = request.POST['username']
-        email = request.POST['email']
-        password = request.POST['password']
-        confirm = request.POST['confirm']
+        form = RoomieForms.UserForm(request.POST, request.FILES)  # Handle form data and file uploads
+        if form.is_valid():
+            form.save()  # Save the user to the database
+            messages.success(request, "Your account has been created successfully!")
+            return redirect('login')  # Redirect to the login page
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = RoomieForms.UserForm()  # Instantiate an empty form
 
-        if password != confirm:
-            messages.error(request, "Passwords do not match.")
-            return redirect(register)
+    return render(request, 'register.html', {'form': form})
 
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already taken.")
-            return redirect(register)
-
-        user = User.objects.create_user(username=username, email=email, password=password)
-        login(request, user)
-        return redirect("home.html")  # Redirect to home after registering
-    return render(request, register)
 
 def user_login(request):
     """
@@ -126,8 +102,36 @@ def list_room(request):
         form = RoomieForms.RoomForm
     return render(request, "list_room.html", {'form': form})
 
-User = get_user_model()  # Get the custom user model
+
 
 def find_roommate(request):
     roommates = User.objects.filter(account_type='seeker')  # Fetch only seekers
     return render(request, "find_roommate.html", {'roommates': roommates})
+
+def send_message(request, user_id):
+    """
+    View to send a message to a specific user.
+    """
+    recipient = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        form = RoomieForms.MessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.sender = request.user
+            message.recipient = recipient
+            message.save()
+            messages.success(request, "Message sent successfully!")
+            return redirect('find_roommate')  # Redirect to the roommate list or another page
+    else:
+        form = RoomieForms.MessageForm()
+
+    return render(request, 'send_message.html', {'form': form, 'recipient': recipient})
+
+
+
+def user_profile(request, user_id):
+    """
+    View to display the profile of a specific user.
+    """
+    user = get_object_or_404(User, id=user_id)  # Fetch the user by ID or return a 404 if not found
+    return render(request, 'user_profile.html', {'user': user})

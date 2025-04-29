@@ -5,32 +5,32 @@
 <div class="container d-flex justify-content-center align-items-center" style="height: 90vh;">
     <div class="card shadow p-4" style="width: 400px;">
         <h2 class="text-center mb-4">Create Your Account</h2>
-        <form method="POST">
+
+        <!-- Display success and error messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
             
-            <div class="mb-3">
-                {{ form.username.label_tag }}
-                {{ form.username }}
-            </div>
-            <div class="mb-3">
-                {{ form.email.label_tag }}
-                {{ form.email }}
-            </div>
-            <div class="mb-3">
-                {{ form.password1.label_tag }}
-                {{ form.password1 }}
-            </div>
-            <div class="mb-3">
-                {{ form.password2.label_tag }}
-                {{ form.password2 }}
-            </div>
+            <!-- Render form fields dynamically -->
+            {% for field in form %}
+                <div class="mb-3">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="text-danger small">
+                            {{ field.errors|join:", " }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
             <button type="submit" class="btn btn-success w-100">Register</button>
         </form>
         <p class="text-center mt-3">Already have an account? <a href="{% url 'login' %}">Login</a></p>

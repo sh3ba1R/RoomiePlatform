@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Send a Message to {{ recipient.username }}</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary w-100">Send Message</button>
+    </form>
+</div>
+{% endblock %}

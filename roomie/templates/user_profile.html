@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow p-4">
+        <div class="text-center">
+            {% if user.profile_photo %}
+                <img src="{{ user.profile_photo.url }}" class="rounded-circle mb-3" style="width: 150px; height: 150px;" alt="{{ user.username }}">
+            {% else %}
+                <img src="{% static 'roomie/images/default_user.jpg' %}" class="rounded-circle mb-3" style="width: 150px; height: 150px;" alt="Default User Image">
+            {% endif %}
+            <h2>{{ user.username }}</h2>
+            <p class="text-muted">{{ user.email }}</p>
+        </div>
+        <hr>
+        <div>
+            <h4>About</h4>
+            <p>{{ user.bio|default:"No bio provided" }}</p>
+        </div>
+        <div>
+            <h4>Location</h4>
+            <p>{{ user.location|default:"Location not provided" }}</p>
+        </div>
+        <div>
+            <h4>Account Type</h4>
+            <p>{{ user.get_account_type_display }}</p>
+        </div>
+        <div>
+            <h4>Gender</h4>
+            <p>{{ user.get_gender_display|default:"Not specified" }}</p>
+        </div>
+        <div>
+            <h4>Birthdate</h4>
+            <p>{{ user.birthdate|date:"F j, Y"|default:"Not provided" }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

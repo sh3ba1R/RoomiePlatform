@@ -17,11 +17,8 @@
                 {% endif %}
                 <div class="card-body text-center">
                     <h5 class="card-title mb-1">{{ roommate.username }}</h5>
-                    <p class="text-muted mb-1"><i class="bi bi-geo-alt"></i> {{ roommate.location }}</p>
-                    {% if roommate.account_type == 'seeker' %}
-                        <p class="mb-1"><strong>Budget:</strong> {{ roommate.budget }} SAR</p>
-                        <p class="mb-3"><strong>Preferences:</strong> {{ roommate.preferences }}</p>
-                    {% endif %}
+                    <p class="text-muted mb-1"><i class="bi bi-geo-alt"></i> {{ roommate.location|default:"Location not provided" }}</p>
+                    <p class="mb-3"><strong>Bio:</strong> {{ roommate.bio|default:"No bio provided" }}</p>
                     <a href="{% url 'user_profile' roommate.id %}" class="btn btn-outline-primary btn-sm mb-2">View Profile</a>
                     <a href="{% url 'send_message' roommate.id %}" class="btn btn-primary btn-sm">Contact</a>
                 </div>
