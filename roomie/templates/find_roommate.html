@@ -3,24 +3,27 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center mb-2">Find a Roommate</h2>
-    <p class="text-center text-muted mb-4">Browse available roommates and connect with your ideal match.</p>
+    <h2 class="text-center mb-2">Find Your Ideal Roommate</h2>
+    <p class="text-center text-muted mb-4">Browse profiles and connect with potential roommates that match your preferences.</p>
 
     <div class="row g-4">
         {% for roommate in roommates %}
         <div class="col-md-4">
             <div class="card h-100 shadow-sm">
-                {% if roommate.image %}
-                    <img src="{{ roommate.image.url }}" class="card-img-top" alt="{{ roommate.name }}">
+                {% if roommate.profile_photo %}
+                    <img src="{{ roommate.profile_photo.url }}" class="card-img-top rounded-circle mx-auto mt-3" style="width: 150px; height: 150px;" alt="{{ roommate.username }}">
                 {% else %}
-                    <img src="{% static 'roomie/images/default_user.jpg' %}" class="card-img-top" alt="Default Roommate Image">
+                    <img src="{% static 'roomie/images/default_user.jpg' %}" class="card-img-top rounded-circle mx-auto mt-3" style="width: 150px; height: 150px;" alt="Default Roommate Image">
                 {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title mb-1">{{ roommate.name }}</h5>
-                    <p class="text-muted mb-1"><i class="bi bi-geo-alt"></i> {{ roommate.city }}, {{ roommate.area }}</p>
-                    <p class="mb-1"><strong>Budget:</strong> {{ roommate.budget }} SAR</p>
-                    <p class="mb-3"><strong>Room Type:</strong> {{ roommate.room_type }}</p>
-                    <a href="{% url 'send_message' roommate.id %}" class="btn btn-primary w-100">Contact</a>
+                <div class="card-body text-center">
+                    <h5 class="card-title mb-1">{{ roommate.username }}</h5>
+                    <p class="text-muted mb-1"><i class="bi bi-geo-alt"></i> {{ roommate.location }}</p>
+                    {% if roommate.account_type == 'seeker' %}
+                        <p class="mb-1"><strong>Budget:</strong> {{ roommate.budget }} SAR</p>
+                        <p class="mb-3"><strong>Preferences:</strong> {{ roommate.preferences }}</p>
+                    {% endif %}
+                    <a href="{% url 'user_profile' roommate.id %}" class="btn btn-outline-primary btn-sm mb-2">View Profile</a>
+                    <a href="{% url 'send_message' roommate.id %}" class="btn btn-primary btn-sm">Contact</a>
                 </div>
             </div>
         </div>

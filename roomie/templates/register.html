@@ -4,24 +4,32 @@
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="height: 90vh;">
     <div class="card shadow p-4" style="width: 400px;">
-        <h2 class="text-center">Register</h2>
+        <h2 class="text-center mb-4">Create Your Account</h2>
         <form method="POST">
             {% csrf_token %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
             <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" name="username" id="username" class="form-control" required>
+                {{ form.username.label_tag }}
+                {{ form.username }}
             </div>
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" name="email" id="email" class="form-control" required>
+                {{ form.email.label_tag }}
+                {{ form.email }}
             </div>
             <div class="mb-3">
-                <label for="password1" class="form-label">Password</label>
-                <input type="password" name="password1" id="password1" class="form-control" required>
+                {{ form.password1.label_tag }}
+                {{ form.password1 }}
             </div>
             <div class="mb-3">
-                <label for="password2" class="form-label">Confirm Password</label>
-                <input type="password" name="password2" id="password2" class="form-control" required>
+                {{ form.password2.label_tag }}
+                {{ form.password2 }}
             </div>
             <button type="submit" class="btn btn-success w-100">Register</button>
         </form>

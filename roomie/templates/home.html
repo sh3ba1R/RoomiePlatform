@@ -1,34 +1,59 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container text-center mt-5">
-    <h1 class="display-4">Welcome to Roomie</h1>
-    <p class="lead">Find your perfect roommate or list your room today!</p>
-
-    <div class="mt-4">
-        <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Register</a>
-        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Login</a>
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="display-4">Find Your Perfect Roommate</h1>
+        <p class="lead">Browse rooms, connect with roommates, and make your living experience better.</p>
+        <div class="mt-4">
+            {% if user.is_authenticated %}
+                <a href="{% url 'list_room' %}" class="btn btn-primary btn-lg">List Your Room</a>
+                <a href="{% url 'find_roommate' %}" class="btn btn-outline-primary btn-lg">Find a Roommate</a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Get Started</a>
+                <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Login</a>
+            {% endif %}
+        </div>
     </div>
 
-    <div class="mt-5 row">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">List Your Room</h5>
-                    <p class="card-text">Have an extra room? List it and find a great roommate.</p>
-                    <a href="{% url 'find_roommate' %}" class="btn btn-success">List a Room</a>
+    <div class="mt-5">
+        <h2 class="text-center">Featured Rooms</h2>
+        <div class="row mt-4">
+            {% for room in featured_rooms %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <img src="{{ room.image.url }}" class="card-img-top" alt="{{ room.title }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ room.title }}</h5>
+                            <p class="card-text">{{ room.location }}</p>
+                            <p class="card-text"><strong>${{ room.rent }}</strong> / month</p>
+                            <a href="{% url 'room_detail' room.id %}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            {% empty %}
+                <p class="text-center">No featured rooms available at the moment.</p>
+            {% endfor %}
         </div>
+    </div>
 
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Find a Roommate</h5>
-                    <p class="card-text">Looking for a roommate? Browse available rooms and profiles.</p>
-                    <a href="{% url 'list_room' %}" class="btn btn-info">Find a Roommate</a>
+    <div class="mt-5">
+        <h2 class="text-center">Meet Our Roommates</h2>
+        <div class="row mt-4">
+            {% for user in featured_users %}
+                <div class="col-md-3 mb-4">
+                    <div class="card shadow-sm text-center">
+                        <img src="{{ user.profile_photo.url }}" class="card-img-top rounded-circle mx-auto mt-3" style="width: 100px; height: 100px;" alt="{{ user.username }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ user.username }}</h5>
+                            <p class="card-text">{{ user.location }}</p>
+                            <a href="{% url 'user_profile' user.id %}" class="btn btn-outline-primary btn-sm">View Profile</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            {% empty %}
+                <p class="text-center">No featured roommates available at the moment.</p>
+            {% endfor %}
         </div>
     </div>
 </div>
