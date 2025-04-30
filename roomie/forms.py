@@ -83,8 +83,11 @@ class RoomieForms:
         """
         class Meta:
             model = RoomBooking
-            fields = ['room', 'seeker', 'start_date', 'end_date', 'status']
-
+            fields = ['start_date', 'end_date']  # Only include fields relevant to seekers
+            widgets = {
+                'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+                'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
 
     class RoomContractForm(forms.ModelForm):
         """

@@ -1,13 +1,13 @@
-{% extends 'base.html' %} 
-{% load static %} 
+{% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
 <div class="container">
   <!-- Hero Section -->
   <div class="text-center mb-5">
     <h2 class="display-5 fw-bold mb-3">Find Your Ideal Roommate</h2>
     <p class="lead text-muted mb-4">
-      Connect with potential roommates that match your lifestyle and
-      preferences.
+      Connect with potential roommates that match your lifestyle and preferences.
     </p>
   </div>
 
@@ -54,54 +54,63 @@
         <div class="col-md-4">
           <select name="account_type" class="form-select">
             <option value="">All Account Types</option>
-            <option value="seeker" {% if request.GET.account_type == 'seeker' %}selected{% endif %}>Roommate Seekers</option>
-            <option value="provider" {% if request.GET.account_type == 'provider' %}selected{% endif %}>Room Providers</option>
+            <option value="seeker" {% if request.GET.account_type == 'seeker' %}selected{% endif %}>
+              Roommate Seekers
+            </option>
+            <option value="provider" {% if request.GET.account_type == 'provider' %}selected{% endif %}>
+              Room Providers
+            </option>
           </select>
         </div>
 
-        <!-- Additional filters in a collapse section -->
-        <div class="col-12">
-          <a 
-            class="btn btn-sm btn-outline-secondary" 
-            data-bs-toggle="collapse" 
-            href="#advancedFilters" 
-            role="button" 
-            aria-expanded="false"
-          >
-            <i class="fas fa-sliders-h me-1"></i> Advanced Filters
-          </a>
+        <!-- Submit button -->
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search me-1"></i> Search
+          </button>
         </div>
+      </form>
+    </div>
+  </div>
 
-        <div class="col-12 collapse" id="advancedFilters">
-          <div class="card card-body border-0 bg-light mt-2">
-            <div class="row g-3">
-              <!-- Gender filter -->
-              <div class="col-md-4">
-                <label class="form-label small">Gender</label>
-                <div class="d-flex gap-3">
-                  <div class="form-check">
-                    <input class="form-check-input" type="
-              {% elif roommate.gender == 'female' %}
-              <i class="fas fa-venus me-1"></i>
-              {% else %}
-              <i class="fas fa-genderless me-1"></i>
-              {% endif %} {{ roommate.get_gender_display }}
-            </span>
-            {% endif %} {% if roommate.birthdate %}
-            <span class="feature-badge">
-              <i class="fas fa-birthday-cake me-1"></i>
-              {{ roommate.birthdate|timesince }} old
-            </span>
-            {% endif %}
-          </div>
+  <!-- Roommate Profiles Section -->
+  <div class="row g-4">
+    {% for roommate in roommates %}
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <!-- Profile Photo -->
+        {% if roommate.profile_photo %}
+        <img
+          src="{{ roommate.profile_photo.url }}"
+          class="card-img-top"
+          style="height: 200px; object-fit: cover;"
+          alt="{{ roommate.username }}"
+        />
+        {% else %}
+        <img
+          src="/media/profile_photos/default_user.jpg"
+          class="card-img-top"
+          style="height: 200px; object-fit: cover;"
+          alt="Default Profile"
+        />
+        {% endif %}
 
-          <!-- Bio excerpt -->
+        <!-- Roommate Details -->
+        <div class="card-body">
+          <h5 class="card-title">{{ roommate.username }}</h5>
+          <p class="card-text text-muted mb-2">
+            <i class="fas fa-map-marker-alt me-1"></i>
+            {{ roommate.location|default:"Location not provided" }}
+          </p>
           <p class="card-text small mb-3">
-            {% if roommate.bio %} {{ roommate.bio|truncatechars:60 }} {% else %}
-            No bio provided {% endif %}
+            {% if roommate.bio %}
+              {{ roommate.bio|truncatechars:60 }}
+            {% else %}
+              No bio provided
+            {% endif %}
           </p>
 
-          <!-- Action buttons -->
+          <!-- Action Buttons -->
           <div class="d-grid gap-2">
             <a
               href="{% url 'user_profile' roommate.id %}"
@@ -123,29 +132,30 @@
     <div class="col-12 text-center">
       <div class="alert alert-info py-4">
         <i class="fas fa-info-circle me-2"></i>
-        No roommate profiles found at the moment. Check back soon or be the
-        first to create a profile!
+        No roommate profiles found at the moment. Check back soon or be the first to create a profile!
       </div>
     </div>
     {% endfor %}
   </div>
 
-  <!-- Pagination - if needed -->
+  <!-- Pagination -->
   {% if roommates.has_other_pages %}
   <nav class="mt-5">
     <ul class="pagination justify-content-center">
       {% if roommates.has_previous %}
       <li class="page-item">
-        <a class="page-link" href="?page={{ roommates.previous_page_number }}"
-          >&laquo; Previous</a
-        >
+        <a class="page-link" href="?page={{ roommates.previous_page_number }}">
+          &laquo; Previous
+        </a>
       </li>
       {% else %}
       <li class="page-item disabled">
         <span class="page-link">&laquo; Previous</span>
       </li>
-      {% endif %} {% for i in roommates.paginator.page_range %} {% if
-      roommates.number == i %}
+      {% endif %}
+
+      {% for i in roommates.paginator.page_range %}
+      {% if roommates.number == i %}
       <li class="page-item active">
         <span class="page-link">{{ i }}</span>
       </li>
@@ -153,11 +163,14 @@
       <li class="page-item">
         <a class="page-link" href="?page={{ i }}">{{ i }}</a>
       </li>
-      {% endif %} {% endfor %} {% if roommates.has_next %}
+      {% endif %}
+      {% endfor %}
+
+      {% if roommates.has_next %}
       <li class="page-item">
-        <a class="page-link" href="?page={{ roommates.next_page_number }}"
-          >Next &raquo;</a
-        >
+        <a class="page-link" href="?page={{ roommates.next_page_number }}">
+          Next &raquo;
+        </a>
       </li>
       {% else %}
       <li class="page-item disabled">

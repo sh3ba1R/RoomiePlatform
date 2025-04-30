@@ -58,7 +58,12 @@ class Room(models.Model):
         ('apartment', 'Apartment'),
     ])
     is_available = models.BooleanField(default=True)
-    image = models.ImageField(upload_to='room_images/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to='images/',
+        blank=True,
+        null=True,
+        default='/media/images/default_room.jpg'  # Set default room image
+        )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

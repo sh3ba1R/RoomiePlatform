@@ -1,0 +1,120 @@
+<!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\filter_rooms.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">All Rooms</h2>
+
+    <!-- Filter Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <!-- Location Filter -->
+                <div class="col-md-4">
+                    <label for="location" class="form-label">Location</label>
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        class="form-control"
+                        placeholder="Enter location"
+                        value="{{ request.GET.location }}"
+                    />
+                </div>
+
+                <!-- Room Type Filter -->
+                <div class="col-md-4">
+                    <label for="room_type" class="form-label">Room Type</label>
+                    <select id="room_type" name="room_type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="private" {% if request.GET.room_type == 'private' %}selected{% endif %}>Private Room</option>
+                        <option value="shared" {% if request.GET.room_type == 'shared' %}selected{% endif %}>Shared Room</option>
+                        <option value="studio" {% if request.GET.room_type == 'studio' %}selected{% endif %}>Studio</option>
+                        <option value="apartment" {% if request.GET.room_type == 'apartment' %}selected{% endif %}>Apartment</option>
+                    </select>
+                </div>
+
+                <!-- Rent Range Filter -->
+                <div class="col-md-2">
+                    <label for="min_rent" class="form-label">Min Rent ($)</label>
+                    <input
+                        type="number"
+                        id="min_rent"
+                        name="min_rent"
+                        class="form-control"
+                        placeholder="Min"
+                        value="{{ request.GET.min_rent }}"
+                    />
+                </div>
+                <div class="col-md-2">
+                    <label for="max_rent" class="form-label">Max Rent ($)</label>
+                    <input
+                        type="number"
+                        id="max_rent"
+                        name="max_rent"
+                        class="form-control"
+                        placeholder="Max"
+                        value="{{ request.GET.max_rent }}"
+                    />
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filtered Results -->
+    <div class="row g-4">
+        {% for room in rooms %}
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                {% if room.image %}
+                <img
+                    src="{{ room.image.url }}"
+                    class="card-img-top"
+                    style="height: 200px; object-fit: cover;"
+                    alt="{{ room.title }}"
+                />
+                {% else %}
+                <img
+                    src="/media/images/default_room.jpg"
+                    class="card-img-top"
+                    style="height: 200px; object-fit: cover;"
+                    alt="Default Room Image"
+                />
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ room.title }}</h5>
+                    <p class="card-text text-muted mb-2">
+                        <i class="fas fa-map-marker-alt me-1"></i> {{ room.location }}
+                    </p>
+                    <p class="card-text">
+                        <strong>${{ room.rent }}</strong> / month
+                    </p>
+                    <p class="card-text">
+                        <span class="badge bg-light text-dark">{{ room.get_room_type_display }}</span>
+                        {% if room.is_available %}
+                        <span class="badge bg-success">Available</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Unavailable</span>
+                        {% endif %}
+                    </p>
+                    <a href="{% url 'room_detail' room.room_id %}" class="btn btn-primary btn-sm">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle me-2"></i> No rooms match your criteria.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

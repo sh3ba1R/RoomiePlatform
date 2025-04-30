@@ -44,58 +44,67 @@
   <!-- Featured Rooms Section - Enhanced with cards -->
   <section class="mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="mb-0">
-        <i class="fas fa-home text-primary me-2"></i> Featured Rooms
-      </h2>
-      <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+        <h2 class="mb-0">
+            <i class="fas fa-home text-primary me-2"></i> Featured Rooms
+        </h2>
+        <div class="d-flex justify-content-end">
+            <a href="{% url 'filter_rooms' %}" class="btn btn-sm btn-outline-primary">
+                View All
+            </a>
+        </div>
     </div>
     <div class="row g-4">
-      {% for room in featured_rooms %}
-      <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-          <div class="position-relative">
-            <img
-              src="{{ room.image.url }}"
-              class="card-img-top"
-              alt="{{ room.title }}"
-            />
-            <div class="room-price">${{ room.rent }}/month</div>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">{{ room.title }}</h5>
-            <p class="card-text text-muted mb-1">
-              <i class="fas fa-map-marker-alt me-2"></i>{{ room.location }}
-            </p>
-            <p class="card-text mb-3">
-              <span class="badge bg-light text-dark me-2"
-                >{{ room.get_room_type_display }}</span
-              >
-              {% if room.is_available %}
-              <span class="badge bg-success">Available</span>
-              {% else %}
-              <span class="badge bg-secondary">Unavailable</span>
-              {% endif %}
-            </p>
-            <div class="d-grid">
-              <a
-                href="{% url 'user_profile' room.provider.id %}"
-                class="btn btn-primary"
-                >View Details</a
-              >
+        {% for room in featured_rooms %}
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="position-relative">
+                    {% if room.image %}
+                    <img
+                        src="{{ room.image.url }}"
+                        class="card-img-top"
+                        alt="{{ room.title }}"
+                        style="height: 200px; object-fit: cover;"
+                    />
+                    {% else %}
+                    <img
+                        src="/media/images/default_room.jpg"
+                        class="card-img-top"
+                        alt="Default Room Image"
+                        style="height: 200px; object-fit: cover;"
+                    />
+                    {% endif %}
+                    <div class="room-price">${{ room.rent }}/month</div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ room.title }}</h5>
+                    <p class="card-text text-muted mb-1">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ room.location }}
+                    </p>
+                    <p class="card-text mb-3">
+                        <span class="badge bg-light text-dark me-2">{{ room.get_room_type_display }}</span>
+                        {% if room.is_available %}
+                        <span class="badge bg-success">Available</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Unavailable</span>
+                        {% endif %}
+                    </p>
+                    <div class="d-grid">
+                        <a href="{% url 'room_detail' room.room_id %}" class="btn btn-primary">
+                            View Details
+                        </a>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-      {% empty %}
-      <div class="col-12">
-        <div class="alert alert-info text-center py-4">
-          <i class="fas fa-info-circle me-2"></i> No featured rooms available at
-          the moment. Check back soon!
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center py-4">
+                <i class="fas fa-info-circle me-2"></i> No featured rooms available at the moment. Check back soon!
+            </div>
         </div>
-      </div>
-      {% endfor %}
+        {% endfor %}
     </div>
-  </section>
+</section>
 
   <!-- Meet Our Roommates Section - Enhanced with cards -->
   <section>

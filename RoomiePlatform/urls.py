@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -21,8 +22,8 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('roomie.urls')), # This includes URLs from the roomie app
+    path("admin/", admin.site.urls),
+    path("", include("roomie.urls")),  # This includes URLs from the roomie app
 ]
 
 # Serve media files during development

@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from core.models import Room, Message
+from core.models import Room, Message, RoomBooking
 
 
 from .forms import RoomieFormFactory,RoomieForms
@@ -196,3 +196,79 @@ def mark_message_read(request, user_id, message_id):
         return JsonResponse({"status": "success", "is_read": message.is_read})
     except Message.DoesNotExist:
         return JsonResponse({"error": "Message not found"}, status=404)
+    
+
+def room_detail(request, room_id):
+    """
+    View to display the details of a specific room.
+    """
+    room = get_object_or_404(Room, room_id=room_id)
+    return render(request, 'room_detail.html', {'room': room})
+
+def filter_rooms(request):
+    """
+    View to filter and display rooms based on user input.
+    """
+    rooms = Room.objects.all()
+
+    # Get filter parameters from the request
+    location = request.GET.get('location', '')
+    room_type = request.GET.get('room_type', '')
+    min_rent = request.GET.get('min_rent', '')
+    max_rent = request.GET.get('max_rent', '')
+
+    # Apply filters
+    if location:
+        rooms = rooms.filter(location__icontains=location)
+    if room_type:
+        rooms = rooms.filter(room_type=room_type)
+    if min_rent:
+        rooms = rooms.filter(rent__gte=min_rent)
+    if max_rent:
+        rooms = rooms.filter(rent__lte=max_rent)
+
+    return render(request, 'filter_rooms.html', {'rooms': rooms})
+
+@login_required
+def book_room(request, room_id):
+    """
+    Allow seekers to book a room.
+    """
+    room = get_object_or_404(Room, room_id=room_id)
+
+    # Ensure only seekers can book rooms
+    if request.user.account_type != 'seeker':
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = RoomieForms.RoomBookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save(commit=False)
+            booking.room = room
+            booking.seeker = request.user
+            booking.save()
+            return redirect('room_detail', room_id=room.room_id)
+    else:
+        form = RoomieForms.RoomBookingForm()
+
+    return render(request, 'book_room.html', {'room': room, 'form': form})
+
+
+@login_required
+def delete_room(request, room_id):
+    """
+    Allow providers to delete their room listings.
+    """
+    room = get_object_or_404(Room, room_id=room_id)
+
+    # Ensure only the provider who owns the room can delete it
+    if request.user != room.provider:
+        messages.error(request, "You are not authorized to delete this room.")
+        return redirect('user_profile', user_id=request.user.id)
+
+    if request.method == 'POST':
+        room.delete()
+        messages.success(request, "Room listing deleted successfully.")
+        return redirect('user_profile', user_id=request.user.id)
+
+    return render(request, 'confirm_delete_room.html', {'room': room})

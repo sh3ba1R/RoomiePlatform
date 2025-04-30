@@ -1,4 +1,7 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %}
+{% load static %} 
+{% load form_tags %} <!-- Load the custom template tags -->
+{% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-lg-8">
@@ -67,6 +70,7 @@
                   <i class="fas fa-heading text-muted"></i>
                 </span>
                 {{ form.subject|add_class:"form-control" }}
+                {{ form.body|add_class:"form-control" }}
               </div>
               {% if form.subject.errors %}
               <div class="text-danger small mt-1">

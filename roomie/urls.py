@@ -25,6 +25,11 @@ urlpatterns = [
     path('messages/<int:user_id>/', views.messages_view, name='messages'),  # Messages page
     path('messages/<int:user_id>/mark-read/<int:message_id>/', views.mark_message_read, name='mark_message_read'),
     path('list-room/', views.list_room, name='list_room'),  # URL for listing a room
+    path('room/<int:room_id>/', views.room_detail, name='room_detail'),  # Room details page
+    path('filter-rooms/', views.filter_rooms, name='filter_rooms'),  # Advanced filter page
+    path('room/<int:room_id>/book/', views.book_room, name='book_room'),
+    path('room/<int:room_id>/delete/', views.delete_room, name='delete_room'),
+
 
 
 

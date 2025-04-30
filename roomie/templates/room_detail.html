@@ -1,0 +1,68 @@
+<!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\room_detail.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Room Image and Details -->
+        <div class="col-md-8">
+            <div class="card shadow">
+                {% if room.image %}
+                    <img src="{{ room.image.url }}" class="card-img-top" alt="{{ room.title }}" style="height: 400px; object-fit: cover;">
+                {% else %}
+                    <img src="/media/images/default_room.jpg" class="card-img-top" alt="Default Room Image" style="height: 400px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h2 class="card-title">{{ room.title }}</h2>
+                    <p class="card-text"><strong>Location:</strong> {{ room.location }}</p>
+                    <p class="card-text"><strong>Rent:</strong> ${{ room.rent }} / month</p>
+                    <p class="card-text"><strong>Room Type:</strong> {{ room.get_room_type_display }}</p>
+                    <p class="card-text"><strong>Description:</strong> {{ room.description }}</p>
+                    <p class="card-text"><strong>Availability:</strong> 
+                        {% if room.is_available %}
+                            <span class="text-success">Available</span>
+                        {% else %}
+                            <span class="text-danger">Not Available</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Section -->
+        <div class="col-md-4">
+            <div class="card shadow p-4">
+                <h4 class="text-center">Interested in this room?</h4>
+                {% if user.is_authenticated and user.account_type == 'seeker' %}
+                    {% if room.is_available %}
+                        <a href="{% url 'book_room' room.room_id %}" class="btn btn-primary w-100 mt-3">
+                            Book This Room
+                        </a>
+                    {% else %}
+                        <button class="btn btn-secondary w-100 mt-3" disabled>
+                            Room Not Available
+                        </button>
+                    {% endif %}
+                {% else %}
+                    <p class="text-center text-muted mt-3">
+                        Please <a href="{% url 'login' %}">log in</a> as a seeker to book this room.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Information -->
+    <div class="mt-5">
+        <h4>Additional Information</h4>
+        <p class="text-muted">If you have any questions about this room, feel free to contact the provider.</p>
+        {% if user.is_authenticated and user.account_type == 'seeker' %}
+            <a href="{% url 'send_message' room.provider.id %}" class="btn btn-outline-primary">
+                Contact Provider
+            </a>
+        {% else %}
+            <p class="text-muted">Log in to contact the provider.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
