@@ -13,7 +13,7 @@
                 {% if roommate.profile_photo %}
                     <img src="{{ roommate.profile_photo.url }}" class="card-img-top rounded-circle mx-auto mt-3" style="width: 150px; height: 150px;" alt="{{ roommate.username }}">
                 {% else %}
-                    <img src="{% static 'roomie/images/default_user.jpg' %}" class="card-img-top rounded-circle mx-auto mt-3" style="width: 150px; height: 150px;" alt="Default Roommate Image">
+                    <img src="/media/profile_photos/default_user.jpg" class="card-img-top rounded-circle mx-auto mt-3" style="width: 100px; height: 100px;" alt="Default Roommate Image">
                 {% endif %}
                 <div class="card-body text-center">
                     <h5 class="card-title mb-1">{{ roommate.username }}</h5>

@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
-from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib.auth import authenticate, login, get_user_model,logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from core.models import Room, Message
+
 
 from .forms import RoomieFormFactory,RoomieForms
 
@@ -13,7 +15,16 @@ User = get_user_model()  # Get the custom user model
 
 
 def home(request):
-    return render(request, "home.html")
+    """
+    Home page view to display featured rooms and all roommates.
+    """
+    featured_rooms = Room.objects.filter(is_available=True)[:6]  # Fetch up to 6 available rooms
+    roommates = User.objects.filter(account_type='seeker')  # Fetch all seekers (roommates)
+    
+    return render(request, 'home.html', {
+        'featured_rooms': featured_rooms,
+        'roommates': roommates,
+    })
 
 def register(request):
     """
@@ -76,31 +87,25 @@ def user_login(request):
         
     return render(request, "login.html", {'form': form})
 
+@login_required
 def list_room(request):
     """
-    Handle the room listing process through form submission.
-
-    This view function manages both the display of the room listing form (GET)
-    and the processing of room data (POST). Upon successful submission, the room
-    is associated with the current user as the owner.
-
-    Args:
-        request: HttpRequest object containing metadata about the request
-
-    Returns:
-        HttpResponse: Renders list_room.html with the form for GET requests,
-        or redirects to 'home' after successful POST submission
+    Allow providers to list a room.
     """
+    if request.user.account_type != 'provider':
+        return redirect('home')  # Redirect seekers or unauthorized users to the home page
+
     if request.method == 'POST':
-        form = RoomieForms.RoomForm(request.POST)
+        form = RoomieForms.RoomForm(request.POST, request.FILES)
         if form.is_valid():
             room = form.save(commit=False)
-            room.owner = request.user
+            room.provider = request.user  # Assign the logged-in user as the room provider
             room.save()
-            return redirect('home')
+            return redirect('home')  # Redirect to the home page after successful submission
     else:
-        form = RoomieForms.RoomForm
-    return render(request, "list_room.html", {'form': form})
+        form = RoomieForms.RoomForm()
+
+    return render(request, 'list_room.html', {'form': form})
 
 
 
@@ -135,3 +140,25 @@ def user_profile(request, user_id):
     """
     user = get_object_or_404(User, id=user_id)  # Fetch the user by ID or return a 404 if not found
     return render(request, 'user_profile.html', {'user': user})
+
+
+
+@login_required
+def messages_view(request, user_id):
+    """
+    View to display incoming messages for the logged-in user.
+    """
+    if request.user.id != user_id:
+        return HttpResponse("Unauthorized", status=401)  # Prevent access to other users' messages
+
+    messages = Message.objects.filter(recipient=request.user).order_by('-timestamp')
+    return render(request, 'messages.html', {'messages': messages})
+
+
+
+def logout_view(request):
+    """
+    Custom logout view to handle GET requests.
+    """
+    logout(request)
+    return redirect('home')  # Redirect to the home page after logout

@@ -20,10 +20,41 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'list_room' %}">List a Room</a></li>
+                    
+                    {% if user.is_authenticated and user.account_type == 'provider' %}
+                        <!-- Only providers can see the "List a Room" button -->
+                        <li class="nav-item"><a class="nav-link" href="{% url 'list_room' %}">List a Room</a></li>
+                    {% endif %}
+                    
                     <li class="nav-item"><a class="nav-link" href="{% url 'find_roommate' %}">Find a Roommate</a></li>
-                    <li class="nav-item"><a class="nav-link btn btn-light text-primary" href="{% url 'register' %}">Register</a></li>
-                    <li class="nav-item"><a class="nav-link btn btn-outline-light" href="{% url 'login' %}">Login</a></li>
+                    
+                    {% if user.is_authenticated %}
+                        <!-- Message Button -->
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-light text-primary me-2" href="{% url 'messages' user.id %}">
+                                Messages
+                            </a>
+                        </li>
+                        
+                        <!-- Profile Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if user.profile_photo %}
+                                    <img src="{{ user.profile_photo.url }}" class="rounded-circle" style="width: 30px; height: 30px;" alt="Profile">
+                                {% else %}
+                                    <img src="/media/profile_photos/default_user.jpg" class="card-img-top rounded-circle mx-auto mt-3" style="width: 100px; height: 100px;" alt="Default Roommate Image">
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'user_profile' user.id %}">View Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link btn btn-light text-primary" href="{% url 'register' %}">Register</a></li>
+                        <li class="nav-item"><a class="nav-link btn btn-outline-light" href="{% url 'login' %}">Login</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

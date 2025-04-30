@@ -1,28 +1,15 @@
+<!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\list_room.html -->
 {% extends 'base.html' %}
-{% load static %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center">Available Rooms</h2>
-    <p class="text-center">Browse available rooms and find the perfect match for your needs.</p>
-
-    <div class="row mt-4">
-        {% for room in rooms %}
-            <div class="col-md-4 mb-4">
-                <div class="card shadow">
-                    <img src="{{ room.image.url }}" class="card-img-top" alt="{{ room.title }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ room.title }}</h5>
-                        <p class="card-text"><strong>Location:</strong> {{ room.location }}</p>
-                        <p class="card-text"><strong>Rent:</strong> {{ room.rent }} SAR / month</p>
-                        <p class="card-text"><strong>Room Type:</strong> {{ room.get_room_type_display }}</p>
-                        <a href="{% url 'room_detail' room.id %}" class="btn btn-primary w-100">View Details</a>
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <p class="text-center">No rooms available at the moment. Please check back later.</p>
-        {% endfor %}
+    <h2 class="text-center">List a Room</h2>
+    <div class="card shadow p-4 mt-4">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary w-100">Submit</button>
+        </form>
     </div>
 </div>
 {% endblock %}

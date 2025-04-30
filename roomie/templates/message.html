@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Your Messages</h2>
+    <div class="list-group mt-4">
+        {% for message in messages %}
+            <a href="#" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ message.sender.username }}</h5>
+                    <small>{{ message.timestamp|date:"F j, Y, g:i a" }}</small>
+                </div>
+                <p class="mb-1"><strong>Subject:</strong> {{ message.subject }}</p>
+                <p class="mb-1">{{ message.body|truncatechars:100 }}</p>
+                {% if not message.is_read %}
+                    <span class="badge bg-primary">Unread</span>
+                {% endif %}
+            </a>
+        {% empty %}
+            <p class="text-center">You have no messages at the moment.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

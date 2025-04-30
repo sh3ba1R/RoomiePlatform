@@ -33,7 +33,12 @@ class User(AbstractUser):
     birthdate = models.DateField(blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
-    profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)
+    profile_photo = models.ImageField(
+        upload_to='profile_photos/',
+        blank=True,
+        null=True,
+        default='profile_photos/default_user.jpg'  # Set default profile photo
+    )
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default='seeker')
 
     def __str__(self):

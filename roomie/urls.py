@@ -1,4 +1,6 @@
 from django.urls import path
+from django.contrib.auth.views import LogoutView
+
 from . import views
 """
 URL Configuration for the Roomie Platform application.
@@ -16,9 +18,13 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('register/', views.register, name='register'),
     path('login/', views.user_login, name='login'),
-    path('list-room/', views.list_room, name='list_room'),
+    path('logout/', views.logout_view, name='logout'),  # Custom logout page    path('list-room/', views.list_room, name='list_room'),
     path('find-roommate/', views.find_roommate, name='find_roommate'),
     path('send-message/<int:user_id>/', views.send_message, name='send_message'),
     path('user-profile/<int:user_id>/', views.user_profile, name='user_profile'),  # User profile page
+    path('messages/<int:user_id>/', views.messages_view, name='messages'),  # Messages page
+    path('list-room/', views.list_room, name='list_room'),  # URL for listing a room
+
+
 
 ]

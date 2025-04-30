@@ -2,20 +2,28 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="text-center">
-        <h1 class="display-4">Find Your Perfect Roommate</h1>
-        <p class="lead">Browse rooms, connect with roommates, and make your living experience better.</p>
-        <div class="mt-4">
-            {% if user.is_authenticated %}
-                <a href="{% url 'list_room' %}" class="btn btn-primary btn-lg">List Your Room</a>
-                <a href="{% url 'find_roommate' %}" class="btn btn-outline-primary btn-lg">Find a Roommate</a>
-            {% else %}
+    {% if user.is_authenticated %}
+        <!-- Logged-in User Content -->
+        <div class="text-center">
+            <h1 class="display-4">Welcome, {{ user.username }}!</h1>
+            <p class="lead">Manage your profile and check your messages.</p>
+            <div class="mt-4">
+                <a href="{% url 'user_profile' user.id %}" class="btn btn-primary btn-lg">View Profile</a>
+                <a href="{% url 'messages' user.id %}" class="btn btn-outline-primary btn-lg">Messages</a>            </div>
+        </div>
+    {% else %}
+        <!-- Non-Logged-in User Content -->
+        <div class="text-center">
+            <h1 class="display-4">Find Your Perfect Roommate</h1>
+            <p class="lead">Browse rooms, connect with roommates, and make your living experience better.</p>
+            <div class="mt-4">
                 <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Get Started</a>
                 <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Login</a>
-            {% endif %}
+            </div>
         </div>
-    </div>
+    {% endif %}
 
+    <!-- Featured Rooms Section -->
     <div class="mt-5">
         <h2 class="text-center">Featured Rooms</h2>
         <div class="row mt-4">
@@ -37,22 +45,27 @@
         </div>
     </div>
 
+    <!-- Meet Our Roommates Section -->
     <div class="mt-5">
         <h2 class="text-center">Meet Our Roommates</h2>
         <div class="row mt-4">
-            {% for user in featured_users %}
+            {% for roommate in roommates %}
                 <div class="col-md-3 mb-4">
                     <div class="card shadow-sm text-center">
-                        <img src="{{ user.profile_photo.url }}" class="card-img-top rounded-circle mx-auto mt-3" style="width: 100px; height: 100px;" alt="{{ user.username }}">
+                        {% if roommate.profile_photo %}
+                            <img src="{{ roommate.profile_photo.url }}" class="card-img-top rounded-circle mx-auto mt-3" style="width: 100px; height: 100px;" alt="{{ roommate.username }}">
+                        {% else %}
+                            <img src="/media/profile_photos/default_user.jpg" class="card-img-top rounded-circle mx-auto mt-3" style="width: 100px; height: 100px;" alt="Default Roommate Image">
+                        {% endif %}
                         <div class="card-body">
-                            <h5 class="card-title">{{ user.username }}</h5>
-                            <p class="card-text">{{ user.location }}</p>
-                            <a href="{% url 'user_profile' user.id %}" class="btn btn-outline-primary btn-sm">View Profile</a>
+                            <h5 class="card-title">{{ roommate.username }}</h5>
+                            <p class="card-text">{{ roommate.location|default:"Location not provided" }}</p>
+                            <a href="{% url 'user_profile' roommate.id %}" class="btn btn-outline-primary btn-sm">View Profile</a>
                         </div>
                     </div>
                 </div>
             {% empty %}
-                <p class="text-center">No featured roommates available at the moment.</p>
+                <p class="text-center">No roommates available at the moment.</p>
             {% endfor %}
         </div>
     </div>
