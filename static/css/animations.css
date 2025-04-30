@@ -1,0 +1,104 @@
+/* Animation effects for dark mode toggle and UI elements */
+.dark-mode-toggle.rotating {
+  animation: rotate 0.5s ease;
+}
+
+.dark-mode-toggle.clicked {
+  animation: pulse 0.3s ease;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Page transition effect */
+.page-transition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Card hover effects */
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Button hover animations */
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* Profile image hover effect */
+.profile-image-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-image-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Message notification animation */
+@keyframes messageAlert {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.message-alert {
+  animation: messageAlert 1s ease infinite;
+}
+
+/* Form field focus animation */
+.form-control:focus,
+.form-select:focus {
+  transition: all 0.3s ease;
+  transform: translateY(-2px);
+}

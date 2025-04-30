@@ -1,20 +1,112 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-transparent py-3">
+          <div class="d-flex align-items-center">
+            <!-- Recipient Profile Image -->
+            <div class="flex-shrink-0">
+              {% if recipient.profile_photo %}
+              <img
+                src="{{ recipient.profile_photo.url }}"
+                class="rounded-circle"
+                style="width: 50px; height: 50px; object-fit: cover"
+                alt="{{ recipient.username }}"
+              />
+              {% else %}
+              <img
+                src="/media/profile_photos/default_user.jpg"
+                class="rounded-circle"
+                style="width: 50px; height: 50px; object-fit: cover"
+                alt="Default Profile"
+              />
+              {% endif %}
+            </div>
+            <!-- Recipient Info -->
+            <div class="flex-grow-1 ms-3">
+              <h5 class="mb-0 fw-bold">Message to {{ recipient.username }}</h5>
+              <p class="text-muted mb-0 small">
+                <i class="fas fa-envelope me-1"></i> {{ recipient.email }}
+              </p>
+            </div>
+          </div>
+        </div>
 
-{% block content %}
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Send a Message to {{ recipient.username }}</h2>
-    <form method="POST">
-        {% csrf_token %}
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %}" role="alert">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary w-100">Send Message</button>
-    </form>
+        <div class="card-body p-4">
+          <!-- Status Messages -->
+          {% if messages %} {% for message in messages %}
+          <div
+            class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %} alert-dismissible fade show"
+            role="alert"
+          >
+            <i
+              class="{% if message.tags == 'success' %}fas fa-check-circle{% elif message.tags == 'error' %}fas fa-exclamation-circle{% else %}fas fa-info-circle{% endif %} me-2"
+            ></i>
+            {{ message }}
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          {% endfor %} {% endif %}
+
+          <!-- Message Form -->
+          <form method="POST">
+            {% csrf_token %}
+
+            <!-- Subject Field -->
+            <div class="mb-3">
+              <label for="{{ form.subject.id_for_label }}" class="form-label"
+                >Subject</label
+              >
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <i class="fas fa-heading text-muted"></i>
+                </span>
+                {{ form.subject|add_class:"form-control" }}
+              </div>
+              {% if form.subject.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.subject.errors }}
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Message Body Field -->
+            <div class="mb-4">
+              <label for="{{ form.body.id_for_label }}" class="form-label"
+                >Message</label
+              >
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <i class="fas fa-comment-alt text-muted"></i>
+                </span>
+                {{ form.body|add_class:"form-control" }}
+              </div>
+              {% if form.body.errors %}
+              <div class="text-danger small mt-1">{{ form.body.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-end gap-2">
+              <a
+                href="{% url 'user_profile' recipient.id %}"
+                class="btn btn-outline-secondary"
+              >
+                <i class="fas fa-times me-1"></i> Cancel
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane me-1"></i> Send Message
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

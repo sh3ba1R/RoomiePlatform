@@ -1,39 +1,179 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-4 mb-4">
+      <!-- Profile Card -->
+      <div class="card shadow-sm">
+        <div class="card-body text-center p-4">
+          {% if user.profile_photo %}
+          <img
+            src="{{ user.profile_photo.url }}"
+            class="rounded-circle profile-image-hover mb-3"
+            style="width: 150px; height: 150px; object-fit: cover"
+            alt="{{ user.username }}"
+          />
+          {% else %}
+          <img
+            src="/media/profile_photos/default_user.jpg"
+            class="rounded-circle profile-image-hover mb-3"
+            style="width: 150px; height: 150px; object-fit: cover"
+            alt="Default Profile Image"
+          />
+          {% endif %}
+          <h2 class="fw-bold mb-1">{{ user.username }}</h2>
+          <p class="text-muted">{{ user.email }}</p>
 
-{% block content %}
-<div class="container mt-5">
-    <div class="card shadow p-4">
-        <div class="text-center">
-            {% if user.profile_photo %}
-                <img src="{{ user.profile_photo.url }}" class="rounded-circle mb-3" style="width: 150px; height: 150px;" alt="{{ user.username }}">
-            {% else %}
-                <img src="/media/profile_photos/default_user.jpg" class="card-img-top rounded-circle mx-auto mt-3" style="width: 100px; height: 100px;" alt="Default Roommate Image">
+          <!-- User badges -->
+          <div class="mb-3">
+            <span class="badge bg-primary"
+              >{{ user.get_account_type_display }}</span
+            >
+            {% if user.gender %}
+            <span class="badge bg-info text-dark"
+              >{{ user.get_gender_display }}</span
+            >
             {% endif %}
-            <h2>{{ user.username }}</h2>
-            <p class="text-muted">{{ user.email }}</p>
+          </div>
+
+          <!-- Contact button (only show if viewing another user's profile) -->
+          {% if request.user.is_authenticated and request.user.id != user.id %}
+          <div class="d-grid">
+            <a href="{% url 'send_message' user.id %}" class="btn btn-primary">
+              <i class="fas fa-envelope me-2"></i> Contact {{ user.username }}
+            </a>
+          </div>
+          {% endif %}
         </div>
-        <hr>
-        <div>
-            <h4>About</h4>
-            <p>{{ user.bio|default:"No bio provided" }}</p>
+      </div>
+
+      <!-- Location Card -->
+      {% if user.location %}
+      <div class="card shadow-sm mt-4">
+        <div class="card-body p-4">
+          <h5 class="card-title">
+            <i class="fas fa-map-marker-alt text-primary me-2"></i> Location
+          </h5>
+          <p class="mb-0">{{ user.location }}</p>
         </div>
-        <div>
-            <h4>Location</h4>
-            <p>{{ user.location|default:"Location not provided" }}</p>
-        </div>
-        <div>
-            <h4>Account Type</h4>
-            <p>{{ user.get_account_type_display }}</p>
-        </div>
-        <div>
-            <h4>Gender</h4>
-            <p>{{ user.get_gender_display|default:"Not specified" }}</p>
-        </div>
-        <div>
-            <h4>Birthdate</h4>
-            <p>{{ user.birthdate|date:"F j, Y"|default:"Not provided" }}</p>
-        </div>
+      </div>
+      {% endif %}
     </div>
+
+    <div class="col-lg-8">
+      <!-- Bio Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h5 class="card-title">
+            <i class="fas fa-user text-primary me-2"></i> About
+          </h5>
+          <p>{{ user.bio|default:"No bio provided"|linebreaks }}</p>
+        </div>
+      </div>
+
+      <!-- Personal Info Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h5 class="card-title">
+            <i class="fas fa-info-circle text-primary me-2"></i> Personal
+            Information
+          </h5>
+          <div class="row mt-3">
+            <div class="col-md-6 mb-3">
+              <div class="d-flex">
+                <div class="flex-shrink-0">
+                  <i class="fas fa-venus-mars text-muted"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Gender</h6>
+                  <p class="text-muted">
+                    {{ user.get_gender_display|default:"Not specified" }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="d-flex">
+                <div class="flex-shrink-0">
+                  <i class="fas fa-birthday-cake text-muted"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Birthdate</h6>
+                  <p class="text-muted">
+                    {{ user.birthdate|date:"F j, Y"|default:"Not provided" }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="d-flex">
+                <div class="flex-shrink-0">
+                  <i class="fas fa-envelope text-muted"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Email</h6>
+                  <p class="text-muted">{{ user.email }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="d-flex">
+                <div class="flex-shrink-0">
+                  <i class="fas fa-user-circle text-muted"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h6 class="mb-0">Account Type</h6>
+                  <p class="text-muted">{{ user.get_account_type_display }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- If provider, show rooms -->
+      {% if user.account_type == 'provider' %}
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h5 class="card-title">
+            <i class="fas fa-home text-primary me-2"></i> Listed Rooms
+          </h5>
+          <div class="row mt-3">
+            {% for room in user.rooms.all %}
+            <div class="col-md-6 mb-3">
+              <div class="card h-100">
+                {% if room.image %}
+                <img
+                  src="{{ room.image.url }}"
+                  class="card-img-top"
+                  style="height: 140px; object-fit: cover"
+                  alt="{{ room.title }}"
+                />
+                {% endif %}
+                <div class="card-body">
+                  <h6 class="card-title">{{ room.title }}</h6>
+                  <p class="text-muted small mb-2">
+                    <i class="fas fa-map-marker-alt me-1"></i> {{ room.location
+                    }}
+                  </p>
+                  <p class="text-primary fw-bold mb-2">
+                    ${{ room.rent }}/month
+                  </p>
+                  <p class="card-text small">
+                    {{ room.description|truncatechars:60 }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+              <p class="text-muted">No rooms listed yet.</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}

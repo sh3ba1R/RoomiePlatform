@@ -4,6 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from core.models import Room, Message
 
 
@@ -78,7 +79,7 @@ def user_login(request):
             
             if user is not None:
                 login(request, user)
-                return redirect('home.html')  # Redirect to home after login
+                return redirect('home')  # Fixed Redirect to home after login
             else:
                 form.add_error(None, 'Invalid username or password')
     else:
@@ -151,7 +152,24 @@ def messages_view(request, user_id):
     if request.user.id != user_id:
         return HttpResponse("Unauthorized", status=401)  # Prevent access to other users' messages
 
+    # Get all messages for the user
     messages = Message.objects.filter(recipient=request.user).order_by('-timestamp')
+    
+    # If a message_id is provided in GET parameters, mark that message as read
+    message_id = request.GET.get('mark_read')
+    if message_id:
+        try:
+            message = Message.objects.get(message_id=message_id, recipient=request.user)
+            message.is_read = True
+            message.save()
+            # Return a JSON response for AJAX calls
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success'})
+        except Message.DoesNotExist:
+            # Return error for AJAX calls
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': 'Message not found'}, status=404)
+    
     return render(request, 'messages.html', {'messages': messages})
 
 
@@ -162,3 +180,19 @@ def logout_view(request):
     """
     logout(request)
     return redirect('home')  # Redirect to the home page after logout
+
+@login_required
+def mark_message_read(request, user_id, message_id):
+    """
+    AJAX view to mark a message as read/unread.
+    """
+    if request.user.id != user_id:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+    
+    try:
+        message = Message.objects.get(message_id=message_id, recipient=request.user)
+        message.is_read = not message.is_read  # Toggle the read status
+        message.save()
+        return JsonResponse({"status": "success", "is_read": message.is_read})
+    except Message.DoesNotExist:
+        return JsonResponse({"error": "Message not found"}, status=404)

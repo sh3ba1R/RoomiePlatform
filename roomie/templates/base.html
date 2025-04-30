@@ -1,76 +1,247 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Roomie - Find Your Perfect Match</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{% static 'static/roomie/styles.css' %}">
-</head>
-<body>
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+    <!-- App Styles -->
+    <link rel="stylesheet" href="{% static 'roomie/styles.css' %}" />
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">Roomie</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-                    
-                    {% if user.is_authenticated and user.account_type == 'provider' %}
-                        <!-- Only providers can see the "List a Room" button -->
-                        <li class="nav-item"><a class="nav-link" href="{% url 'list_room' %}">List a Room</a></li>
-                    {% endif %}
-                    
-                    <li class="nav-item"><a class="nav-link" href="{% url 'find_roommate' %}">Find a Roommate</a></li>
-                    
-                    {% if user.is_authenticated %}
-                        <!-- Message Button -->
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-light text-primary me-2" href="{% url 'messages' user.id %}">
-                                Messages
-                            </a>
-                        </li>
-                        
-                        <!-- Profile Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                {% if user.profile_photo %}
-                                    <img src="{{ user.profile_photo.url }}" class="rounded-circle" style="width: 30px; height: 30px;" alt="Profile">
-                                {% else %}
-                                    <img src="/media/profile_photos/default_user.jpg" class="card-img-top rounded-circle mx-auto mt-3" style="width: 100px; height: 100px;" alt="Default Roommate Image">
-                                {% endif %}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'user_profile' user.id %}">View Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item"><a class="nav-link btn btn-light text-primary" href="{% url 'register' %}">Register</a></li>
-                        <li class="nav-item"><a class="nav-link btn btn-outline-light" href="{% url 'login' %}">Login</a></li>
-                    {% endif %}
-                </ul>
-            </div>
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Dark mode and animation CSS -->
+    <link rel="stylesheet" href="{% static 'css/darkmode.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}" />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="page-transition">
+    <!-- Navbar - Enhanced styling -->
+    <nav
+      class="navbar navbar-expand-lg navbar-light bg-light shadow-sm sticky-top"
+    >
+      <div class="container">
+        <a
+          class="navbar-brand d-flex align-items-center"
+          href="{% url 'home' %}"
+        >
+          <i class="fas fa-home me-2 text-primary"></i>
+          <span class="fw-bold">Roomie</span>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'home' %}">
+                <i class="fas fa-home me-1"></i> Home
+              </a>
+            </li>
+
+            {% if user.is_authenticated and user.account_type == 'provider' %}
+            <!-- Only providers can see the "List a Room" button -->
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'list_room' %}">
+                <i class="fas fa-plus-circle me-1"></i> List a Room
+              </a>
+            </li>
+            {% endif %}
+
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'find_roommate' %}">
+                <i class="fas fa-search me-1"></i> Find a Roommate
+              </a>
+            </li>
+
+            {% if user.is_authenticated %}
+            <!-- Message Button - Improved styling -->
+            <li class="nav-item">
+              <a
+                class="nav-link btn btn-light position-relative me-2"
+                href="{% url 'messages' user.id %}"
+              >
+                <i class="fas fa-envelope me-1"></i> Messages
+                <!-- Add notification badge if needed -->
+                <!-- <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger message-alert">
+                  1
+                  <span class="visually-hidden">unread messages</span>
+                </span> -->
+              </a>
+            </li>
+
+            <!-- Profile Dropdown - Enhanced -->
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle d-flex align-items-center"
+                href="#"
+                id="navbarDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {% if user.profile_photo %}
+                <img
+                  src="{{ user.profile_photo.url }}"
+                  class="rounded-circle profile-image-hover"
+                  style="width: 30px; height: 30px; object-fit: cover"
+                  alt="Profile"
+                />
+                {% else %}
+                <img
+                  src="/media/profile_photos/default_user.jpg"
+                  class="rounded-circle profile-image-hover"
+                  style="width: 30px; height: 30px; object-fit: cover"
+                  alt="Default Profile"
+                />
+                {% endif %}
+                <span class="ms-2">{{ user.username }}</span>
+              </a>
+              <ul
+                class="dropdown-menu dropdown-menu-end shadow"
+                aria-labelledby="navbarDropdown"
+              >
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'user_profile' user.id %}"
+                  >
+                    <i class="fas fa-user me-2"></i> View Profile
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                  </a>
+                </li>
+              </ul>
+            </li>
+            {% else %}
+            <!-- Auth buttons for non-logged in users - Improved styling -->
+            <li class="nav-item me-2">
+              <a
+                class="nav-link btn btn-outline-primary px-3"
+                href="{% url 'register' %}"
+              >
+                <i class="fas fa-user-plus me-1"></i> Register
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link btn btn-primary text-white px-3"
+                href="{% url 'login' %}"
+              >
+                <i class="fas fa-sign-in-alt me-1"></i> Login
+              </a>
+            </li>
+            {% endif %}
+          </ul>
         </div>
+
+        <!-- Dark mode toggle button with improved styling -->
+        <div class="ms-3 d-flex align-items-center">
+          <button
+            id="darkModeToggle"
+            class="dark-mode-toggle"
+            title="Switch to Dark Mode"
+          >
+            <i class="fas fa-moon dark-mode-icon"></i>
+          </button>
+        </div>
+      </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container mt-4">
-        {% block content %}{% endblock %}
-    </div>
+    <!-- Main Content with better padding -->
+    <main class="container py-5">{% block content %}{% endblock %}</main>
 
-    <!-- Footer -->
-    <footer class="bg-light text-center py-3 mt-4">
-        <p class="mb-0">© 2025 Roomie. All rights reserved.</p>
+    <!-- Enhanced Footer -->
+    <footer class="bg-light text-center py-4 mt-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4 mb-3 mb-md-0">
+            <h5 class="text-primary">Roomie</h5>
+            <p class="text-muted small">
+              Find your perfect roommate match with our user-friendly platform.
+              Connect with like-minded individuals seeking shared
+              accommodations.
+            </p>
+          </div>
+          <div class="col-md-4 mb-3 mb-md-0">
+            <h5 class="text-primary">Quick Links</h5>
+            <ul class="list-unstyled">
+              <li>
+                <a href="{% url 'home' %}" class="text-decoration-none">Home</a>
+              </li>
+              <li>
+                <a href="{% url 'find_roommate' %}" class="text-decoration-none"
+                  >Find Roommate</a
+                >
+              </li>
+              {% if user.is_authenticated and user.account_type == 'provider' %}
+              <li>
+                <a href="{% url 'list_room' %}" class="text-decoration-none"
+                  >List Room</a
+                >
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <h5 class="text-primary">Connect</h5>
+            <div class="d-flex justify-content-center">
+              <a href="#" class="text-decoration-none mx-2"
+                ><i class="fab fa-facebook fa-lg"></i
+              ></a>
+              <a href="#" class="text-decoration-none mx-2"
+                ><i class="fab fa-twitter fa-lg"></i
+              ></a>
+              <a href="#" class="text-decoration-none mx-2"
+                ><i class="fab fa-instagram fa-lg"></i
+              ></a>
+              <a href="#" class="text-decoration-none mx-2"
+                ><i class="fab fa-linkedin fa-lg"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+        <hr />
+        <p class="mb-0 small">© 2025 Roomie. All rights reserved.</p>
+      </div>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+
+    <!-- Dark mode JavaScript -->
+    <script src="{% static 'js/darkmode.js' %}"></script>
+  </body>
 </html>

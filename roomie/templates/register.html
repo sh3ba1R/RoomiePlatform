@@ -1,39 +1,52 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow">
+        <div class="card-body p-4">
+          <h2 class="text-center mb-4">Create Your Account</h2>
 
-{% block content %}
-<div class="container d-flex justify-content-center align-items-center" style="height: 90vh;">
-    <div class="card shadow p-4" style="width: 400px;">
-        <h2 class="text-center mb-4">Create Your Account</h2>
+          <!-- Display success and error messages -->
+          {% if messages %} {% for message in messages %}
+          <div
+            class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %}"
+            role="alert"
+          >
+            {{ message }}
+          </div>
+          {% endfor %} {% endif %}
 
-        <!-- Display success and error messages -->
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %}" role="alert">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        <form method="POST" enctype="multipart/form-data">
+          <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            
-            <!-- Render form fields dynamically -->
+
+            <!-- Render form fields dynamically with improved styling -->
             {% for field in form %}
-                <div class="mb-3">
-                    {{ field.label_tag }}
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger small">
-                            {{ field.errors|join:", " }}
-                        </div>
-                    {% endif %}
-                </div>
+            <div class="mb-3">
+              <label for="{{ field.id_for_label }}" class="form-label"
+                >{{ field.label }}</label
+              >
+              <div class="form-control-wrapper">{{ field }}</div>
+              {% if field.help_text %}
+              <div class="form-text text-muted small">
+                {{ field.help_text }}
+              </div>
+              {% endif %} {% if field.errors %}
+              <div class="text-danger small">{{ field.errors|join:", " }}</div>
+              {% endif %}
+            </div>
             {% endfor %}
-            
-            <button type="submit" class="btn btn-success w-100">Register</button>
-        </form>
-        <p class="text-center mt-3">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+
+            <div class="d-grid gap-2 mt-4">
+              <button type="submit" class="btn btn-success">Register</button>
+            </div>
+          </form>
+
+          <p class="text-center mt-3 mb-0">
+            Already have an account? <a href="{% url 'login' %}">Login</a>
+          </p>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

@@ -1,9 +1,205 @@
+/* Enhanced Roomie Platform Styles */
+
+/* Base styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
+  font-family: "Poppins", sans-serif;
+  background-color: #f8f9fa;
+  color: #343a40;
+  line-height: 1.6;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+}
+
+.display-4 {
+  font-weight: 700;
+}
+
+.lead {
+  font-weight: 300;
+}
+
+/* Navbar styling */
+.navbar {
+  padding: 0.8rem 1rem;
 }
 
 .navbar-brand {
-    font-size: 1.5rem;
-    font-weight: bold;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.nav-link {
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s;
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+}
+
+/* Card styling */
+.card {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+}
+
+/* Button styling */
+.btn {
+  font-weight: 500;
+  padding: 0.5rem 1.5rem;
+  border-radius: 5px;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+.btn-success {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.btn-success:hover {
+  background-color: #157347;
+  border-color: #146c43;
+}
+
+/* Form styling */
+.form-control,
+.form-select {
+  border-radius: 5px;
+  padding: 0.6rem 1rem;
+  border: 1px solid #dee2e6;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* Profile components */
+.profile-header {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.profile-image {
+  border: 4px solid #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Room listing styles */
+.room-card .card-img-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.room-price {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: rgba(25, 135, 84, 0.9);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+/* Roommate profiles */
+.roommate-card {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.roommate-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  margin: 0 auto 1rem;
+  border: 3px solid #fff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Feature badges */
+.feature-badge {
+  background-color: #e9ecef;
+  color: #495057;
+  padding: 0.3rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+}
+
+/* Enhanced footer */
+footer {
+  border-top: 1px solid #dee2e6;
+}
+
+footer a {
+  color: #6c757d;
+  transition: color 0.3s;
+}
+
+footer a:hover {
+  color: #0d6efd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+  .display-4 {
+    font-size: 2.5rem;
+  }
+
+  .card-img-top {
+    height: 180px;
+  }
+
+  .navbar-brand {
+    font-size: 1.3rem;
+  }
 }

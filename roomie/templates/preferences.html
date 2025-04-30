@@ -1,0 +1,474 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card shadow-sm">
+        <div class="card-body p-5">
+          <h2 class="text-center mb-4">
+            <i class="fas fa-sliders-h text-primary me-2"></i> Roommate
+            Preferences
+          </h2>
+          <p class="text-muted text-center mb-4">
+            Set your preferences to help us find your ideal roommate match
+          </p>
+
+          <form method="POST" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <!-- Living Preferences Section -->
+            <div class="mb-5">
+              <h4 class="mb-3">
+                <i class="fas fa-home text-primary me-2"></i> Living Preferences
+              </h4>
+
+              <!-- Preferred Location -->
+              <div class="mb-3">
+                <label for="preferred_location" class="form-label"
+                  >Preferred Location</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="preferred_location"
+                  name="preferred_location"
+                  placeholder="e.g. Downtown, University District, etc."
+                  value="{{ preferences.preferred_location }}"
+                />
+              </div>
+
+              <!-- Budget Range -->
+              <div class="mb-3">
+                <label for="budget_range" class="form-label"
+                  >Budget Range ($ per month)</label
+                >
+                <div class="row g-2">
+                  <div class="col-6">
+                    <div class="input-group">
+                      <span class="input-group-text">$</span>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="min_budget"
+                        name="min_budget"
+                        placeholder="Min"
+                        value="{{ preferences.min_budget }}"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="input-group">
+                      <span class="input-group-text">$</span>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="max_budget"
+                        name="max_budget"
+                        placeholder="Max"
+                        value="{{ preferences.max_budget }}"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Move-in Date -->
+              <div class="mb-3">
+                <label for="move_in_date" class="form-label"
+                  >Earliest Move-in Date</label
+                >
+                <input
+                  type="date"
+                  class="form-control"
+                  id="move_in_date"
+                  name="move_in_date"
+                  value="{{ preferences.move_in_date|date:'Y-m-d' }}"
+                />
+              </div>
+
+              <!-- Room Type -->
+              <div class="mb-3">
+                <label class="form-label">Preferred Room Type</label>
+                <div class="row g-3 mt-1">
+                  <div class="col-md-3 col-6">
+                    <div class="form-check custom-option">
+                      <input class="form-check-input" type="checkbox"
+                      id="room_type_private" name="room_type" value="private" {%
+                      if 'private' in preferences.room_type %}checked{% endif
+                      %}>
+                      <label
+                        class="form-check-label d-flex flex-column"
+                        for="room_type_private"
+                      >
+                        <i class="fas fa-door-closed text-primary mb-2"></i>
+                        <span>Private Room</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-3 col-6">
+                    <div class="form-check custom-option">
+                      <input class="form-check-input" type="checkbox"
+                      id="room_type_shared" name="room_type" value="shared" {%
+                      if 'shared' in preferences.room_type %}checked{% endif %}>
+                      <label
+                        class="form-check-label d-flex flex-column"
+                        for="room_type_shared"
+                      >
+                        <i class="fas fa-users text-primary mb-2"></i>
+                        <span>Shared Room</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-3 col-6">
+                    <div class="form-check custom-option">
+                      <input class="form-check-input" type="checkbox"
+                      id="room_type_studio" name="room_type" value="studio" {%
+                      if 'studio' in preferences.room_type %}checked{% endif %}>
+                      <label
+                        class="form-check-label d-flex flex-column"
+                        for="room_type_studio"
+                      >
+                        <i class="fas fa-home text-primary mb-2"></i>
+                        <span>Studio</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-3 col-6">
+                    <div class="form-check custom-option">
+                      <input class="form-check-input" type="checkbox"
+                      id="room_type_apartment" name="room_type"
+                      value="apartment" {% if 'apartment' in
+                      preferences.room_type %}checked{% endif %}>
+                      <label
+                        class="form-check-label d-flex flex-column"
+                        for="room_type_apartment"
+                      >
+                        <i class="fas fa-building text-primary mb-2"></i>
+                        <span>Apartment</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Roommate Preferences Section -->
+            <div class="mb-5">
+              <h4 class="mb-3">
+                <i class="fas fa-user-friends text-primary me-2"></i> Roommate
+                Preferences
+              </h4>
+
+              <!-- Gender Preference -->
+              <div class="mb-3">
+                <label class="form-label">Preferred Gender</label>
+                <div class="row g-2">
+                  <div class="col-md-4 col-6">
+                    <div class="form-check custom-radio">
+                      <input class="form-check-input" type="radio"
+                      name="gender_preference" id="gender_any" value="any" {% if
+                      preferences.gender_preference == 'any' %}checked{% endif
+                      %}>
+                      <label class="form-check-label" for="gender_any">
+                        No Preference
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-4 col-6">
+                    <div class="form-check custom-radio">
+                      <input class="form-check-input" type="radio"
+                      name="gender_preference" id="gender_male" value="male" {%
+                      if preferences.gender_preference == 'male' %}checked{%
+                      endif %}>
+                      <label class="form-check-label" for="gender_male">
+                        Male
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-4 col-6">
+                    <div class="form-check custom-radio">
+                      <input class="form-check-input" type="radio"
+                      name="gender_preference" id="gender_female" value="female"
+                      {% if preferences.gender_preference == 'female'
+                      %}checked{% endif %}>
+                      <label class="form-check-label" for="gender_female">
+                        Female
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Age Range -->
+              <div class="mb-3">
+                <label class="form-label">Age Range</label>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="min_age"
+                      name="min_age"
+                      placeholder="Minimum age"
+                      value="{{ preferences.min_age }}"
+                      min="18"
+                      max="100"
+                    />
+                  </div>
+                  <div class="col-6">
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="max_age"
+                      name="max_age"
+                      placeholder="Maximum age"
+                      value="{{ preferences.max_age }}"
+                      min="18"
+                      max="100"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lifestyle Preferences Section -->
+            <div class="mb-5">
+              <h4 class="mb-3">
+                <i class="fas fa-heart text-primary me-2"></i> Lifestyle
+                Preferences
+              </h4>
+
+              <!-- Smoking preference -->
+              <div class="mb-3">
+                <label class="form-label">Smoking</label>
+                <div class="range-slider">
+                  <input
+                    type="range"
+                    class="form-range"
+                    min="1"
+                    max="5"
+                    step="1"
+                    id="smoking_preference"
+                    name="smoking_preference"
+                    value="{{ preferences.smoking_preference|default:'1' }}"
+                  />
+                  <div class="range-labels d-flex justify-content-between">
+                    <span>Non-smoker</span>
+                    <span>Outdoors only</span>
+                    <span>Smoker OK</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pets preference -->
+              <div class="mb-3">
+                <label class="form-label">Pets</label>
+                <div class="range-slider">
+                  <input
+                    type="range"
+                    class="form-range"
+                    min="1"
+                    max="5"
+                    step="1"
+                    id="pets_preference"
+                    name="pets_preference"
+                    value="{{ preferences.pets_preference|default:'1' }}"
+                  />
+                  <div class="range-labels d-flex justify-content-between">
+                    <span>No pets</span>
+                    <span>Small pets</span>
+                    <span>All pets OK</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cleanliness preference -->
+              <div class="mb-3">
+                <label class="form-label">Cleanliness</label>
+                <div class="range-slider">
+                  <input
+                    type="range"
+                    class="form-range"
+                    min="1"
+                    max="5"
+                    step="1"
+                    id="cleanliness_preference"
+                    name="cleanliness_preference"
+                    value="{{ preferences.cleanliness_preference|default:'3' }}"
+                  />
+                  <div class="range-labels d-flex justify-content-between">
+                    <span>Relaxed</span>
+                    <span>Moderate</span>
+                    <span>Very clean</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Social preference -->
+              <div class="mb-3">
+                <label class="form-label">Social Habits</label>
+                <div class="range-slider">
+                  <input
+                    type="range"
+                    class="form-range"
+                    min="1"
+                    max="5"
+                    step="1"
+                    id="social_preference"
+                    name="social_preference"
+                    value="{{ preferences.social_preference|default:'3' }}"
+                  />
+                  <div class="range-labels d-flex justify-content-between">
+                    <span>Private/Quiet</span>
+                    <span>Balanced</span>
+                    <span>Social/Active</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Guests preference -->
+              <div class="mb-3">
+                <label class="form-label">Guest Policy</label>
+                <div class="range-slider">
+                  <input
+                    type="range"
+                    class="form-range"
+                    min="1"
+                    max="5"
+                    step="1"
+                    id="guests_preference"
+                    name="guests_preference"
+                    value="{{ preferences.guests_preference|default:'3' }}"
+                  />
+                  <div class="range-labels d-flex justify-content-between">
+                    <span>Rarely/Never</span>
+                    <span>Occasionally</span>
+                    <span>Frequently</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Preferences Section -->
+            <div class="mb-5">
+              <h4 class="mb-3">
+                <i class="fas fa-clipboard-list text-primary me-2"></i>
+                Additional Info
+              </h4>
+
+              <!-- Additional comments -->
+              <div class="mb-3">
+                <label for="additional_comments" class="form-label"
+                  >Anything else potential roommates should know?</label
+                >
+                <textarea
+                  class="form-control"
+                  id="additional_comments"
+                  name="additional_comments"
+                  rows="4"
+                  placeholder="Share any additional preferences or information..."
+                >
+{{ preferences.additional_comments }}</textarea
+                >
+              </div>
+
+              <!-- Privacy settings -->
+              <div class="form-check form-switch mb-3">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="show_preferences_publicly"
+                  name="show_preferences_publicly"
+                  {%
+                  if
+                  preferences.show_preferences_publicly
+                  %}checked{%
+                  endif
+                  %}
+                />
+                <label class="form-check-label" for="show_preferences_publicly">
+                  Show my preferences on my public profile
+                </label>
+              </div>
+            </div>
+
+            <!-- Form buttons -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                onclick="history.back()"
+              >
+                <i class="fas fa-times me-1"></i> Cancel
+              </button>
+              <button type="submit" class="btn btn-primary px-4">
+                <i class="fas fa-save me-1"></i> Save Preferences
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Custom checkbox and radio styling */
+  .custom-option {
+    display: block;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .custom-option:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+  }
+
+  .form-check-input:checked ~ .custom-option {
+    border-color: var(--bs-primary);
+    background-color: rgba(13, 110, 253, 0.1);
+  }
+
+  /* Range slider styling */
+  .range-slider {
+    margin-bottom: 2rem;
+  }
+
+  .range-labels {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #6c757d;
+  }
+
+  .form-range::-webkit-slider-thumb {
+    background: var(--bs-primary);
+  }
+
+  .form-range::-moz-range-thumb {
+    background: var(--bs-primary);
+  }
+
+  /* Dark mode compatibility */
+  body.dark-mode .custom-option {
+    border-color: var(--dark-border);
+  }
+
+  body.dark-mode .custom-option:hover {
+    background-color: rgba(126, 181, 255, 0.05);
+  }
+
+  body.dark-mode .form-check-input:checked ~ .custom-option {
+    border-color: var(--dark-accent);
+    background-color: rgba(126, 181, 255, 0.1);
+  }
+
+  body.dark-mode .range-labels {
+    color: var(--dark-text-secondary);
+  }
+</style>
+{% endblock %}

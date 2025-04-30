@@ -1,0 +1,284 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-12 mb-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-0">
+          <i class="fas fa-envelope text-primary me-2"></i> Your Messages
+        </h2>
+        <a href="{% url 'find_roommate' %}" class="btn btn-primary">
+          <i class="fas fa-user-plus me-1"></i> Find People to Message
+        </a>
+      </div>
+      <hr />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      <!-- Message List -->
+      <div class="card shadow-sm mb-4 mb-md-0">
+        <div class="card-header bg-transparent">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Inbox</h5>
+            <span class="badge bg-primary rounded-pill"
+              >{{ messages|length }}</span
+            >
+          </div>
+        </div>
+        <div
+          class="list-group list-group-flush message-list"
+          style="max-height: 600px; overflow-y: auto"
+        >
+          {% for message in messages %}
+          <a
+            href="#message-{{ message.message_id }}"
+            class="list-group-item list-group-item-action {% if not message.is_read %}unread-message fw-bold{% endif %}"
+            data-bs-toggle="pill"
+            onclick="markAsRead('{{ message.message_id }}')"
+          >
+            <div class="d-flex align-items-center">
+              {% if message.sender.profile_photo %}
+              <img
+                src="{{ message.sender.profile_photo.url }}"
+                class="rounded-circle me-3"
+                style="width: 40px; height: 40px; object-fit: cover"
+                alt="{{ message.sender.username }}"
+              />
+              {% else %}
+              <img
+                src="/media/profile_photos/default_user.jpg"
+                class="rounded-circle me-3"
+                style="width: 40px; height: 40px; object-fit: cover"
+                alt="Default User"
+              />
+              {% endif %}
+              <div class="flex-grow-1 min-width-0">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0 text-truncate">
+                    {{ message.sender.username }}
+                  </h6>
+                  <small class="text-muted ms-2"
+                    >{{ message.timestamp|date:"M d" }}</small
+                  >
+                </div>
+                <p class="mb-0 text-truncate small">{{ message.subject }}</p>
+              </div>
+              {% if not message.is_read %}
+              <span class="ms-2 badge bg-primary rounded-pill">New</span>
+              {% endif %}
+            </div>
+          </a>
+          {% empty %}
+          <div class="list-group-item text-center py-4">
+            <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+            <p class="mb-0">No messages yet</p>
+            <p class="text-muted small">Your messages will appear here</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <!-- Message Content -->
+      <div class="card shadow-sm">
+        <div class="tab-content">
+          {% if messages %} {% for message in messages %}
+          <div
+            class="tab-pane fade {% if forloop.first %}show active{% endif %}"
+            id="message-{{ message.message_id }}"
+          >
+            <div class="card-header bg-transparent">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="mb-1">{{ message.subject }}</h5>
+                  <p class="mb-0 text-muted small">
+                    From: {{ message.sender.username }} • {{
+                    message.timestamp|date:"F j, Y, g:i a" }}
+                  </p>
+                </div>
+                <div class="dropdown">
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
+                    type="button"
+                    id="messageActions"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <ul
+                    class="dropdown-menu dropdown-menu-end"
+                    aria-labelledby="messageActions"
+                  >
+                    <li>
+                      <a
+                        class="dropdown-item"
+                        href="{% url 'send_message' message.sender.id %}"
+                      >
+                        <i class="fas fa-reply me-2"></i> Reply
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        class="dropdown-item mark-read-btn"
+                        href="#"
+                        data-message-id="{{ message.message_id }}"
+                      >
+                        {% if message.is_read %}
+                        <i class="fas fa-envelope me-2"></i> Mark as unread {%
+                        else %} <i class="fas fa-envelope-open me-2"></i> Mark
+                        as read {% endif %}
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                      <a class="dropdown-item text-danger" href="#">
+                        <i class="fas fa-trash-alt me-2"></i> Delete
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="card-body p-4">
+              <div class="d-flex mb-4">
+                {% if message.sender.profile_photo %}
+                <img
+                  src="{{ message.sender.profile_photo.url }}"
+                  class="rounded-circle me-3"
+                  style="width: 50px; height: 50px; object-fit: cover"
+                  alt="{{ message.sender.username }}"
+                />
+                {% else %}
+                <img
+                  src="/media/profile_photos/default_user.jpg"
+                  class="rounded-circle me-3"
+                  style="width: 50px; height: 50px; object-fit: cover"
+                  alt="Default User"
+                />
+                {% endif %}
+                <div>
+                  <h6 class="mb-1">{{ message.sender.username }}</h6>
+                  <p class="text-muted small mb-0">
+                    {{ message.sender.email }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="message-content">{{ message.body|linebreaks }}</div>
+            </div>
+            <div class="card-footer bg-transparent">
+              <div class="d-flex justify-content-between">
+                <a
+                  href="{% url 'user_profile' message.sender.id %}"
+                  class="btn btn-outline-secondary btn-sm"
+                >
+                  <i class="fas fa-user me-1"></i> View Profile
+                </a>
+                <a
+                  href="{% url 'send_message' message.sender.id %}"
+                  class="btn btn-primary btn-sm"
+                >
+                  <i class="fas fa-reply me-1"></i> Reply
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %} {% else %}
+          <div class="card-body text-center py-5">
+            <div class="py-4">
+              <i class="fas fa-envelope-open fa-4x text-muted mb-3"></i>
+              <h4>No Messages</h4>
+              <p class="text-muted">
+                You don't have any messages in your inbox.
+              </p>
+              <a href="{% url 'find_roommate' %}" class="btn btn-primary mt-2">
+                <i class="fas fa-user-plus me-1"></i> Find People to Message
+              </a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add JavaScript for message functionality -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Activate first pill if none are active
+    if (!document.querySelector(".message-list .active")) {
+      const firstMessage = document.querySelector(".message-list a");
+      if (firstMessage) {
+        firstMessage.classList.add("active");
+      }
+    }
+
+    // Handle mark as read/unread buttons
+    const markReadButtons = document.querySelectorAll(".mark-read-btn");
+    markReadButtons.forEach((btn) => {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        const messageId = this.dataset.messageId;
+        // Here you would call your backend API to mark as read/unread
+        console.log("Toggling read status for message:", messageId);
+
+        // Toggle the button text (this is just frontend, backend call would be needed)
+        if (this.innerHTML.includes("Mark as unread")) {
+          this.innerHTML =
+            '<i class="fas fa-envelope-open me-2"></i> Mark as read';
+        } else {
+          this.innerHTML =
+            '<i class="fas fa-envelope me-2"></i> Mark as unread';
+        }
+      });
+    });
+  });
+
+  function markAsRead(messageId) {
+    // Here you would make an AJAX call to mark the message as read
+    console.log("Marking as read:", messageId);
+
+    // For now, just update the UI
+    const messageItem = document.querySelector(
+      `a[href="#message-${messageId}"]`
+    );
+    if (messageItem && messageItem.classList.contains("unread-message")) {
+      messageItem.classList.remove("unread-message", "fw-bold");
+      const badge = messageItem.querySelector(".badge");
+      if (badge) badge.remove();
+    }
+  }
+</script>
+
+<!-- Add custom CSS for dark mode compatibility -->
+<style>
+  /* Message list item styling */
+  .unread-message {
+    background-color: rgba(13, 110, 253, 0.05);
+  }
+
+  body.dark-mode .unread-message {
+    background-color: rgba(126, 181, 255, 0.05);
+  }
+
+  /* Message content in dark mode */
+  body.dark-mode .message-content {
+    color: var(--dark-text);
+  }
+
+  /* List group item hover effect in dark mode */
+  body.dark-mode .list-group-item-action:hover {
+    background-color: var(--dark-hover);
+  }
+
+  /* Message tabs in dark mode */
+  body.dark-mode .nav-pills .nav-link.active {
+    background-color: var(--dark-accent);
+    color: #fff;
+  }
+</style>
+{% endblock %}

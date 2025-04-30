@@ -1,73 +1,219 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
+<div class="container">
+  {% if user.is_authenticated %}
+  <!-- Logged-in User Content - Enhanced UI -->
+  <div class="text-center mb-5">
+    <h1 class="display-4 mb-3">Welcome, {{ user.username }}!</h1>
+    <p class="lead mb-4">
+      Manage your profile and connect with potential roommates today.
+    </p>
+    <div class="d-flex gap-3 justify-content-center">
+      <a href="{% url 'user_profile' user.id %}" class="btn btn-primary btn-lg">
+        <i class="fas fa-user me-2"></i> View Profile
+      </a>
+      <a
+        href="{% url 'messages' user.id %}"
+        class="btn btn-outline-primary btn-lg"
+      >
+        <i class="fas fa-envelope me-2"></i> Messages
+      </a>
+    </div>
+  </div>
+  {% else %}
+  <!-- Non-Logged-in User Content - Hero section -->
+  <div class="text-center mb-5 py-5">
+    <h1 class="display-4 fw-bold mb-3">Find Your Perfect Roommate</h1>
+    <p class="lead col-md-8 mx-auto mb-5">
+      Connect with like-minded roommates, discover affordable housing options,
+      and make your living experience better with Roomie.
+    </p>
+    <div class="d-flex gap-3 justify-content-center">
+      <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 py-2">
+        <i class="fas fa-user-plus me-2"></i> Get Started
+      </a>
+      <a
+        href="{% url 'login' %}"
+        class="btn btn-outline-primary btn-lg px-4 py-2"
+      >
+        <i class="fas fa-sign-in-alt me-2"></i> Login
+      </a>
+    </div>
+  </div>
+  {% endif %}
 
-{% block content %}
-<div class="container mt-5">
-    {% if user.is_authenticated %}
-        <!-- Logged-in User Content -->
-        <div class="text-center">
-            <h1 class="display-4">Welcome, {{ user.username }}!</h1>
-            <p class="lead">Manage your profile and check your messages.</p>
-            <div class="mt-4">
-                <a href="{% url 'user_profile' user.id %}" class="btn btn-primary btn-lg">View Profile</a>
-                <a href="{% url 'messages' user.id %}" class="btn btn-outline-primary btn-lg">Messages</a>            </div>
-        </div>
-    {% else %}
-        <!-- Non-Logged-in User Content -->
-        <div class="text-center">
-            <h1 class="display-4">Find Your Perfect Roommate</h1>
-            <p class="lead">Browse rooms, connect with roommates, and make your living experience better.</p>
-            <div class="mt-4">
-                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Get Started</a>
-                <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Login</a>
+  <!-- Featured Rooms Section - Enhanced with cards -->
+  <section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-0">
+        <i class="fas fa-home text-primary me-2"></i> Featured Rooms
+      </h2>
+      <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="row g-4">
+      {% for room in featured_rooms %}
+      <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+          <div class="position-relative">
+            <img
+              src="{{ room.image.url }}"
+              class="card-img-top"
+              alt="{{ room.title }}"
+            />
+            <div class="room-price">${{ room.rent }}/month</div>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">{{ room.title }}</h5>
+            <p class="card-text text-muted mb-1">
+              <i class="fas fa-map-marker-alt me-2"></i>{{ room.location }}
+            </p>
+            <p class="card-text mb-3">
+              <span class="badge bg-light text-dark me-2"
+                >{{ room.get_room_type_display }}</span
+              >
+              {% if room.is_available %}
+              <span class="badge bg-success">Available</span>
+              {% else %}
+              <span class="badge bg-secondary">Unavailable</span>
+              {% endif %}
+            </p>
+            <div class="d-grid">
+              <a
+                href="{% url 'user_profile' room.provider.id %}"
+                class="btn btn-primary"
+                >View Details</a
+              >
             </div>
+          </div>
         </div>
-    {% endif %}
-
-    <!-- Featured Rooms Section -->
-    <div class="mt-5">
-        <h2 class="text-center">Featured Rooms</h2>
-        <div class="row mt-4">
-            {% for room in featured_rooms %}
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm">
-                        <img src="{{ room.image.url }}" class="card-img-top" alt="{{ room.title }}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ room.title }}</h5>
-                            <p class="card-text">{{ room.location }}</p>
-                            <p class="card-text"><strong>${{ room.rent }}</strong> / month</p>
-                            <a href="{% url 'room_detail' room.id %}" class="btn btn-primary">View Details</a>
-                        </div>
-                    </div>
-                </div>
-            {% empty %}
-                <p class="text-center">No featured rooms available at the moment.</p>
-            {% endfor %}
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info text-center py-4">
+          <i class="fas fa-info-circle me-2"></i> No featured rooms available at
+          the moment. Check back soon!
         </div>
+      </div>
+      {% endfor %}
     </div>
+  </section>
 
-    <!-- Meet Our Roommates Section -->
-    <div class="mt-5">
-        <h2 class="text-center">Meet Our Roommates</h2>
-        <div class="row mt-4">
-            {% for roommate in roommates %}
-                <div class="col-md-3 mb-4">
-                    <div class="card shadow-sm text-center">
-                        {% if roommate.profile_photo %}
-                            <img src="{{ roommate.profile_photo.url }}" class="card-img-top rounded-circle mx-auto mt-3" style="width: 100px; height: 100px;" alt="{{ roommate.username }}">
-                        {% else %}
-                            <img src="/media/profile_photos/default_user.jpg" class="card-img-top rounded-circle mx-auto mt-3" style="width: 100px; height: 100px;" alt="Default Roommate Image">
-                        {% endif %}
-                        <div class="card-body">
-                            <h5 class="card-title">{{ roommate.username }}</h5>
-                            <p class="card-text">{{ roommate.location|default:"Location not provided" }}</p>
-                            <a href="{% url 'user_profile' roommate.id %}" class="btn btn-outline-primary btn-sm">View Profile</a>
-                        </div>
-                    </div>
-                </div>
-            {% empty %}
-                <p class="text-center">No roommates available at the moment.</p>
-            {% endfor %}
-        </div>
+  <!-- Meet Our Roommates Section - Enhanced with cards -->
+  <section>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-0">
+        <i class="fas fa-users text-primary me-2"></i> Meet Our Roommates
+      </h2>
+      <a href="{% url 'find_roommate' %}" class="btn btn-sm btn-outline-primary"
+        >View All</a
+      >
     </div>
+    <div class="row g-4">
+      {% for roommate in roommates %}
+      <div class="col-md-3">
+        <div class="card h-100 shadow-sm roommate-card">
+          {% if roommate.profile_photo %}
+          <img
+            src="{{ roommate.profile_photo.url }}"
+            class="rounded-circle roommate-image"
+            alt="{{ roommate.username }}"
+          />
+          {% else %}
+          <img
+            src="/media/profile_photos/default_user.jpg"
+            class="rounded-circle roommate-image"
+            alt="Default Roommate Image"
+          />
+          {% endif %}
+          <div class="card-body p-0">
+            <h5 class="card-title mb-1">{{ roommate.username }}</h5>
+            <p class="card-text text-muted mb-3">
+              <i class="fas fa-map-marker-alt me-1"></i>
+              {{ roommate.location|default:"Location not provided" }}
+            </p>
+            <div class="d-grid gap-2">
+              <a
+                href="{% url 'user_profile' roommate.id %}"
+                class="btn btn-sm btn-outline-primary"
+                >View Profile</a
+              >
+              <a
+                href="{% url 'send_message' roommate.id %}"
+                class="btn btn-sm btn-primary"
+                >Contact</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info text-center py-4">
+          <i class="fas fa-info-circle me-2"></i> No roommates available at the
+          moment. Be the first to join!
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- How It Works Section - Added new section -->
+  <section class="my-5 pt-3">
+    <h2 class="text-center mb-4">
+      <i class="fas fa-info-circle text-primary me-2"></i> How Roomie Works
+    </h2>
+    <div class="row g-4 mt-2">
+      <div class="col-md-4">
+        <div class="card h-100 text-center p-4 shadow-sm">
+          <div class="card-body">
+            <div
+              class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3"
+              style="width: 80px; height: 80px"
+            >
+              <i class="fas fa-user-plus fa-2x text-primary"></i>
+            </div>
+            <h4>Create Profile</h4>
+            <p class="text-muted">
+              Sign up and create your detailed profile to help find the perfect
+              match.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 text-center p-4 shadow-sm">
+          <div class="card-body">
+            <div
+              class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3"
+              style="width: 80px; height: 80px"
+            >
+              <i class="fas fa-search fa-2x text-primary"></i>
+            </div>
+            <h4>Browse Options</h4>
+            <p class="text-muted">
+              Browse through available rooms or potential roommates based on
+              your preferences.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 text-center p-4 shadow-sm">
+          <div class="card-body">
+            <div
+              class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3"
+              style="width: 80px; height: 80px"
+            >
+              <i class="fas fa-comments fa-2x text-primary"></i>
+            </div>
+            <h4>Connect</h4>
+            <p class="text-muted">
+              Message potential matches and arrange to meet before making your
+              decision.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
 {% endblock %}

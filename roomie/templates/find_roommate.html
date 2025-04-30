@@ -1,34 +1,171 @@
-{% extends 'base.html' %}
-{% load static %}
-
+{% extends 'base.html' %} 
+{% load static %} 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="text-center mb-2">Find Your Ideal Roommate</h2>
-    <p class="text-center text-muted mb-4">Browse profiles and connect with potential roommates that match your preferences.</p>
+<div class="container">
+  <!-- Hero Section -->
+  <div class="text-center mb-5">
+    <h2 class="display-5 fw-bold mb-3">Find Your Ideal Roommate</h2>
+    <p class="lead text-muted mb-4">
+      Connect with potential roommates that match your lifestyle and
+      preferences.
+    </p>
+  </div>
 
-    <div class="row g-4">
-        {% for roommate in roommates %}
+  <!-- Advanced Search and Filter Section -->
+  <div class="card shadow-sm mb-5">
+    <div class="card-body p-4">
+      <h5 class="card-title mb-3">
+        <i class="fas fa-filter text-primary me-2"></i> Search & Filter
+      </h5>
+      <form id="roommate-filter-form" method="GET" class="row g-3">
+        <!-- Search bar -->
         <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                {% if roommate.profile_photo %}
-                    <img src="{{ roommate.profile_photo.url }}" class="card-img-top rounded-circle mx-auto mt-3" style="width: 150px; height: 150px;" alt="{{ roommate.username }}">
-                {% else %}
-                    <img src="/media/profile_photos/default_user.jpg" class="card-img-top rounded-circle mx-auto mt-3" style="width: 100px; height: 100px;" alt="Default Roommate Image">
-                {% endif %}
-                <div class="card-body text-center">
-                    <h5 class="card-title mb-1">{{ roommate.username }}</h5>
-                    <p class="text-muted mb-1"><i class="bi bi-geo-alt"></i> {{ roommate.location|default:"Location not provided" }}</p>
-                    <p class="mb-3"><strong>Bio:</strong> {{ roommate.bio|default:"No bio provided" }}</p>
-                    <a href="{% url 'user_profile' roommate.id %}" class="btn btn-outline-primary btn-sm mb-2">View Profile</a>
-                    <a href="{% url 'send_message' roommate.id %}" class="btn btn-primary btn-sm">Contact</a>
-                </div>
-            </div>
+          <div class="input-group">
+            <span class="input-group-text bg-light">
+              <i class="fas fa-search text-muted"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              name="search"
+              placeholder="Search by name or keywords"
+              value="{{ request.GET.search }}"
+            />
+          </div>
         </div>
-        {% empty %}
-        <div class="col-12 text-center">
-            <p class="text-muted">No roommate profiles found at the moment. Check back soon!</p>
+
+        <!-- Location filter -->
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text bg-light">
+              <i class="fas fa-map-marker-alt text-muted"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              name="location"
+              placeholder="Search by location"
+              value="{{ request.GET.location }}"
+            />
+          </div>
         </div>
-        {% endfor %}
+
+        <!-- Account type filter -->
+        <div class="col-md-4">
+          <select name="account_type" class="form-select">
+            <option value="">All Account Types</option>
+            <option value="seeker" {% if request.GET.account_type == 'seeker' %}selected{% endif %}>Roommate Seekers</option>
+            <option value="provider" {% if request.GET.account_type == 'provider' %}selected{% endif %}>Room Providers</option>
+          </select>
+        </div>
+
+        <!-- Additional filters in a collapse section -->
+        <div class="col-12">
+          <a 
+            class="btn btn-sm btn-outline-secondary" 
+            data-bs-toggle="collapse" 
+            href="#advancedFilters" 
+            role="button" 
+            aria-expanded="false"
+          >
+            <i class="fas fa-sliders-h me-1"></i> Advanced Filters
+          </a>
+        </div>
+
+        <div class="col-12 collapse" id="advancedFilters">
+          <div class="card card-body border-0 bg-light mt-2">
+            <div class="row g-3">
+              <!-- Gender filter -->
+              <div class="col-md-4">
+                <label class="form-label small">Gender</label>
+                <div class="d-flex gap-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="
+              {% elif roommate.gender == 'female' %}
+              <i class="fas fa-venus me-1"></i>
+              {% else %}
+              <i class="fas fa-genderless me-1"></i>
+              {% endif %} {{ roommate.get_gender_display }}
+            </span>
+            {% endif %} {% if roommate.birthdate %}
+            <span class="feature-badge">
+              <i class="fas fa-birthday-cake me-1"></i>
+              {{ roommate.birthdate|timesince }} old
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Bio excerpt -->
+          <p class="card-text small mb-3">
+            {% if roommate.bio %} {{ roommate.bio|truncatechars:60 }} {% else %}
+            No bio provided {% endif %}
+          </p>
+
+          <!-- Action buttons -->
+          <div class="d-grid gap-2">
+            <a
+              href="{% url 'user_profile' roommate.id %}"
+              class="btn btn-outline-primary btn-sm"
+            >
+              <i class="fas fa-user me-1"></i> View Profile
+            </a>
+            <a
+              href="{% url 'send_message' roommate.id %}"
+              class="btn btn-primary btn-sm"
+            >
+              <i class="fas fa-envelope me-1"></i> Contact
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
+    {% empty %}
+    <div class="col-12 text-center">
+      <div class="alert alert-info py-4">
+        <i class="fas fa-info-circle me-2"></i>
+        No roommate profiles found at the moment. Check back soon or be the
+        first to create a profile!
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination - if needed -->
+  {% if roommates.has_other_pages %}
+  <nav class="mt-5">
+    <ul class="pagination justify-content-center">
+      {% if roommates.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ roommates.previous_page_number }}"
+          >&laquo; Previous</a
+        >
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">&laquo; Previous</span>
+      </li>
+      {% endif %} {% for i in roommates.paginator.page_range %} {% if
+      roommates.number == i %}
+      <li class="page-item active">
+        <span class="page-link">{{ i }}</span>
+      </li>
+      {% else %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+      </li>
+      {% endif %} {% endfor %} {% if roommates.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ roommates.next_page_number }}"
+          >Next &raquo;</a
+        >
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">Next &raquo;</span>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
 </div>
 {% endblock %}

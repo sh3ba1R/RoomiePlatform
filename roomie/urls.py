@@ -23,6 +23,7 @@ urlpatterns = [
     path('send-message/<int:user_id>/', views.send_message, name='send_message'),
     path('user-profile/<int:user_id>/', views.user_profile, name='user_profile'),  # User profile page
     path('messages/<int:user_id>/', views.messages_view, name='messages'),  # Messages page
+    path('messages/<int:user_id>/mark-read/<int:message_id>/', views.mark_message_read, name='mark_message_read'),
     path('list-room/', views.list_room, name='list_room'),  # URL for listing a room
 
 
