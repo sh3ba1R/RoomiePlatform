@@ -45,7 +45,12 @@ class RoomieForms:
         """
         class Meta:
             model = Room
-            fields = ['provider', 'title', 'description', 'location', 'rent', 'room_type', 'is_available', 'image']
+            fields = ['provider', 'title', 'description', 'location', 'rent', 'room_type','bedrooms', 'is_available', 'image']
+            exclude = ['provider']  # Exclude the provider field from the form
+            widgets = {
+                'bedrooms': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            }
+
 
     class UserForm(UserCreationForm):
         """

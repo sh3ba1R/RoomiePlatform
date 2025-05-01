@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from core.models import Room, Message, RoomBooking
+from django.db.models import Count, Q, F
 
 
 from .forms import RoomieFormFactory,RoomieForms
@@ -19,9 +20,14 @@ def home(request):
     """
     Home page view to display featured rooms and all roommates.
     """
-    featured_rooms = Room.objects.filter(is_available=True)[:6]  # Fetch up to 6 available rooms
-    roommates = User.objects.filter(account_type='seeker')  # Fetch all seekers (roommates)
-    
+    # Fetch rooms that are available and have remaining capacity
+    featured_rooms = Room.objects.annotate(
+        approved_bookings=Count('bookings', filter=Q(bookings__status='approved'))
+    ).filter(is_available=True).filter(bedrooms__gt=F('approved_bookings'))[:6]
+
+    # Fetch all seekers (roommates)
+    roommates = User.objects.filter(account_type='seeker')
+
     return render(request, 'home.html', {
         'featured_rooms': featured_rooms,
         'roommates': roommates,
@@ -106,7 +112,7 @@ def list_room(request):
     else:
         form = RoomieForms.RoomForm()
 
-    return render(request, 'list_room.html', {'form': form})
+    return render(request, 'list_room.html', {'form': form, 'provider': request.user})
 
 
 
@@ -272,3 +278,63 @@ def delete_room(request, room_id):
         return redirect('user_profile', user_id=request.user.id)
 
     return render(request, 'confirm_delete_room.html', {'room': room})
+
+@login_required
+def my_bookings(request):
+    """
+    Display all bookings submitted by the seeker.
+    """
+    if request.user.account_type != 'seeker':
+        return redirect('home')
+
+    bookings = RoomBooking.objects.filter(seeker=request.user).select_related('room')
+    return render(request, 'my_bookings.html', {'bookings': bookings})
+
+@login_required
+def manage_bookings(request):
+    """
+    Display all bookings for the provider's rooms.
+    """
+    if request.user.account_type != 'provider':
+        return redirect('home')
+
+    # Fetch all bookings for rooms owned by the provider
+    bookings = RoomBooking.objects.filter(room__provider=request.user).select_related('room', 'seeker')
+
+    # Add remaining capacity for each booking
+    booking_data = []
+    for booking in bookings:
+        room = booking.room
+        approved_bookings = RoomBooking.objects.filter(room=room, status='approved').count()
+        remaining_capacity = room.bedrooms - approved_bookings
+        booking_data.append({
+            'booking': booking,
+            'remaining_capacity': remaining_capacity
+        })
+
+    return render(request, 'manage_bookings.html', {'booking_data': booking_data})
+@login_required
+def update_booking_status(request, booking_id, status):
+    """
+    Allow providers to accept or reject a booking.
+    """
+    booking = get_object_or_404(RoomBooking, id=booking_id, room__provider=request.user)
+
+    if status not in ['approved', 'rejected']:
+        messages.error(request, "Invalid status update.")
+        return redirect('manage_bookings')
+
+    if status == 'approved' and not RoomBooking.can_accept_booking(booking.room):
+        messages.error(request, f"Cannot approve booking. Maximum capacity of {booking.room.bedrooms} bedrooms reached.")
+        return redirect('manage_bookings')
+
+    booking.status = status
+    booking.save()
+
+    # Notify the seeker
+    if status == 'approved':
+        messages.success(request, f"Booking for {booking.room.title} has been approved.")
+    elif status == 'rejected':
+        messages.error(request, f"Booking for {booking.room.title} has been rejected.")
+
+    return redirect('manage_bookings')

@@ -17,6 +17,7 @@
                     <p class="card-text"><strong>Location:</strong> {{ room.location }}</p>
                     <p class="card-text"><strong>Rent:</strong> ${{ room.rent }} / month</p>
                     <p class="card-text"><strong>Room Type:</strong> {{ room.get_room_type_display }}</p>
+                    <p class="card-text"><strong>Bedrooms:</strong> {{ room.bedrooms }}</p>
                     <p class="card-text"><strong>Description:</strong> {{ room.description }}</p>
                     <p class="card-text"><strong>Availability:</strong> 
                         {% if room.is_available %}

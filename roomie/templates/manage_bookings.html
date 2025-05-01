@@ -1,0 +1,38 @@
+<!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\manage_bookings.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Manage Bookings</h2>
+    <div class="list-group mt-4">
+        {% for data in booking_data %}
+        <div class="list-group-item">
+            <h5 class="mb-2">{{ data.booking.room.title }}</h5>
+            <p><strong>Seeker:</strong> {{ data.booking.seeker.username }}</p>
+            <p><strong>Status:</strong> 
+                <span class="{% if data.booking.status == 'approved' %}text-success{% elif data.booking.status == 'rejected' %}text-danger{% else %}text-warning{% endif %}">
+                    {{ data.booking.status|capfirst }}
+                </span>
+            </p>
+            <p><strong>Start Date:</strong> {{ data.booking.start_date }}</p>
+            <p><strong>End Date:</strong> {{ data.booking.end_date }}</p>
+            <p><strong>Remaining Capacity:</strong> 
+                <span class="{% if data.remaining_capacity > 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ data.remaining_capacity }}
+                </span>
+            </p>
+            <div class="d-flex gap-2">
+                {% if data.booking.status == 'pending' and data.remaining_capacity > 0 %}
+                <a href="{% url 'update_booking_status' data.booking.id 'approved' %}" class="btn btn-success btn-sm">Approve</a>
+                {% endif %}
+                {% if data.booking.status == 'pending' %}
+                <a href="{% url 'update_booking_status' data.booking.id 'rejected' %}" class="btn btn-danger btn-sm">Reject</a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">No bookings available for your rooms.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

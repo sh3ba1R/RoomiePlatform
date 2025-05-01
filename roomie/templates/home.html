@@ -1,26 +1,26 @@
-{% extends 'base.html' %} {% block content %}
+<!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\home.html -->
+{% extends 'base.html' %}
+
+{% block content %}
 <div class="container">
   {% if user.is_authenticated %}
-  <!-- Logged-in User Content - Enhanced UI -->
+  <!-- Logged-in User Content -->
   <div class="text-center mb-5">
     <h1 class="display-4 mb-3">Welcome, {{ user.username }}!</h1>
     <p class="lead mb-4">
-      Manage your profile and connect with potential roommates today.
+      Manage your profile, explore rooms, and connect with potential roommates today.
     </p>
     <div class="d-flex gap-3 justify-content-center">
       <a href="{% url 'user_profile' user.id %}" class="btn btn-primary btn-lg">
         <i class="fas fa-user me-2"></i> View Profile
       </a>
-      <a
-        href="{% url 'messages' user.id %}"
-        class="btn btn-outline-primary btn-lg"
-      >
+      <a href="{% url 'messages' user.id %}" class="btn btn-outline-primary btn-lg">
         <i class="fas fa-envelope me-2"></i> Messages
       </a>
     </div>
   </div>
   {% else %}
-  <!-- Non-Logged-in User Content - Hero section -->
+  <!-- Non-Logged-in User Content -->
   <div class="text-center mb-5 py-5">
     <h1 class="display-4 fw-bold mb-3">Find Your Perfect Roommate</h1>
     <p class="lead col-md-8 mx-auto mb-5">
@@ -31,90 +31,88 @@
       <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 py-2">
         <i class="fas fa-user-plus me-2"></i> Get Started
       </a>
-      <a
-        href="{% url 'login' %}"
-        class="btn btn-outline-primary btn-lg px-4 py-2"
-      >
+      <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-4 py-2">
         <i class="fas fa-sign-in-alt me-2"></i> Login
       </a>
     </div>
   </div>
   {% endif %}
 
-  <!-- Featured Rooms Section - Enhanced with cards -->
+  <!-- Featured Rooms Section -->
   <section class="mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">
-            <i class="fas fa-home text-primary me-2"></i> Featured Rooms
-        </h2>
-        <div class="d-flex justify-content-end">
-            <a href="{% url 'filter_rooms' %}" class="btn btn-sm btn-outline-primary">
-                View All
-            </a>
-        </div>
+      <h2 class="mb-0">
+        <i class="fas fa-home text-primary me-2"></i> Featured Rooms
+      </h2>
+      <a href="{% url 'filter_rooms' %}" class="btn btn-sm btn-outline-primary">
+        View All
+      </a>
     </div>
     <div class="row g-4">
-        {% for room in featured_rooms %}
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <div class="position-relative">
-                    {% if room.image %}
-                    <img
-                        src="{{ room.image.url }}"
-                        class="card-img-top"
-                        alt="{{ room.title }}"
-                        style="height: 200px; object-fit: cover;"
-                    />
-                    {% else %}
-                    <img
-                        src="/media/images/default_room.jpg"
-                        class="card-img-top"
-                        alt="Default Room Image"
-                        style="height: 200px; object-fit: cover;"
-                    />
-                    {% endif %}
-                    <div class="room-price">${{ room.rent }}/month</div>
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title">{{ room.title }}</h5>
-                    <p class="card-text text-muted mb-1">
-                        <i class="fas fa-map-marker-alt me-2"></i>{{ room.location }}
-                    </p>
-                    <p class="card-text mb-3">
-                        <span class="badge bg-light text-dark me-2">{{ room.get_room_type_display }}</span>
-                        {% if room.is_available %}
-                        <span class="badge bg-success">Available</span>
-                        {% else %}
-                        <span class="badge bg-secondary">Unavailable</span>
-                        {% endif %}
-                    </p>
-                    <div class="d-grid">
-                        <a href="{% url 'room_detail' room.room_id %}" class="btn btn-primary">
-                            View Details
-                        </a>
-                    </div>
-                </div>
+      {% for room in featured_rooms %}
+      <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+          <div class="position-relative">
+            {% if room.image %}
+            <img
+              src="{{ room.image.url }}"
+              class="card-img-top"
+              alt="{{ room.title }}"
+              style="height: 200px; object-fit: cover;"
+            />
+            {% else %}
+            <img
+              src="/media/images/default_room.jpg"
+              class="card-img-top"
+              alt="Default Room Image"
+              style="height: 200px; object-fit: cover;"
+            />
+            {% endif %}
+            <div class="room-price">${{ room.rent }}/month</div>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">{{ room.title }}</h5>
+            <p class="card-text text-muted mb-1">
+              <i class="fas fa-map-marker-alt me-2"></i>{{ room.location }}
+            </p>
+            <p class="card-text mb-1">
+              <strong>Bedrooms:</strong> {{ room.bedrooms }}
+            </p>
+            <p class="card-text mb-3">
+              <span class="badge bg-light text-dark me-2">{{ room.get_room_type_display }}</span>
+              {% if room.is_available %}
+              <span class="badge bg-success">Available</span>
+              {% else %}
+              <span class="badge bg-secondary">Unavailable</span>
+              {% endif %}
+            </p>
+            <div class="d-grid">
+              <a href="{% url 'room_detail' room.room_id %}" class="btn btn-primary">
+                View Details
+              </a>
             </div>
+          </div>
         </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info text-center py-4">
-                <i class="fas fa-info-circle me-2"></i> No featured rooms available at the moment. Check back soon!
-            </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info text-center py-4">
+          <i class="fas fa-info-circle me-2"></i> No featured rooms available at the moment. Check back soon!
         </div>
-        {% endfor %}
+      </div>
+      {% endfor %}
     </div>
-</section>
+  </section>
 
-  <!-- Meet Our Roommates Section - Enhanced with cards -->
+  <!-- Meet Our Roommates Section -->
   <section>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="mb-0">
         <i class="fas fa-users text-primary me-2"></i> Meet Our Roommates
       </h2>
-      <a href="{% url 'find_roommate' %}" class="btn btn-sm btn-outline-primary"
-        >View All</a
-      >
+      <a href="{% url 'find_roommate' %}" class="btn btn-sm btn-outline-primary">
+        View All
+      </a>
     </div>
     <div class="row g-4">
       {% for roommate in roommates %}
@@ -140,16 +138,12 @@
               {{ roommate.location|default:"Location not provided" }}
             </p>
             <div class="d-grid gap-2">
-              <a
-                href="{% url 'user_profile' roommate.id %}"
-                class="btn btn-sm btn-outline-primary"
-                >View Profile</a
-              >
-              <a
-                href="{% url 'send_message' roommate.id %}"
-                class="btn btn-sm btn-primary"
-                >Contact</a
-              >
+              <a href="{% url 'user_profile' roommate.id %}" class="btn btn-sm btn-outline-primary">
+                View Profile
+              </a>
+              <a href="{% url 'send_message' roommate.id %}" class="btn btn-sm btn-primary">
+                Contact
+              </a>
             </div>
           </div>
         </div>
@@ -157,15 +151,14 @@
       {% empty %}
       <div class="col-12">
         <div class="alert alert-info text-center py-4">
-          <i class="fas fa-info-circle me-2"></i> No roommates available at the
-          moment. Be the first to join!
+          <i class="fas fa-info-circle me-2"></i> No roommates available at the moment. Be the first to join!
         </div>
       </div>
       {% endfor %}
     </div>
   </section>
 
-  <!-- How It Works Section - Added new section -->
+  <!-- How It Works Section -->
   <section class="my-5 pt-3">
     <h2 class="text-center mb-4">
       <i class="fas fa-info-circle text-primary me-2"></i> How Roomie Works
@@ -182,8 +175,7 @@
             </div>
             <h4>Create Profile</h4>
             <p class="text-muted">
-              Sign up and create your detailed profile to help find the perfect
-              match.
+              Sign up and create your detailed profile to help find the perfect match.
             </p>
           </div>
         </div>
@@ -199,8 +191,7 @@
             </div>
             <h4>Browse Options</h4>
             <p class="text-muted">
-              Browse through available rooms or potential roommates based on
-              your preferences.
+              Browse through available rooms or potential roommates based on your preferences.
             </p>
           </div>
         </div>
@@ -216,8 +207,7 @@
             </div>
             <h4>Connect</h4>
             <p class="text-muted">
-              Message potential matches and arrange to meet before making your
-              decision.
+              Message potential matches and arrange to meet before making your decision.
             </p>
           </div>
         </div>

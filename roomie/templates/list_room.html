@@ -7,6 +7,7 @@
     <div class="card shadow p-4 mt-4">
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
+            <p><strong>Provider:</strong> {{ provider.username }}</p> <!-- Display provider's name -->
             {{ form.as_p }}
             <button type="submit" class="btn btn-primary w-100">Submit</button>
         </form>

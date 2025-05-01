@@ -57,6 +57,7 @@ class Room(models.Model):
         ('studio', 'Studio'),
         ('apartment', 'Apartment'),
     ])
+    bedrooms = models.PositiveIntegerField(default=1)  # Number of bedrooms
     is_available = models.BooleanField(default=True)
     image = models.ImageField(
         upload_to='images/',
@@ -82,9 +83,18 @@ class RoomBooking(models.Model):
         ('cancelled', 'Cancelled'),
     ], default='pending')
     timestamp = models.DateTimeField(auto_now_add=True)
+    notification_sent = models.BooleanField(default=False)  # Track if the seeker has been notified
+
 
     def __str__(self):
         return f"Booking by {self.seeker.username} for {self.room.title} ({self.status})"
+
+    def can_accept_booking(room):
+        """
+        Check if the room can accept more bookings based on the number of bedrooms.
+        """
+        approved_bookings = RoomBooking.objects.filter(room=room, status='approved').count()
+        return approved_bookings < room.bedrooms
 
 class RoomContract(models.Model):
     STATUS_CHOICES = [

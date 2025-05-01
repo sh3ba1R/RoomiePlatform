@@ -29,6 +29,10 @@ urlpatterns = [
     path('filter-rooms/', views.filter_rooms, name='filter_rooms'),  # Advanced filter page
     path('room/<int:room_id>/book/', views.book_room, name='book_room'),
     path('room/<int:room_id>/delete/', views.delete_room, name='delete_room'),
+    path('my-bookings/', views.my_bookings, name='my_bookings'),
+    path('manage-bookings/', views.manage_bookings, name='manage_bookings'),
+    path('update-booking/<int:booking_id>/<str:status>/', views.update_booking_status, name='update_booking_status'),
+
 
 
 
