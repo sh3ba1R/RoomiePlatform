@@ -113,7 +113,18 @@ class RoomieForms:
         """
         class Meta:
             model = SupportTicket
-            fields = ['user', 'title', 'description', 'status']
+            fields = ['title', 'description']
+            widgets = {
+                'title': forms.TextInput(attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Enter a title for your support ticket'
+                }),
+                'description': forms.Textarea(attrs={
+                    'class': 'form-control',
+                    'rows': 6,
+                    'placeholder': 'Describe your issue in detail...'
+                }),
+            }
 
 
     class SubscriptionForm(forms.ModelForm):

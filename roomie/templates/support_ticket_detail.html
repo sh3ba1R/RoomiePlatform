@@ -1,0 +1,242 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{% url 'support_home' %}">Support</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'view_support_tickets' %}">Your Tickets</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Ticket #{{ ticket.id }}
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Ticket Status Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0">{{ ticket.title }}</h1>
+            <span
+              class="badge {% if ticket.status == 'open' %}bg-success{% elif ticket.status == 'in_progress' %}bg-warning{% elif ticket.status == 'resolved' %}bg-info{% else %}bg-secondary{% endif %} p-2"
+            >
+              {{ ticket.get_status_display }}
+            </span>
+          </div>
+          <p class="text-muted mb-0">
+            <small
+              >Ticket #{{ ticket.id }} • Submitted on {{
+              ticket.created_at|date:"F j, Y, g:i a" }}</small
+            >
+          </p>
+        </div>
+      </div>
+
+      <!-- Ticket Detail Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">
+            <i class="fas fa-info-circle text-primary me-2"></i> Ticket
+            Information
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-4 fw-bold">Category:</div>
+            <div class="col-md-8">
+              {% if ticket.ticket_type == 'seeker' %}
+              <span class="badge bg-info">Seeker Support</span>
+              {% elif ticket.ticket_type == 'provider' %}
+              <span class="badge bg-primary">Provider Support</span>
+              {% else %}
+              <span class="badge bg-secondary">General Support</span>
+              {% endif %} {% if ticket.category %}
+              <span class="badge bg-light text-dark"
+                >{{ ticket.get_category_display }}</span
+              >
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4 fw-bold">Last Updated:</div>
+            <div class="col-md-8">
+              {{ ticket.updated_at|date:"F j, Y, g:i a" }}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4 fw-bold">Issue Description:</div>
+            <div class="col-md-8">
+              <div class="card">
+                <div class="card-body bg-light">
+                  {{ ticket.description|linebreaks }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Support Responses -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">
+            <i class="fas fa-comments text-primary me-2"></i> Responses
+          </h5>
+        </div>
+        <div class="card-body">
+          {% if ticket.responses.all %}
+          <div class="timeline">
+            {% for response in ticket.responses.all %}
+            <div class="timeline-item mb-4">
+              <div class="d-flex">
+                <div class="flex-shrink-0">
+                  {% if response.staff %}
+                  <div class="avatar bg-primary text-white">
+                    <i class="fas fa-headset"></i>
+                  </div>
+                  {% else %}
+                  <div class="avatar bg-light">
+                    <i class="fas fa-user text-primary"></i>
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="card">
+                    <div class="card-header bg-light py-2">
+                      <div
+                        class="d-flex justify-content-between align-items-center"
+                      >
+                        <span class="fw-bold">
+                          {% if response.staff %} Support Staff {% else %} You
+                          {% endif %}
+                        </span>
+                        <small class="text-muted">
+                          {{ response.created_at|date:"F j, Y, g:i a" }}
+                        </small>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      {{ response.message|linebreaks }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-4">
+            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+            <h5>No Responses Yet</h5>
+            <p class="text-muted">
+              Our support team will respond to your ticket as soon as possible.
+            </p>
+          </div>
+          {% endif %} {% if ticket.status != 'closed' %}
+          <!-- Add Reply Form -->
+          <div class="mt-4">
+            <h6 class="mb-3">Add a Response</h6>
+            <form
+              method="POST"
+              action="{% url 'add_ticket_response' ticket.id %}"
+            >
+              {% csrf_token %}
+              <div class="mb-3">
+                <textarea
+                  name="message"
+                  class="form-control"
+                  rows="4"
+                  placeholder="Type your response here..."
+                  required
+                ></textarea>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                {% if ticket.status == 'resolved' %}
+                <a
+                  href="{% url 'reopen_ticket' ticket.id %}"
+                  class="btn btn-warning"
+                >
+                  <i class="fas fa-redo me-1"></i> Reopen Ticket
+                </a>
+                {% else %}
+                <a
+                  href="{% url 'close_ticket' ticket.id %}"
+                  class="btn btn-secondary"
+                >
+                  <i class="fas fa-check-circle me-1"></i> Mark as Resolved
+                </a>
+                {% endif %}
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-paper-plane me-1"></i> Send Response
+                </button>
+              </div>
+            </form>
+          </div>
+          {% else %}
+          <div class="alert alert-secondary mt-4">
+            <div class="d-flex">
+              <div class="me-3">
+                <i class="fas fa-lock fa-2x"></i>
+              </div>
+              <div>
+                <h5 class="alert-heading">This ticket is closed</h5>
+                <p class="mb-0">
+                  This support ticket has been closed. If you need further
+                  assistance, please
+                  <a
+                    href="{% url 'reopen_ticket' ticket.id %}"
+                    class="alert-link"
+                    >reopen this ticket</a
+                  >
+                  or create a new one.
+                </p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'view_support_tickets' %}" class="btn btn-secondary">
+          <i class="fas fa-arrow-left me-1"></i> Back to Tickets
+        </a>
+        {% if ticket.status != 'closed' %}
+        <a href="{% url 'close_ticket' ticket.id %}" class="btn btn-danger">
+          <i class="fas fa-times-circle me-1"></i> Close Ticket
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .timeline-item:not(:last-child):after {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: 40px;
+    height: calc(100% - 40px);
+    width: 1px;
+    background: #dee2e6;
+  }
+</style>
+{% endblock %}

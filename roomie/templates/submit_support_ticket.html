@@ -1,0 +1,189 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white py-3">
+          <h2 class="card-title mb-0 text-center">
+            <i class="fas fa-ticket-alt me-2"></i> Submit a Support Ticket
+          </h2>
+        </div>
+        <div class="card-body p-4">
+          {% if messages %} {% for message in messages %}
+          <div
+            class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %}"
+            role="alert"
+          >
+            {{ message }}
+          </div>
+          {% endfor %} {% endif %}
+
+          <div class="mb-4">
+            <div class="alert alert-info">
+              <div class="d-flex">
+                <div class="me-3">
+                  <i class="fas fa-info-circle fa-2x text-primary"></i>
+                </div>
+                <div>
+                  {% if ticket_type == 'seeker' %}
+                  <h5 class="alert-heading">Seeker Support</h5>
+                  <p class="mb-0">
+                    Get help with finding rooms, booking issues, or roommate
+                    concerns.
+                  </p>
+                  {% elif ticket_type == 'provider' %}
+                  <h5 class="alert-heading">Provider Support</h5>
+                  <p class="mb-0">
+                    Assistance with listing rooms, managing bookings, or tenant
+                    issues.
+                  </p>
+                  {% else %}
+                  <h5 class="alert-heading">General Support</h5>
+                  <p class="mb-0">
+                    Help with account issues, technical problems, or general
+                    questions.
+                  </p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="ticket_type" value="{{ ticket_type }}" />
+
+            <!-- Title Field -->
+            <div class="mb-3">
+              <label
+                for="{{ form.title.id_for_label }}"
+                class="form-label fw-bold"
+                >Title *</label
+              >
+              {{ form.title }}
+              <div class="form-text">
+                A brief summary of your issue or question
+              </div>
+              {% if form.title.errors %}
+              <div class="text-danger">{{ form.title.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Description Field -->
+            <div class="mb-3">
+              <label
+                for="{{ form.description.id_for_label }}"
+                class="form-label fw-bold"
+                >Description *</label
+              >
+              {{ form.description }}
+              <div class="form-text">
+                Please provide as much detail as possible about your issue
+              </div>
+              {% if form.description.errors %}
+              <div class="text-danger">{{ form.description.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Priority Field (if applicable) -->
+            {% if form.priority %}
+            <div class="mb-3">
+              <label
+                for="{{ form.priority.id_for_label }}"
+                class="form-label fw-bold"
+                >Priority</label
+              >
+              {{ form.priority }} {% if form.priority.errors %}
+              <div class="text-danger">{{ form.priority.errors }}</div>
+              {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Ticket Category Fields - Conditional based on user type -->
+            {% if ticket_type == 'seeker' %}
+            <div class="mb-3">
+              <label class="form-label fw-bold">Issue Category</label>
+              <select name="category" class="form-control">
+                <option value="booking_issues">Booking Issues</option>
+                <option value="roommate_concerns">Roommate Concerns</option>
+                <option value="payment_issues">Payment Issues</option>
+                <option value="finding_rooms">Help Finding Rooms</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            {% elif ticket_type == 'provider' %}
+            <div class="mb-3">
+              <label class="form-label fw-bold">Issue Category</label>
+              <select name="category" class="form-control">
+                <option value="listing_issues">Listing Issues</option>
+                <option value="booking_management">Booking Management</option>
+                <option value="tenant_concerns">Tenant Concerns</option>
+                <option value="payment_processing">Payment Processing</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            {% else %}
+            <div class="mb-3">
+              <label class="form-label fw-bold">Issue Category</label>
+              <select name="category" class="form-control">
+                <option value="account_issues">Account Issues</option>
+                <option value="technical_problems">Technical Problems</option>
+                <option value="features_request">Feature Request</option>
+                <option value="general_question">General Question</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            {% endif %}
+
+            <!-- Submit Buttons -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+              <a
+                href="{% url 'support_home' %}"
+                class="btn btn-secondary me-md-2"
+              >
+                <i class="fas fa-arrow-left me-1"></i> Cancel
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane me-1"></i> Submit Ticket
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Apply Bootstrap styling to form elements
+    const titleInput = document.getElementById("{{ form.title.id_for_label }}");
+    if (titleInput) {
+      titleInput.classList.add("form-control");
+      titleInput.setAttribute(
+        "placeholder",
+        "Enter a title for your support ticket"
+      );
+    }
+
+    const descriptionTextarea = document.getElementById(
+      "{{ form.description.id_for_label }}"
+    );
+    if (descriptionTextarea) {
+      descriptionTextarea.classList.add("form-control");
+      descriptionTextarea.setAttribute("rows", "6");
+      descriptionTextarea.setAttribute(
+        "placeholder",
+        "Describe your issue in detail..."
+      );
+    }
+
+    const prioritySelect = document.getElementById(
+      "{{ form.priority.id_for_label }}"
+    );
+    if (prioritySelect) {
+      prioritySelect.classList.add("form-control");
+    }
+  });
+</script>
+{% endblock %}

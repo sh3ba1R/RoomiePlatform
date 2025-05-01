@@ -5,16 +5,13 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from core.models import Room, Message, RoomBooking
+from django.core.paginator import Paginator
+from core.models import Room, Message, RoomBooking, SupportTicket, TicketResponse
 from django.db.models import Count, Q, F
 
-
-from .forms import RoomieFormFactory,RoomieForms
+from .forms import RoomieFormFactory, RoomieForms
 
 User = get_user_model()  # Get the custom user model
-
-
-
 
 def home(request):
     """
@@ -50,7 +47,6 @@ def register(request):
 
     return render(request, 'register.html', {'form': form})
 
-
 def user_login(request):
     """
     Handle user authentication process.
@@ -85,7 +81,7 @@ def user_login(request):
             
             if user is not None:
                 login(request, user)
-                return redirect('home')  # Fixed Redirect to home after login
+                return redirect('dashboard')  # Redirect to dashboard after login
             else:
                 form.add_error(None, 'Invalid username or password')
     else:
@@ -95,12 +91,47 @@ def user_login(request):
     return render(request, "login.html", {'form': form})
 
 @login_required
+def dashboard(request):
+    """
+    Display personalized dashboard for authenticated users.
+    
+    This view shows an overview of the user's account activity,
+    with different content depending on the account type (seeker or provider).
+    """
+    user = request.user
+    
+    # Get unread messages count
+    unread_messages = Message.objects.filter(recipient=user, is_read=False).count()
+    
+    # Get recent messages 
+    recent_messages = Message.objects.filter(recipient=user).order_by('-timestamp')[:5]
+    
+    context = {
+        'unread_messages': unread_messages,
+        'recent_messages': recent_messages,
+        'profile_views': 0,  # Placeholder for future profile view tracking feature
+    }
+    
+    # Add recommended content based on user type
+    if user.account_type == 'seeker':
+        # Get recommended rooms for seekers
+        recommended_rooms = Room.objects.filter(is_available=True).order_by('?')[:3]
+        context['recommended_rooms'] = recommended_rooms
+    else:
+        # Get potential roommates for providers
+        recommended_roommates = User.objects.filter(account_type='seeker').order_by('?')[:3]
+        context['recommended_roommates'] = recommended_roommates
+    
+    return render(request, 'dashboard.html', context)
+
+@login_required
 def list_room(request):
     """
     Allow providers to list a room.
     """
     if request.user.account_type != 'provider':
-        return redirect('home')  # Redirect seekers or unauthorized users to the home page
+        messages.error(request, "Only room providers can list rooms.")
+        return redirect('home')  # Redirect unauthorized users to the home page
 
     if request.method == 'POST':
         form = RoomieForms.RoomForm(request.POST, request.FILES)
@@ -108,13 +139,14 @@ def list_room(request):
             room = form.save(commit=False)
             room.provider = request.user  # Assign the logged-in user as the room provider
             room.save()
-            return redirect('home')  # Redirect to the home page after successful submission
+            messages.success(request, "Your room has been listed successfully!")
+            return redirect('user_profile', user_id=request.user.id)  # Redirect to user profile to see the listed room
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = RoomieForms.RoomForm()
 
     return render(request, 'list_room.html', {'form': form, 'provider': request.user})
-
-
 
 def find_roommate(request):
     roommates = User.objects.filter(account_type='seeker')  # Fetch only seekers
@@ -139,16 +171,12 @@ def send_message(request, user_id):
 
     return render(request, 'send_message.html', {'form': form, 'recipient': recipient})
 
-
-
 def user_profile(request, user_id):
     """
     View to display the profile of a specific user.
     """
     user = get_object_or_404(User, id=user_id)  # Fetch the user by ID or return a 404 if not found
     return render(request, 'user_profile.html', {'user': user})
-
-
 
 @login_required
 def messages_view(request, user_id):
@@ -178,8 +206,6 @@ def messages_view(request, user_id):
     
     return render(request, 'messages.html', {'messages': messages})
 
-
-
 def logout_view(request):
     """
     Custom logout view to handle GET requests.
@@ -202,7 +228,6 @@ def mark_message_read(request, user_id, message_id):
         return JsonResponse({"status": "success", "is_read": message.is_read})
     except Message.DoesNotExist:
         return JsonResponse({"error": "Message not found"}, status=404)
-    
 
 def room_detail(request, room_id):
     """
@@ -259,7 +284,6 @@ def book_room(request, room_id):
 
     return render(request, 'book_room.html', {'room': room, 'form': form})
 
-
 @login_required
 def delete_room(request, room_id):
     """
@@ -313,6 +337,7 @@ def manage_bookings(request):
         })
 
     return render(request, 'manage_bookings.html', {'booking_data': booking_data})
+
 @login_required
 def update_booking_status(request, booking_id, status):
     """
@@ -338,3 +363,153 @@ def update_booking_status(request, booking_id, status):
         messages.error(request, f"Booking for {booking.room.title} has been rejected.")
 
     return redirect('manage_bookings')
+
+@login_required
+def support_home(request):
+    """
+    Main support page that directs users to appropriate support pages based on account type.
+    """
+    # Get recent tickets for the current user
+    recent_tickets = None
+    if request.user.is_authenticated:
+        recent_tickets = SupportTicket.objects.filter(
+            user=request.user
+        ).order_by('-created_at')[:5]
+    
+    return render(request, 'support_home.html', {
+        'recent_tickets': recent_tickets
+    })
+
+@login_required
+def submit_support_ticket(request):
+    """
+    View for submitting a new support ticket.
+    """
+    # Determine ticket type based on query parameter or user account type
+    ticket_type = request.GET.get('type', 'general')
+    
+    # For provider-specific support, check if user is a provider
+    if ticket_type == 'provider' and request.user.account_type != 'provider':
+        messages.error(request, "You must be a provider to access provider support.")
+        return redirect('support_home')
+    
+    # For seeker-specific support, check if user is a seeker
+    if ticket_type == 'seeker' and request.user.account_type != 'seeker':
+        messages.error(request, "You must be a seeker to access seeker support.")
+        return redirect('support_home')
+    
+    if request.method == 'POST':
+        form = RoomieForms.SupportTicketForm(request.POST)
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            ticket.user = request.user
+            ticket.ticket_type = request.POST.get('ticket_type', 'general')
+            ticket.category = request.POST.get('category', 'other')
+            ticket.status = 'open'  # Default to open status
+            ticket.save()
+            
+            messages.success(request, "Your support ticket has been submitted successfully. We'll get back to you soon.")
+            return redirect('view_support_ticket_detail', ticket_id=ticket.id)
+    else:
+        form = RoomieForms.SupportTicketForm()
+    
+    return render(request, 'submit_support_ticket.html', {
+        'form': form,
+        'ticket_type': ticket_type
+    })
+
+@login_required
+def view_support_tickets(request):
+    """
+    View for listing all support tickets submitted by the current user.
+    """
+    # Get all tickets for the current user with optional filtering
+    status_filter = request.GET.get('status', '')
+    type_filter = request.GET.get('type', '')
+    
+    tickets = SupportTicket.objects.filter(user=request.user)
+    
+    if status_filter:
+        tickets = tickets.filter(status=status_filter)
+    
+    if type_filter:
+        tickets = tickets.filter(ticket_type=type_filter)
+    
+    tickets = tickets.order_by('-created_at')
+    
+    # Pagination
+    paginator = Paginator(tickets, 10)  # Show 10 tickets per page
+    page = request.GET.get('page')
+    tickets = paginator.get_page(page)
+    
+    return render(request, 'view_support_tickets.html', {
+        'tickets': tickets
+    })
+
+@login_required
+def view_support_ticket_detail(request, ticket_id):
+    """
+    View for displaying details of a specific support ticket.
+    """
+    # Get ticket if it belongs to the current user
+    ticket = get_object_or_404(SupportTicket, id=ticket_id, user=request.user)
+    
+    return render(request, 'support_ticket_detail.html', {
+        'ticket': ticket
+    })
+
+@login_required
+def add_ticket_response(request, ticket_id):
+    """
+    View for adding a response to a support ticket.
+    """
+    ticket = get_object_or_404(SupportTicket, id=ticket_id, user=request.user)
+    
+    if request.method == 'POST':
+        message = request.POST.get('message', '')
+        if message:
+            # Create new ticket response
+            TicketResponse.objects.create(
+                ticket=ticket,
+                user=request.user,
+                message=message,
+                staff=False  # User response, not staff
+            )
+            
+            # Update ticket status if it was resolved or closed
+            if ticket.status in ['resolved', 'closed']:
+                ticket.status = 'in_progress'
+                ticket.save()
+                
+            messages.success(request, "Your response has been added to the ticket.")
+        else:
+            messages.error(request, "Response message cannot be empty.")
+    
+    return redirect('view_support_ticket_detail', ticket_id=ticket.id)
+
+@login_required
+def close_ticket(request, ticket_id):
+    """
+    View for marking a ticket as resolved.
+    """
+    ticket = get_object_or_404(SupportTicket, id=ticket_id, user=request.user)
+    
+    ticket.status = 'resolved'
+    ticket.save()
+    
+    messages.success(request, "Ticket has been marked as resolved.")
+    return redirect('view_support_ticket_detail', ticket_id=ticket.id)
+
+@login_required
+def reopen_ticket(request, ticket_id):
+    """
+    View for reopening a closed or resolved ticket.
+    """
+    ticket = get_object_or_404(SupportTicket, id=ticket_id, user=request.user)
+    
+    if ticket.status in ['resolved', 'closed']:
+        ticket.status = 'in_progress'
+        ticket.save()
+        messages.success(request, "Ticket has been reopened.")
+    
+    return redirect('view_support_ticket_detail', ticket_id=ticket.id)

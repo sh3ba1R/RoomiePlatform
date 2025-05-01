@@ -118,23 +118,78 @@ class RoomContract(models.Model):
         return self.status == 'active' and self.end_date > timezone.now()
 
 class SupportTicket(models.Model):
-    STATUS_CHOICES = [
+    """
+    Model for storing user support tickets and inquiries.
+    """
+    STATUS_CHOICES = (
         ('open', 'Open'),
         ('in_progress', 'In Progress'),
         ('resolved', 'Resolved'),
         ('closed', 'Closed'),
-    ]
-
+    )
+    
+    TICKET_TYPE_CHOICES = (
+        ('seeker', 'Seeker Support'),
+        ('provider', 'Provider Support'),
+        ('general', 'General Support'),
+    )
+    
+    CATEGORY_CHOICES = (
+        # Seeker categories
+        ('booking_issues', 'Booking Issues'),
+        ('roommate_concerns', 'Roommate Concerns'),
+        ('payment_issues', 'Payment Issues'),
+        ('finding_rooms', 'Help Finding Rooms'),
+        
+        # Provider categories
+        ('listing_issues', 'Listing Issues'),
+        ('booking_management', 'Booking Management'),
+        ('tenant_concerns', 'Tenant Concerns'),
+        ('payment_processing', 'Payment Processing'),
+        
+        # General categories
+        ('account_issues', 'Account Issues'),
+        ('technical_problems', 'Technical Problems'),
+        ('features_request', 'Feature Request'),
+        ('general_question', 'General Question'),
+        
+        # Other
+        ('other', 'Other'),
+    )
+    
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='support_tickets')
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=200)
     description = models.TextField()
+    ticket_type = models.CharField(max_length=20, choices=TICKET_TYPE_CHOICES, default='general')
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default='other')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"Ticket {self.title} by {self.user.username} - {self.status}"
     
+    def __str__(self):
+        return f"Ticket #{self.id}: {self.title}"
+    
+    class Meta:
+        ordering = ['-created_at']
+
+
+class TicketResponse(models.Model):
+    """
+    Model for storing responses to support tickets.
+    """
+    id = models.AutoField(primary_key=True)
+    ticket = models.ForeignKey(SupportTicket, on_delete=models.CASCADE, related_name='responses')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ticket_responses', null=True, blank=True)
+    message = models.TextField()
+    staff = models.BooleanField(default=False)  # Indicates if the response is from staff
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Response to Ticket #{self.ticket.id}"
+    
+    class Meta:
+        ordering = ['created_at']
 
 class Subscription(models.Model):
     """

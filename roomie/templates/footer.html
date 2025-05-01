@@ -1,0 +1,77 @@
+<footer class="bg-light text-center py-4 mt-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-3 mb-3 mb-md-0">
+        <h5 class="text-primary">Roomie</h5>
+        <p class="text-muted small">
+          Find your perfect roommate match with our user-friendly platform.
+        </p>
+      </div>
+      <div class="col-md-3 mb-3 mb-md-0">
+        <h5 class="text-primary">Quick Links</h5>
+        <ul class="list-unstyled">
+          <li>
+            <a href="{% url 'home' %}" class="text-decoration-none">Home</a>
+          </li>
+          <li>
+            <a href="{% url 'find_roommate' %}" class="text-decoration-none"
+              >Find Roommate</a
+            >
+          </li>
+          {% if user.is_authenticated and user.account_type == 'provider' %}
+          <li>
+            <a href="{% url 'list_room' %}" class="text-decoration-none"
+              >List Room</a
+            >
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+      <div class="col-md-3 mb-3 mb-md-0">
+        <h5 class="text-primary">Support</h5>
+        <ul class="list-unstyled">
+          <li>
+            <a href="{% url 'support_home' %}" class="text-decoration-none"
+              >Help Center</a
+            >
+          </li>
+          <li>
+            <a
+              href="{% url 'submit_support_ticket' %}?type=general"
+              class="text-decoration-none"
+              >Contact Support</a
+            >
+          </li>
+          {% if user.is_authenticated %}
+          <li>
+            <a
+              href="{% url 'view_support_tickets' %}"
+              class="text-decoration-none"
+              >My Support Tickets</a
+            >
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <h5 class="text-primary">Connect</h5>
+        <div class="d-flex justify-content-center">
+          <a href="#" class="text-decoration-none mx-2"
+            ><i class="fab fa-facebook fa-lg"></i
+          ></a>
+          <a href="#" class="text-decoration-none mx-2"
+            ><i class="fab fa-twitter fa-lg"></i
+          ></a>
+          <a href="#" class="text-decoration-none mx-2"
+            ><i class="fab fa-instagram fa-lg"></i
+          ></a>
+          <a href="#" class="text-decoration-none mx-2"
+            ><i class="fab fa-linkedin fa-lg"></i
+          ></a>
+        </div>
+      </div>
+    </div>
+    <hr />
+    <p class="mb-0 small">© 2025 Roomie. All rights reserved.</p>
+  </div>
+</footer>

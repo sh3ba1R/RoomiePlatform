@@ -1,16 +1,284 @@
 <!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\list_room.html -->
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white py-3">
+          <h2 class="card-title mb-0 text-center">
+            <i class="fas fa-home me-2"></i> List Your Room
+          </h2>
+        </div>
+        <div class="card-body p-4">
+          <div class="alert alert-info mb-4">
+            <div class="d-flex">
+              <div class="me-3">
+                <i class="fas fa-info-circle fa-2x text-primary"></i>
+              </div>
+              <div>
+                <h5 class="alert-heading">Welcome, {{ provider.username }}!</h5>
+                <p class="mb-0">
+                  Complete the form below to list your room. Detailed and
+                  accurate information helps potential roommates find your
+                  listing.
+                </p>
+              </div>
+            </div>
+          </div>
 
-{% block content %}
-<div class="container mt-5">
-    <h2 class="text-center">List a Room</h2>
-    <div class="card shadow p-4 mt-4">
-        <form method="POST" enctype="multipart/form-data">
+          <form
+            method="POST"
+            enctype="multipart/form-data"
+            id="room-listing-form"
+            class="needs-validation"
+            novalidate
+          >
             {% csrf_token %}
-            <p><strong>Provider:</strong> {{ provider.username }}</p> <!-- Display provider's name -->
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary w-100">Submit</button>
-        </form>
+
+            <!-- Basic Information Section -->
+            <h4 class="mb-3 mt-4 border-bottom pb-2">
+              <i class="fas fa-info-circle text-primary me-2"></i> Basic
+              Information
+            </h4>
+
+            <div class="mb-3">
+              <label
+                for="{{ form.title.id_for_label }}"
+                class="form-label fw-bold"
+                >Room Title*</label
+              >
+              {{ form.title }}
+              <div class="form-text">
+                Create a catchy title that highlights your room's best features
+              </div>
+              {% if form.title.errors %}
+              <div class="text-danger">{{ form.title.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label
+                for="{{ form.location.id_for_label }}"
+                class="form-label fw-bold"
+                >Location*</label
+              >
+              {{ form.location }}
+              <div class="form-text">
+                Enter the address or neighborhood where your room is located
+              </div>
+              {% if form.location.errors %}
+              <div class="text-danger">{{ form.location.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label
+                  for="{{ form.rent.id_for_label }}"
+                  class="form-label fw-bold"
+                  >Monthly Rent ($)*</label
+                >
+                {{ form.rent }}
+                <div class="form-text">
+                  Enter the monthly rent amount in dollars
+                </div>
+                {% if form.rent.errors %}
+                <div class="text-danger">{{ form.rent.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label
+                  for="{{ form.bedrooms.id_for_label }}"
+                  class="form-label fw-bold"
+                  >Number of Bedrooms*</label
+                >
+                {{ form.bedrooms }}
+                <div class="form-text">Total number of bedrooms available</div>
+                {% if form.bedrooms.errors %}
+                <div class="text-danger">{{ form.bedrooms.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Room Details Section -->
+            <h4 class="mb-3 mt-4 border-bottom pb-2">
+              <i class="fas fa-house-user text-primary me-2"></i> Room Details
+            </h4>
+
+            <div class="mb-3">
+              <label
+                for="{{ form.room_type.id_for_label }}"
+                class="form-label fw-bold"
+                >Room Type*</label
+              >
+              {{ form.room_type }}
+              <div class="form-text">
+                Select the type of accommodation you're offering
+              </div>
+              {% if form.room_type.errors %}
+              <div class="text-danger">{{ form.room_type.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label
+                for="{{ form.description.id_for_label }}"
+                class="form-label fw-bold"
+                >Description*</label
+              >
+              {{ form.description }}
+              <div class="form-text">
+                Describe your room in detail (amenities, rules, nearby
+                attractions, etc.)
+              </div>
+              {% if form.description.errors %}
+              <div class="text-danger">{{ form.description.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <div class="form-check">
+                {{ form.is_available }}
+                <label
+                  class="form-check-label"
+                  for="{{ form.is_available.id_for_label }}"
+                >
+                  Room is currently available
+                </label>
+              </div>
+              {% if form.is_available.errors %}
+              <div class="text-danger">{{ form.is_available.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Image Upload Section -->
+            <h4 class="mb-3 mt-4 border-bottom pb-2">
+              <i class="fas fa-image text-primary me-2"></i> Room Photos
+            </h4>
+
+            <div class="mb-3">
+              <label
+                for="{{ form.image.id_for_label }}"
+                class="form-label fw-bold"
+                >Upload Room Image</label
+              >
+              <div class="input-group">{{ form.image }}</div>
+              <div class="form-text">
+                Upload a high-quality image of your room (recommended size:
+                1200x800px)
+              </div>
+              {% if form.image.errors %}
+              <div class="text-danger">{{ form.image.errors }}</div>
+              {% endif %}
+
+              <!-- Image Preview -->
+              <div id="image-preview-container" class="mt-3 d-none">
+                <h6>Image Preview:</h6>
+                <img
+                  id="image-preview"
+                  src="#"
+                  alt="Room Preview"
+                  class="img-fluid rounded"
+                  style="max-height: 200px"
+                />
+              </div>
+            </div>
+
+            <!-- Submit Section -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+              <button
+                type="button"
+                class="btn btn-secondary me-md-2"
+                onclick="history.back()"
+              >
+                <i class="fas fa-arrow-left me-1"></i> Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> List Your Room
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
+
+<!-- Add JavaScript for form enhancements -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Apply Bootstrap form classes
+    const formControls = document.querySelectorAll(
+      '#room-listing-form input[type="text"], #room-listing-form input[type="number"], #room-listing-form select, #room-listing-form textarea'
+    );
+    formControls.forEach((element) => {
+      element.classList.add("form-control");
+    });
+
+    // Style the file input
+    const fileInput = document.querySelector(
+      '#room-listing-form input[type="file"]'
+    );
+    if (fileInput) {
+      fileInput.classList.add("form-control");
+    }
+
+    // Style the checkbox
+    const checkbox = document.querySelector(
+      '#room-listing-form input[type="checkbox"]'
+    );
+    if (checkbox) {
+      checkbox.classList.add("form-check-input");
+    }
+
+    // Add placeholders
+    const titleInput = document.getElementById("{{ form.title.id_for_label }}");
+    if (titleInput) {
+      titleInput.setAttribute(
+        "placeholder",
+        "e.g., Spacious Room in Downtown Apartment"
+      );
+    }
+
+    const locationInput = document.getElementById(
+      "{{ form.location.id_for_label }}"
+    );
+    if (locationInput) {
+      locationInput.setAttribute("placeholder", "e.g., 123 Main St, Cityville");
+    }
+
+    const descriptionTextarea = document.getElementById(
+      "{{ form.description.id_for_label }}"
+    );
+    if (descriptionTextarea) {
+      descriptionTextarea.setAttribute(
+        "placeholder",
+        "Describe your room, amenities, house rules, etc."
+      );
+      descriptionTextarea.setAttribute("rows", "6");
+    }
+
+    // Image preview functionality
+    const imageInput = document.getElementById("{{ form.image.id_for_label }}");
+    const imagePreview = document.getElementById("image-preview");
+    const previewContainer = document.getElementById("image-preview-container");
+
+    if (imageInput && imagePreview && previewContainer) {
+      imageInput.addEventListener("change", function () {
+        if (this.files && this.files[0]) {
+          const reader = new FileReader();
+
+          reader.onload = function (e) {
+            imagePreview.setAttribute("src", e.target.result);
+            previewContainer.classList.remove("d-none");
+          };
+
+          reader.readAsDataURL(this.files[0]);
+        } else {
+          previewContainer.classList.add("d-none");
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}

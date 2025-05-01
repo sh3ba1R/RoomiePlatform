@@ -1,20 +1,22 @@
 <!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\home.html -->
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <div class="container">
   {% if user.is_authenticated %}
   <!-- Logged-in User Content -->
   <div class="text-center mb-5">
     <h1 class="display-4 mb-3">Welcome, {{ user.username }}!</h1>
     <p class="lead mb-4">
-      Manage your profile, explore rooms, and connect with potential roommates today.
+      Manage your profile, explore rooms, and connect with potential roommates
+      today.
     </p>
     <div class="d-flex gap-3 justify-content-center">
       <a href="{% url 'user_profile' user.id %}" class="btn btn-primary btn-lg">
         <i class="fas fa-user me-2"></i> View Profile
       </a>
-      <a href="{% url 'messages' user.id %}" class="btn btn-outline-primary btn-lg">
+      <a
+        href="{% url 'messages' user.id %}"
+        class="btn btn-outline-primary btn-lg"
+      >
         <i class="fas fa-envelope me-2"></i> Messages
       </a>
     </div>
@@ -31,7 +33,10 @@
       <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 py-2">
         <i class="fas fa-user-plus me-2"></i> Get Started
       </a>
-      <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-4 py-2">
+      <a
+        href="{% url 'login' %}"
+        class="btn btn-outline-primary btn-lg px-4 py-2"
+      >
         <i class="fas fa-sign-in-alt me-2"></i> Login
       </a>
     </div>
@@ -58,14 +63,14 @@
               src="{{ room.image.url }}"
               class="card-img-top"
               alt="{{ room.title }}"
-              style="height: 200px; object-fit: cover;"
+              style="height: 200px; object-fit: cover"
             />
             {% else %}
             <img
               src="/media/images/default_room.jpg"
               class="card-img-top"
               alt="Default Room Image"
-              style="height: 200px; object-fit: cover;"
+              style="height: 200px; object-fit: cover"
             />
             {% endif %}
             <div class="room-price">${{ room.rent }}/month</div>
@@ -79,7 +84,9 @@
               <strong>Bedrooms:</strong> {{ room.bedrooms }}
             </p>
             <p class="card-text mb-3">
-              <span class="badge bg-light text-dark me-2">{{ room.get_room_type_display }}</span>
+              <span class="badge bg-light text-dark me-2"
+                >{{ room.get_room_type_display }}</span
+              >
               {% if room.is_available %}
               <span class="badge bg-success">Available</span>
               {% else %}
@@ -87,7 +94,10 @@
               {% endif %}
             </p>
             <div class="d-grid">
-              <a href="{% url 'room_detail' room.room_id %}" class="btn btn-primary">
+              <a
+                href="{% url 'room_detail' room.room_id %}"
+                class="btn btn-primary"
+              >
                 View Details
               </a>
             </div>
@@ -97,7 +107,8 @@
       {% empty %}
       <div class="col-12">
         <div class="alert alert-info text-center py-4">
-          <i class="fas fa-info-circle me-2"></i> No featured rooms available at the moment. Check back soon!
+          <i class="fas fa-info-circle me-2"></i> No featured rooms available at
+          the moment. Check back soon!
         </div>
       </div>
       {% endfor %}
@@ -110,7 +121,10 @@
       <h2 class="mb-0">
         <i class="fas fa-users text-primary me-2"></i> Meet Our Roommates
       </h2>
-      <a href="{% url 'find_roommate' %}" class="btn btn-sm btn-outline-primary">
+      <a
+        href="{% url 'find_roommate' %}"
+        class="btn btn-sm btn-outline-primary"
+      >
         View All
       </a>
     </div>
@@ -138,10 +152,16 @@
               {{ roommate.location|default:"Location not provided" }}
             </p>
             <div class="d-grid gap-2">
-              <a href="{% url 'user_profile' roommate.id %}" class="btn btn-sm btn-outline-primary">
+              <a
+                href="{% url 'user_profile' roommate.id %}"
+                class="btn btn-sm btn-outline-primary"
+              >
                 View Profile
               </a>
-              <a href="{% url 'send_message' roommate.id %}" class="btn btn-sm btn-primary">
+              <a
+                href="{% url 'send_message' roommate.id %}"
+                class="btn btn-sm btn-primary"
+              >
                 Contact
               </a>
             </div>
@@ -151,7 +171,8 @@
       {% empty %}
       <div class="col-12">
         <div class="alert alert-info text-center py-4">
-          <i class="fas fa-info-circle me-2"></i> No roommates available at the moment. Be the first to join!
+          <i class="fas fa-info-circle me-2"></i> No roommates available at the
+          moment. Be the first to join!
         </div>
       </div>
       {% endfor %}
@@ -175,7 +196,8 @@
             </div>
             <h4>Create Profile</h4>
             <p class="text-muted">
-              Sign up and create your detailed profile to help find the perfect match.
+              Sign up and create your detailed profile to help find the perfect
+              match.
             </p>
           </div>
         </div>
@@ -191,7 +213,8 @@
             </div>
             <h4>Browse Options</h4>
             <p class="text-muted">
-              Browse through available rooms or potential roommates based on your preferences.
+              Browse through available rooms or potential roommates based on
+              your preferences.
             </p>
           </div>
         </div>
@@ -207,10 +230,29 @@
             </div>
             <h4>Connect</h4>
             <p class="text-muted">
-              Message potential matches and arrange to meet before making your decision.
+              Message potential matches and arrange to meet before making your
+              decision.
             </p>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Support Section -->
+  <section class="my-5 pt-3">
+    <h2 class="text-center mb-4">
+      <i class="fas fa-headset text-primary me-2"></i> Need Help?
+    </h2>
+    <div class="row justify-content-center">
+      <div class="col-md-8 text-center">
+        <p class="lead mb-4">
+          Our support team is here to assist you with any questions or issues
+          you might encounter.
+        </p>
+        <a href="{% url 'support_home' %}" class="btn btn-primary btn-lg">
+          <i class="fas fa-ticket-alt me-2"></i> Get Support
+        </a>
       </div>
     </div>
   </section>

@@ -18,7 +18,8 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('register/', views.register, name='register'),
     path('login/', views.user_login, name='login'),
-    path('logout/', views.logout_view, name='logout'),  # Custom logout page    path('list-room/', views.list_room, name='list_room'),
+    path('logout/', views.logout_view, name='logout'),  # Custom logout page
+    path('list-room/', views.list_room, name='list_room'),
     path('find-roommate/', views.find_roommate, name='find_roommate'),
     path('send-message/<int:user_id>/', views.send_message, name='send_message'),
     path('user-profile/<int:user_id>/', views.user_profile, name='user_profile'),  # User profile page
@@ -33,8 +34,15 @@ urlpatterns = [
     path('manage-bookings/', views.manage_bookings, name='manage_bookings'),
     path('update-booking/<int:booking_id>/<str:status>/', views.update_booking_status, name='update_booking_status'),
 
+    # Support Ticket System URLs
+    path('support/', views.support_home, name='support_home'),
+    path('support/submit/', views.submit_support_ticket, name='submit_support_ticket'),
+    path('support/tickets/', views.view_support_tickets, name='view_support_tickets'),
+    path('support/tickets/<int:ticket_id>/', views.view_support_ticket_detail, name='view_support_ticket_detail'),
+    path('support/tickets/<int:ticket_id>/respond/', views.add_ticket_response, name='add_ticket_response'),
+    path('support/tickets/<int:ticket_id>/close/', views.close_ticket, name='close_ticket'),
+    path('support/tickets/<int:ticket_id>/reopen/', views.reopen_ticket, name='reopen_ticket'),
 
-
-
-
+    # Dashboard URL
+    path('dashboard/', views.dashboard, name='dashboard'),
 ]
