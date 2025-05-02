@@ -1,0 +1,29 @@
+<!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\faq.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="text-center mb-4">Frequently Asked Questions</h1>
+  <div class="accordion" id="faqAccordion">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          How do I book a room?
+        </button>
+      </h2>
+      <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">
+          To book a room, navigate to the room details page and click on the "Book This Room" button. You'll need to be logged in as a seeker to complete this action.
+        </div>
+      </div>
+    </div>
+    <!-- Add more FAQ items as needed -->
+  </div>
+
+  <div class="text-center mt-5">
+    <p class="lead">
+      Still have questions? Contact us via <a href="mailto:Example@email.com">Example@email.com</a>.
+    </p>
+  </div>
+</div>
+{% endblock %}

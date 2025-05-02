@@ -508,12 +508,12 @@
                   <h5 class="mb-3">
                     <i class="fas fa-pencil-alt text-primary me-2"></i> Write a Review
                   </h5>
-                  <form action="{% url 'submit_review' %}" method="POST">
+                    <form action="{% url 'submit_review' %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="user_id" value="{{ user.id }}">
                     <input type="hidden" name="review_type" value="{{ user.account_type }}">
                     <input type="hidden" name="redirect_url" value="{{ request.path }}#reviews">
-                    
+                    </form>
                     <div class="mb-3">
                       <label class="form-label">Rating:</label>
                       <div class="star-rating">

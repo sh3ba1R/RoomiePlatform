@@ -1,0 +1,26 @@
+<!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\subscription_plans.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Subscription Plans</h2>
+    <div class="row g-4">
+        {% for plan in plans %}
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h4 class="card-title">{{ plan.name }}</h4>
+                    <h5 class="card-subtitle mb-3">${{ plan.price }}</h5>
+                    <ul class="list-unstyled">
+                        {% for feature in plan.features %}
+                        <li><i class="fas fa-check text-success me-2"></i>{{ feature }}</li>
+                        {% endfor %}
+                    </ul>
+                    <a href="#" class="btn btn-primary mt-3">Choose Plan</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -33,6 +33,7 @@ urlpatterns = [
     path('my-bookings/', views.my_bookings, name='my_bookings'),
     path('manage-bookings/', views.manage_bookings, name='manage_bookings'),
     path('update-booking/<int:booking_id>/<str:status>/', views.update_booking_status, name='update_booking_status'),
+    path('faq/', views.faq_page, name='faq_page'),
 
     # Support Ticket System URLs
     path('support/', views.support_home, name='support_home'),
@@ -56,8 +57,14 @@ urlpatterns = [
     path('review/reply/<uuid:review_id>/', views.reply_to_review, name='reply_to_review'),
     path('review-reply/edit/<uuid:reply_id>/', views.edit_review_reply, name='edit_review_reply'),
     path('review-reply/delete/<uuid:reply_id>/', views.delete_review_reply, name='delete_review_reply'),
+    
+    path('submit-review/', views.submit_review, name='submit_review'),
+    path('download-contract/<int:contract_id>/', views.download_contract, name='download_contract'),
+
 
     # New Features
     path('toggle-availability/', views.toggle_availability, name='toggle_availability'),
     path('edit-profile/', views.edit_profile, name='edit_profile'),
+    path('subscriptions/', views.subscription_plans, name='subscription_plans'),
+
 ]

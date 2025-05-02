@@ -1,3 +1,4 @@
+<!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\footer.html -->
 <footer class="bg-light text-center py-4 mt-5">
   <div class="container">
     <div class="row">
@@ -31,16 +32,22 @@
         <h5 class="text-primary">Support</h5>
         <ul class="list-unstyled">
           <li>
-            <a href="{% url 'support_home' %}" class="text-decoration-none"
-              >Help Center</a
-            >
+            {% if user.is_authenticated %}
+            <a href="{% url 'support_home' %}" class="text-decoration-none">Help Center</a>
+            {% else %}
+            <a href="{% url 'faq_page' %}" class="text-decoration-none">Help Center</a>
+            {% endif %}
           </li>
           <li>
+            {% if user.is_authenticated %}
             <a
               href="{% url 'submit_support_ticket' %}?type=general"
               class="text-decoration-none"
               >Contact Support</a
             >
+            {% else %}
+            <a href="{% url 'faq_page' %}" class="text-decoration-none">Contact Support</a>
+            {% endif %}
           </li>
           {% if user.is_authenticated %}
           <li>

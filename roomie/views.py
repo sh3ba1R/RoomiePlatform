@@ -4,13 +4,14 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
-from core.models import Room, Message, RoomBooking, SupportTicket, TicketResponse
+from core.models import Room, Message, RoomBooking, SupportTicket, TicketResponse, RoomContract,Subscription
 from django.db.models import Count, Q, F
-
+from reportlab.pdfgen import canvas
+from io import BytesIO
 from .forms import RoomieFormFactory, RoomieForms
-
+from django.urls import reverse
 User = get_user_model()  # Get the custom user model
 
 def home(request):
@@ -25,9 +26,15 @@ def home(request):
     # Fetch all seekers (roommates)
     roommates = User.objects.filter(account_type='seeker')
 
+    # Fetch subscription details for the logged-in user (if seeker)
+    subscription = None
+    if request.user.is_authenticated and hasattr(request.user, 'account_type') and request.user.account_type == 'seeker':
+        subscription = Subscription.objects.filter(user=request.user).first()
+
     return render(request, 'home.html', {
         'featured_rooms': featured_rooms,
         'roommates': roommates,
+        'subscription': subscription,
     })
 
 def register(request):
@@ -439,7 +446,16 @@ def my_bookings(request):
         return redirect('home')
 
     bookings = RoomBooking.objects.filter(seeker=request.user).select_related('room')
-    return render(request, 'my_bookings.html', {'bookings': bookings})
+    booking_data = []
+
+    for booking in bookings:
+        contract = RoomContract.objects.filter(room=booking.room, seeker=booking.seeker).first()
+        booking_data.append({
+            'booking': booking,
+            'contract': contract
+        })
+
+    return render(request, 'my_bookings.html', {'booking_data': booking_data})
 
 @login_required
 def manage_bookings(request):
@@ -483,9 +499,18 @@ def update_booking_status(request, booking_id, status):
     booking.status = status
     booking.save()
 
-    # Notify the seeker
+    # Create a RoomContract if approved
     if status == 'approved':
-        messages.success(request, f"Booking for {booking.room.title} has been approved.")
+        RoomContract.objects.create(
+            room=booking.room,
+            seeker=booking.seeker,
+            provider=booking.room.provider,
+            start_date=booking.start_date,
+            end_date=booking.end_date,
+            rent_amount=booking.room.rent,
+            status='active',
+        )
+        messages.success(request, f"Booking for {booking.room.title} has been approved, and a contract has been created.")
     elif status == 'rejected':
         messages.error(request, f"Booking for {booking.room.title} has been rejected.")
 
@@ -985,6 +1010,7 @@ def room_reviews(request, room_id):
     })
 
 def user_reviews(request, user_id):
+
     """
     Display all reviews for a specific user.
     """
@@ -1030,3 +1056,52 @@ def user_reviews(request, user_id):
         'rating_counts': rating_counts,
         'rating_percentages': rating_percentages
     })
+
+def submit_review(request):
+    if request.method == 'POST':
+        form = RoomieForms.ReviewForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your review has been submitted successfully.")
+            redirect_url = request.POST.get('redirect_url', '/')
+            return redirect(redirect_url)
+    else:
+        form = RoomieForms.ReviewForm()
+
+    return render(request, 'submit_review.html', {'form': form})
+
+@login_required
+def download_contract(request, contract_id):
+    contract = get_object_or_404(RoomContract, id=contract_id, seeker=request.user)
+
+    # Generate PDF
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer)
+    pdf.drawString(100, 800, f"Room Contract")
+    pdf.drawString(100, 780, f"Room: {contract.room.title}")
+    pdf.drawString(100, 760, f"Seeker: {contract.seeker.username}")
+    pdf.drawString(100, 740, f"Provider: {contract.provider.username}")
+    pdf.drawString(100, 720, f"Start Date: {contract.start_date}")
+    pdf.drawString(100, 700, f"End Date: {contract.end_date}")
+    pdf.drawString(100, 680, f"Rent: ${contract.rent_amount}/month")
+    pdf.save()
+
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="contract_{contract.id}.pdf"'
+    return response
+
+@login_required
+def subscription_plans(request):
+    plans = [
+        {'name': 'Free', 'price': 0, 'features': ['Basic access to rooms']},
+        {'name': 'Monthly', 'price': 10, 'features': ['Priority room access', 'Unlimited messaging']},
+        {'name': 'Yearly', 'price': 100, 'features': ['All features of Monthly', 'Discounted price']},
+    ]
+    return render(request, 'subscription_plans.html', {'plans': plans})
+
+def faq_page(request):
+    """
+    Render the FAQ page.
+    """
+    return render(request, 'faq.html')

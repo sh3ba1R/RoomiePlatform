@@ -25,7 +25,6 @@ class User(AbstractUser):
     GENDER_CHOICES = [
         ('male', 'Male'),
         ('female', 'Female'),
-        ('other', 'Other'),
     ]
 
     email = models.EmailField(unique=True)
@@ -85,7 +84,7 @@ class RoomBooking(models.Model):
     ], default='pending')
     timestamp = models.DateTimeField(auto_now_add=True)
     notification_sent = models.BooleanField(default=False)  # Track if the seeker has been notified
-
+    
 
     def __str__(self):
         return f"Booking by {self.seeker.username} for {self.room.title} ({self.status})"
