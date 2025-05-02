@@ -33,7 +33,21 @@ urlpatterns = [
     path('my-bookings/', views.my_bookings, name='my_bookings'),
     path('manage-bookings/', views.manage_bookings, name='manage_bookings'),
     path('update-booking/<int:booking_id>/<str:status>/', views.update_booking_status, name='update_booking_status'),
-    path('faq/', views.faq_page, name='faq_page'),
+    
+    # Help & Information
+    path('faq/', views.faq, name='faq'),
+    path('user-guide/', views.user_guide, name='user_guide'),
+    
+    # Account Settings and Management
+    path('account/settings/', views.account_settings, name='account_settings'),
+    path('account/update-profile/', views.update_profile, name='update_profile'),
+    path('account/update-preferences/', views.update_preferences, name='update_preferences'),
+    path('account/update-privacy/', views.update_privacy, name='update_privacy'),
+    path('account/update-notifications/', views.update_notifications, name='update_notifications'),
+    path('account/change-password/', views.change_password, name='change_password'),
+    path('account/update-profile-photo/', views.update_profile_photo, name='update_profile_photo'),
+    path('account/update-account-type/', views.update_account_type, name='update_account_type'),
+    path('account/delete/', views.delete_account, name='delete_account'),
 
     # Support Ticket System URLs
     path('support/', views.support_home, name='support_home'),

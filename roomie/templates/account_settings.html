@@ -1,0 +1,834 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h1 class="display-6 fw-bold mb-4">Account Settings</h1>
+            
+            <!-- Settings Navigation Tabs -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-0">
+                    <ul class="nav nav-tabs nav-fill" id="accountSettingsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active py-3 px-4" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">
+                                <i class="fas fa-user-circle me-2"></i> Profile
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link py-3 px-4" id="preferences-tab" data-bs-toggle="tab" data-bs-target="#preferences" type="button" role="tab" aria-controls="preferences" aria-selected="false">
+                                <i class="fas fa-sliders-h me-2"></i> Preferences
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link py-3 px-4" id="privacy-tab" data-bs-toggle="tab" data-bs-target="#privacy" type="button" role="tab" aria-controls="privacy" aria-selected="false">
+                                <i class="fas fa-shield-alt me-2"></i> Privacy
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link py-3 px-4" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab" aria-controls="notifications" aria-selected="false">
+                                <i class="fas fa-bell me-2"></i> Notifications
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link py-3 px-4" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">
+                                <i class="fas fa-lock me-2"></i> Security
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Tab Content -->
+            <div class="tab-content" id="accountSettingsContent">
+                <!-- Profile Tab -->
+                <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <div class="row">
+                        <div class="col-lg-4 mb-4 mb-lg-0">
+                            <!-- Profile Photo Section -->
+                            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                                <div class="card-body text-center p-4">
+                                    <h5 class="card-title mb-4">Profile Photo</h5>
+                                    <div class="profile-photo-container mb-3">
+                                        {% if user.profile_photo %}
+                                        <img src="{{ user.profile_photo.url }}" alt="{{ user.username }}" class="profile-photo rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
+                                        {% else %}
+                                        <img src="/media/profile_photos/default_user.jpg" alt="Default Profile" class="profile-photo rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="profile-photo-overlay">
+                                            <button class="btn btn-sm btn-light rounded-circle" title="Change Photo">
+                                                <i class="fas fa-camera"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <form action="{% url 'update_profile_photo' %}" method="post" enctype="multipart/form-data" id="photoForm">
+                                        {% csrf_token %}
+                                        <input type="file" name="profile_photo" id="id_profile_photo" accept="image/*" class="d-none">
+                                        <div class="d-grid gap-2">
+                                            <button type="button" class="btn btn-outline-primary mb-2" id="changePhotoBtn">
+                                                <i class="fas fa-upload me-2"></i> Upload Photo
+                                            </button>
+                                            {% if user.profile_photo %}
+                                            <button type="button" class="btn btn-outline-danger" id="removePhotoBtn">
+                                                <i class="fas fa-trash-alt me-2"></i> Remove Photo
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </form>
+                                    <p class="text-muted small mt-3 mb-0">
+                                        Recommended: Square image, at least 400x400 pixels
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Account Type Section -->
+                            <div class="card shadow-sm border-0 rounded-4">
+                                <div class="card-body p-4">
+                                    <h5 class="card-title mb-3">Account Type</h5>
+                                    <form action="{% url 'update_account_type' %}" method="post" id="accountTypeForm">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label class="form-label">Your current account type:</label>
+                                            <div class="d-grid gap-2">
+                                                <div class="form-check custom-radio-card">
+                                                    <input class="form-check-input" type="radio" name="account_type" id="typeProvider" value="provider" {% if user.account_type == 'provider' %}checked{% endif %}>
+                                                    <label class="form-check-label custom-radio-card-label" for="typeProvider">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="icon-circle bg-primary text-white me-3">
+                                                                <i class="fas fa-home"></i>
+                                                            </div>
+                                                            <div>
+                                                                <h6 class="mb-0">Room Provider</h6>
+                                                                <p class="text-muted small mb-0">I have rooms to offer</p>
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                                
+                                                <div class="form-check custom-radio-card mt-2">
+                                                    <input class="form-check-input" type="radio" name="account_type" id="typeSeeker" value="seeker" {% if user.account_type == 'seeker' %}checked{% endif %}>
+                                                    <label class="form-check-label custom-radio-card-label" for="typeSeeker">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="icon-circle bg-success text-white me-3">
+                                                                <i class="fas fa-search"></i>
+                                                            </div>
+                                                            <div>
+                                                                <h6 class="mb-0">Room Seeker</h6>
+                                                                <p class="text-muted small mb-0">I'm looking for a room</p>
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-info small">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Changing your account type will affect which features are available to you.
+                                        </div>
+                                        
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-2"></i> Update Account Type
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-8">
+                            <!-- Basic Information Section -->
+                            <div class="card shadow-sm border-0 rounded-4">
+                                <div class="card-body p-4">
+                                    <h5 class="card-title mb-4">Basic Information</h5>
+                                    <form action="{% url 'update_profile' %}" method="post" id="profileForm">
+                                        {% csrf_token %}
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-6 mb-3 mb-md-0">
+                                                <label for="username" class="form-label">Username</label>
+                                                <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="email" class="form-label">Email Address</label>
+                                                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-6 mb-3 mb-md-0">
+                                                <label for="first_name" class="form-label">First Name</label>
+                                                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="last_name" class="form-label">Last Name</label>
+                                                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="phone_number" class="form-label">Phone Number</label>
+                                            <input type="tel" class="form-control" id="phone_number" name="phone_number" value="{{ user.phone_number|default:'' }}">
+                                            <div class="form-text">Your number is only shared with confirmed roommates.</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="location" class="form-label">Location</label>
+                                            <input type="text" class="form-control" id="location" name="location" value="{{ user.location|default:'' }}" placeholder="City, State">
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label for="bio" class="form-label">About Me</label>
+                                            <textarea class="form-control" id="bio" name="bio" rows="4" placeholder="Tell potential roommates about yourself, your lifestyle, and what you're looking for...">{{ user.bio|default:'' }}</textarea>
+                                            <div class="form-text text-end">0/500 characters</div>
+                                        </div>
+                                        
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="is_available" name="is_available" {% if user.is_available %}checked{% endif %}>
+                                            <label class="form-check-label" for="is_available">I am currently available for roommates</label>
+                                        </div>
+                                        
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-2"></i> Save Changes
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Preferences Tab -->
+                <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-4">Roommate Preferences</h5>
+                            <form action="{% url 'update_preferences' %}" method="post" id="preferencesForm">
+                                {% csrf_token %}
+                                
+                                <div class="row mb-4">
+                                    <div class="col-lg-6 mb-3 mb-lg-0">
+                                        <label class="form-label fw-medium">Budget Range</label>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="min_budget" class="form-label small text-muted">Minimum ($)</label>
+                                                <input type="number" class="form-control" id="min_budget" name="min_budget" value="{{ user.preferences.min_budget|default:'' }}" min="0">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="max_budget" class="form-label small text-muted">Maximum ($)</label>
+                                                <input type="number" class="form-control" id="max_budget" name="max_budget" value="{{ user.preferences.max_budget|default:'' }}" min="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-lg-6">
+                                        <label class="form-label fw-medium">Move-in Date</label>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3 mb-md-0">
+                                                <label for="move_in_date" class="form-label small text-muted">Earliest Date</label>
+                                                <input type="date" class="form-control" id="move_in_date" name="move_in_date" value="{{ user.preferences.move_in_date|date:'Y-m-d'|default:'' }}">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="lease_duration" class="form-label small text-muted">Lease Duration</label>
+                                                <select class="form-select" id="lease_duration" name="lease_duration">
+                                                    <option value="" {% if not user.preferences.lease_duration %}selected{% endif %}>Select duration</option>
+                                                    <option value="flexible" {% if user.preferences.lease_duration == 'flexible' %}selected{% endif %}>Flexible</option>
+                                                    <option value="1-3" {% if user.preferences.lease_duration == '1-3' %}selected{% endif %}>1-3 months</option>
+                                                    <option value="3-6" {% if user.preferences.lease_duration == '3-6' %}selected{% endif %}>3-6 months</option>
+                                                    <option value="6-12" {% if user.preferences.lease_duration == '6-12' %}selected{% endif %}>6-12 months</option>
+                                                    <option value="12+" {% if user.preferences.lease_duration == '12+' %}selected{% endif %}>12+ months</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <h6 class="fw-medium mb-3">Lifestyle Preferences</h6>
+                                
+                                <div class="row mb-4">
+                                    <div class="col-md-4 mb-3 mb-md-0">
+                                        <label for="cleanliness" class="form-label small text-muted">Cleanliness</label>
+                                        <select class="form-select" id="cleanliness" name="cleanliness">
+                                            <option value="" {% if not user.preferences.cleanliness %}selected{% endif %}>Select preference</option>
+                                            <option value="very_clean" {% if user.preferences.cleanliness == 'very_clean' %}selected{% endif %}>Very Clean</option>
+                                            <option value="clean" {% if user.preferences.cleanliness == 'clean' %}selected{% endif %}>Clean</option>
+                                            <option value="moderately_clean" {% if user.preferences.cleanliness == 'moderately_clean' %}selected{% endif %}>Moderately Clean</option>
+                                            <option value="relaxed" {% if user.preferences.cleanliness == 'relaxed' %}selected{% endif %}>Relaxed</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3 mb-md-0">
+                                        <label for="smoking" class="form-label small text-muted">Smoking</label>
+                                        <select class="form-select" id="smoking" name="smoking">
+                                            <option value="" {% if not user.preferences.smoking %}selected{% endif %}>Select preference</option>
+                                            <option value="non_smoking" {% if user.preferences.smoking == 'non_smoking' %}selected{% endif %}>Non-Smoking</option>
+                                            <option value="outside_only" {% if user.preferences.smoking == 'outside_only' %}selected{% endif %}>Outside Only</option>
+                                            <option value="smoking_allowed" {% if user.preferences.smoking == 'smoking_allowed' %}selected{% endif %}>Smoking Allowed</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <label for="pets" class="form-label small text-muted">Pets</label>
+                                        <select class="form-select" id="pets" name="pets">
+                                            <option value="" {% if not user.preferences.pets %}selected{% endif %}>Select preference</option>
+                                            <option value="no_pets" {% if user.preferences.pets == 'no_pets' %}selected{% endif %}>No Pets</option>
+                                            <option value="cats_only" {% if user.preferences.pets == 'cats_only' %}selected{% endif %}>Cats Only</option>
+                                            <option value="dogs_only" {% if user.preferences.pets == 'dogs_only' %}selected{% endif %}>Dogs Only</option>
+                                            <option value="pets_welcome" {% if user.preferences.pets == 'pets_welcome' %}selected{% endif %}>Pets Welcome</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-4">
+                                    <div class="col-md-4 mb-3 mb-md-0">
+                                        <label for="work_schedule" class="form-label small text-muted">Work Schedule</label>
+                                        <select class="form-select" id="work_schedule" name="work_schedule">
+                                            <option value="" {% if not user.preferences.work_schedule %}selected{% endif %}>Select preference</option>
+                                            <option value="day" {% if user.preferences.work_schedule == 'day' %}selected{% endif %}>Day (9-5)</option>
+                                            <option value="evening" {% if user.preferences.work_schedule == 'evening' %}selected{% endif %}>Evening</option>
+                                            <option value="night" {% if user.preferences.work_schedule == 'night' %}selected{% endif %}>Night</option>
+                                            <option value="flexible" {% if user.preferences.work_schedule == 'flexible' %}selected{% endif %}>Flexible/Remote</option>
+                                            <option value="student" {% if user.preferences.work_schedule == 'student' %}selected{% endif %}>Student</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3 mb-md-0">
+                                        <label for="social_level" class="form-label small text-muted">Social Level</label>
+                                        <select class="form-select" id="social_level" name="social_level">
+                                            <option value="" {% if not user.preferences.social_level %}selected{% endif %}>Select preference</option>
+                                            <option value="very_social" {% if user.preferences.social_level == 'very_social' %}selected{% endif %}>Very Social</option>
+                                            <option value="moderately_social" {% if user.preferences.social_level == 'moderately_social' %}selected{% endif %}>Moderately Social</option>
+                                            <option value="occasionally_social" {% if user.preferences.social_level == 'occasionally_social' %}selected{% endif %}>Occasionally Social</option>
+                                            <option value="private" {% if user.preferences.social_level == 'private' %}selected{% endif %}>Private/Reserved</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <label for="guests_preference" class="form-label small text-muted">Guests</label>
+                                        <select class="form-select" id="guests_preference" name="guests_preference">
+                                            <option value="" {% if not user.preferences.guests_preference %}selected{% endif %}>Select preference</option>
+                                            <option value="frequent_ok" {% if user.preferences.guests_preference == 'frequent_ok' %}selected{% endif %}>Frequent Guests OK</option>
+                                            <option value="occasional_ok" {% if user.preferences.guests_preference == 'occasional_ok' %}selected{% endif %}>Occasional Guests OK</option>
+                                            <option value="rarely" {% if user.preferences.guests_preference == 'rarely' %}selected{% endif %}>Rarely</option>
+                                            <option value="no_guests" {% if user.preferences.guests_preference == 'no_guests' %}selected{% endif %}>No Guests</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <h6 class="fw-medium mb-3">Roommate Attributes</h6>
+                                
+                                <div class="row mb-4">
+                                    <div class="col-md-4 mb-3 mb-md-0">
+                                        <label for="gender_preference" class="form-label small text-muted">Gender Preference</label>
+                                        <select class="form-select" id="gender_preference" name="gender_preference">
+                                            <option value="" {% if not user.preferences.gender_preference %}selected{% endif %}>No Preference</option>
+                                            <option value="male" {% if user.preferences.gender_preference == 'male' %}selected{% endif %}>Male</option>
+                                            <option value="female" {% if user.preferences.gender_preference == 'female' %}selected{% endif %}>Female</option>
+                                            <option value="same" {% if user.preferences.gender_preference == 'same' %}selected{% endif %}>Same as mine</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3 mb-md-0">
+                                        <label for="age_min" class="form-label small text-muted">Age Range (Min)</label>
+                                        <input type="number" class="form-control" id="age_min" name="age_min" value="{{ user.preferences.age_min|default:'' }}" min="18" max="99">
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <label for="age_max" class="form-label small text-muted">Age Range (Max)</label>
+                                        <input type="number" class="form-control" id="age_max" name="age_max" value="{{ user.preferences.age_max|default:'' }}" min="18" max="99">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="additional_preferences" class="form-label small text-muted">Additional Preferences (Optional)</label>
+                                    <textarea class="form-control" id="additional_preferences" name="additional_preferences" rows="3" placeholder="Any other specific preferences or requirements...">{{ user.preferences.additional_preferences|default:'' }}</textarea>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i> Save Preferences
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Privacy Tab -->
+                <div class="tab-pane fade" id="privacy" role="tabpanel" aria-labelledby="privacy-tab">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-4">Privacy Settings</h5>
+                            <form action="{% url 'update_privacy' %}" method="post" id="privacyForm">
+                                {% csrf_token %}
+                                
+                                <h6 class="fw-medium mb-3">Profile Visibility</h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">Who can see my profile?</label>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="profile_visibility" id="visibilityEveryone" value="everyone" {% if user.privacy.profile_visibility == 'everyone' or not user.privacy %}checked{% endif %}>
+                                        <label class="form-check-label" for="visibilityEveryone">
+                                            <strong>Everyone</strong> - Any registered user can view your profile
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="profile_visibility" id="visibilityVerified" value="verified" {% if user.privacy.profile_visibility == 'verified' %}checked{% endif %}>
+                                        <label class="form-check-label" for="visibilityVerified">
+                                            <strong>Verified Users Only</strong> - Only verified users can view your profile
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="profile_visibility" id="visibilityMatches" value="matches" {% if user.privacy.profile_visibility == 'matches' %}checked{% endif %}>
+                                        <label class="form-check-label" for="visibilityMatches">
+                                            <strong>Matches Only</strong> - Only users you've matched or messaged with can view your profile
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="form-label small text-muted">Information Visibility</label>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="show_email" name="show_email" {% if user.privacy.show_email %}checked{% endif %}>
+                                        <label class="form-check-label" for="show_email">
+                                            Show my email address to matched users
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="show_phone" name="show_phone" {% if user.privacy.show_phone %}checked{% endif %}>
+                                        <label class="form-check-label" for="show_phone">
+                                            Show my phone number to matched users
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="show_social" name="show_social" {% if user.privacy.show_social %}checked{% endif %}>
+                                        <label class="form-check-label" for="show_social">
+                                            Show my connected social media accounts
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <h6 class="fw-medium mb-3">Location Privacy</h6>
+                                
+                                <div class="mb-4">
+                                    <label class="form-label small text-muted">How precisely should we show your location?</label>
+                                    <select class="form-select" id="location_precision" name="location_precision">
+                                        <option value="exact" {% if user.privacy.location_precision == 'exact' %}selected{% endif %}>Exact Address (only for confirmed bookings)</option>
+                                        <option value="neighborhood" {% if user.privacy.location_precision == 'neighborhood' %}selected{% endif %}>Neighborhood Level</option>
+                                        <option value="city" {% if user.privacy.location_precision == 'city' or not user.privacy %}selected{% endif %}>City Level Only</option>
+                                    </select>
+                                </div>
+                                
+                                <h6 class="fw-medium mb-3">Account Deletion</h6>
+                                
+                                <div class="alert alert-danger">
+                                    <h6 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i> Delete Account</h6>
+                                    <p class="small mb-0">Deleting your account is permanent. All your data, messages, listings, and reviews will be permanently removed.</p>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mb-4">
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                                        <i class="fas fa-trash-alt me-2"></i> Delete Account
+                                    </button>
+                                    
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i> Save Privacy Settings
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notifications Tab -->
+                <div class="tab-pane fade" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-4">Notification Preferences</h5>
+                            <form action="{% url 'update_notifications' %}" method="post" id="notificationsForm">
+                                {% csrf_token %}
+                                
+                                <h6 class="fw-medium mb-3">Email Notifications</h6>
+                                
+                                <div class="list-group mb-4">
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">New Messages</h6>
+                                            <p class="text-muted small mb-0">Receive emails when someone messages you</p>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="email_messages" name="email_messages" {% if user.notifications.email_messages %}checked{% endif %}>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">Booking Updates</h6>
+                                            <p class="text-muted small mb-0">Receive emails about booking requests and confirmations</p>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="email_bookings" name="email_bookings" {% if user.notifications.email_bookings %}checked{% endif %}>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">Profile Views</h6>
+                                            <p class="text-muted small mb-0">Receive emails when someone views your profile</p>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="email_profile_views" name="email_profile_views" {% if user.notifications.email_profile_views %}checked{% endif %}>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">New Matches</h6>
+                                            <p class="text-muted small mb-0">Receive emails when you match with potential roommates</p>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="email_matches" name="email_matches" {% if user.notifications.email_matches %}checked{% endif %}>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">Platform Updates</h6>
+                                            <p class="text-muted small mb-0">Receive emails about new features and platform updates</p>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="email_updates" name="email_updates" {% if user.notifications.email_updates %}checked{% endif %}>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <h6 class="fw-medium mb-3">Push Notifications</h6>
+                                
+                                <div class="mb-4">
+                                    <div class="alert alert-info small">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Push notifications require that you allow browser notifications from our website.
+                                    </div>
+                                
+                                    <div class="list-group">
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">Enable Push Notifications</h6>
+                                                <p class="text-muted small mb-0">Receive notifications even when browser is closed</p>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="enable_push" name="enable_push" {% if user.notifications.enable_push %}checked{% endif %}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i> Save Notification Settings
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Tab -->
+                <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-4">Security Settings</h5>
+                            
+                            <!-- Change Password Section -->
+                            <h6 class="fw-medium mb-3">Change Password</h6>
+                            <form action="{% url 'change_password' %}" method="post" id="passwordForm" class="mb-5">
+                                {% csrf_token %}
+                                
+                                <div class="mb-3">
+                                    <label for="current_password" class="form-label small text-muted">Current Password</label>
+                                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="new_password" class="form-label small text-muted">New Password</label>
+                                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                    <div class="form-text">
+                                        Password must be at least 8 characters and include letters, numbers, and special characters.
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="confirm_password" class="form-label small text-muted">Confirm New Password</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-key me-2"></i> Change Password
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <!-- Two-Factor Authentication -->
+                            <h6 class="fw-medium mb-3">Two-Factor Authentication</h6>
+                            
+                            <div class="card border-0 bg-light mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">Two-Factor Authentication</h6>
+                                            <p class="text-muted small mb-0">Add an extra layer of security to your account</p>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="enable2FA" name="enable2FA" {% if user.security.enable_2fa %}checked{% endif %}>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3" id="2fa-settings" style="display: none;">
+                                        <div class="alert alert-info small">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Two-factor authentication adds an extra layer of security to your account by requiring a verification code in addition to your password when you sign in.
+                                        </div>
+                                        
+                                        <button class="btn btn-outline-primary btn-sm" id="setup2FA">
+                                            <i class="fas fa-mobile-alt me-2"></i> Set Up Two-Factor Authentication
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Login History -->
+                            <h6 class="fw-medium mb-3">Login History</h6>
+                            
+                            <div class="table-responsive mb-4">
+                                <table class="table table-striped">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">Date & Time</th>
+                                            <th scope="col">Device</th>
+                                            <th scope="col">Location</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{{ now|date:"M d, Y H:i" }}</td>
+                                            <td>Chrome on Windows</td>
+                                            <td>Your current location</td>
+                                            <td><span class="badge bg-success">Current</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>May 1, 2025 10:23</td>
+                                            <td>Safari on iOS</td>
+                                            <td>San Francisco, CA</td>
+                                            <td><span class="badge bg-secondary">Success</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Apr 28, 2025 15:45</td>
+                                            <td>Chrome on Windows</td>
+                                            <td>San Francisco, CA</td>
+                                            <td><span class="badge bg-secondary">Success</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-outline-danger" id="logoutAllBtn">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Sign Out Of All Devices
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone.
+                </div>
+                <p>We're sorry to see you go. Deleting your account will permanently remove:</p>
+                <ul>
+                    <li>Your profile and personal information</li>
+                    <li>All messages and conversations</li>
+                    <li>Room listings and booking history</li>
+                    <li>Reviews and ratings</li>
+                </ul>
+                <p>Are you sure you want to proceed?</p>
+                <form id="deleteAccountForm">
+                    <div class="mb-3">
+                        <label for="deleteConfirmPassword" class="form-label">Enter your password to confirm</label>
+                        <input type="password" class="form-control" id="deleteConfirmPassword" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="confirmDelete" required>
+                        <label class="form-check-label" for="confirmDelete">I understand this action is permanent and cannot be undone</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>Delete Account</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom Radio Card */
+    .custom-radio-card {
+        position: relative;
+        padding: 0;
+    }
+    
+    .custom-radio-card-label {
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        width: 100%;
+        margin-bottom: 0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .custom-radio-card .form-check-input {
+        position: absolute;
+        opacity: 0;
+        z-index: -1;
+    }
+    
+    .custom-radio-card .form-check-input:checked + .custom-radio-card-label {
+        border-color: var(--bs-primary);
+        background-color: rgba(13, 110, 253, 0.05);
+        box-shadow: 0 0 0 1px var(--bs-primary);
+    }
+    
+    /* Profile Photo Container */
+    .profile-photo-container {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+    }
+    
+    .profile-photo-overlay {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: rgba(255,255,255,0.8);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .profile-photo-overlay:hover {
+        background: rgba(255,255,255,1);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show active tab on page load if in URL hash
+        const hash = window.location.hash;
+        if (hash) {
+            const triggerEl = document.querySelector(`button[data-bs-target="${hash}"]`);
+            if (triggerEl) {
+                const tab = new bootstrap.Tab(triggerEl);
+                tab.show();
+            }
+        }
+        
+        // Photo upload functionality
+        const photoBtn = document.getElementById('changePhotoBtn');
+        const photoInput = document.getElementById('id_profile_photo');
+        const photoOverlay = document.querySelector('.profile-photo-overlay');
+        
+        if (photoBtn && photoInput) {
+            photoBtn.addEventListener('click', function() {
+                photoInput.click();
+            });
+            
+            photoOverlay.addEventListener('click', function() {
+                photoInput.click();
+            });
+            
+            photoInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    document.getElementById('photoForm').submit();
+                }
+            });
+        }
+        
+        // Character counter for bio
+        const bioField = document.getElementById('bio');
+        const charCounter = bioField.nextElementSibling;
+        
+        if (bioField && charCounter) {
+            const updateCounter = function() {
+                const count = bioField.value.length;
+                charCounter.textContent = `${count}/500 characters`;
+                if (count > 450) {
+                    charCounter.classList.add('text-warning');
+                } else {
+                    charCounter.classList.remove('text-warning');
+                }
+            };
+            
+            bioField.addEventListener('input', updateCounter);
+            updateCounter(); // Initial count
+        }
+        
+        // Two-factor authentication toggle
+        const twoFAToggle = document.getElementById('enable2FA');
+        const twoFASettings = document.getElementById('2fa-settings');
+        
+        if (twoFAToggle && twoFASettings) {
+            const updateTwoFASettings = function() {
+                if (twoFAToggle.checked) {
+                    twoFASettings.style.display = 'block';
+                } else {
+                    twoFASettings.style.display = 'none';
+                }
+            };
+            
+            twoFAToggle.addEventListener('change', updateTwoFASettings);
+            updateTwoFASettings(); // Initial state
+        }
+        
+        // Delete account form validation
+        const deleteConfirm = document.getElementById('confirmDelete');
+        const deleteBtn = document.getElementById('confirmDeleteBtn');
+        
+        if (deleteConfirm && deleteBtn) {
+            deleteConfirm.addEventListener('change', function() {
+                deleteBtn.disabled = !this.checked;
+            });
+        }
+    });
+</script>
+{% endblock %}

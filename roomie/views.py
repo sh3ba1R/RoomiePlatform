@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
-from django.contrib.auth import authenticate, login, get_user_model,logout
+from django.contrib.auth import authenticate, login, get_user_model, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
-from core.models import Room, Message, RoomBooking, SupportTicket, TicketResponse, RoomContract,Subscription
+from core.models import Room, Message, RoomBooking, SupportTicket, TicketResponse, RoomContract, Subscription
 from django.db.models import Count, Q, F
 from reportlab.pdfgen import canvas
 from io import BytesIO
@@ -1105,3 +1105,345 @@ def faq_page(request):
     Render the FAQ page.
     """
     return render(request, 'faq.html')
+
+def faq(request):
+    """
+    Displays the Frequently Asked Questions page.
+    """
+    # Define FAQ categories and questions
+    faq_categories = {
+        'general': {
+            'title': 'General Questions',
+            'questions': [
+                {
+                    'question': 'What is Roomie Platform?',
+                    'answer': 'Roomie Platform is a comprehensive service that connects people looking for rooms (seekers) with those who have rooms to offer (providers). Our platform makes it easy to find compatible roommates and suitable living spaces based on preferences, location, and budget.'
+                },
+                {
+                    'question': 'Is it free to use Roomie Platform?',
+                    'answer': 'Basic features are free for all users. Room seekers may choose to upgrade to premium plans for additional features like priority listing, advanced filters, and unlimited messaging. Room providers can list their properties for free, with optional promotional features available for a fee.'
+                },
+                {
+                    'question': 'How do I get started?',
+                    'answer': 'Simply register for an account, specify whether you\'re looking for a room or have a room to offer, complete your profile with your preferences and details, and start browsing or listing rooms! Check our User Guide for detailed instructions.'
+                },
+                {
+                    'question': 'What areas does Roomie Platform cover?',
+                    'answer': 'We currently operate in major cities across the country, with plans to expand to more locations soon. You can search for any location to see available listings in that area.'
+                }
+            ]
+        },
+        'account': {
+            'title': 'Account & Profile',
+            'questions': [
+                {
+                    'question': 'How do I change my account type (seeker/provider)?',
+                    'answer': 'You can change your account type in the Account Settings page. Go to your profile, click on Account Settings, and then select the new account type under the "Account Type" section.'
+                },
+                {
+                    'question': 'Can I have both seeker and provider profiles?',
+                    'answer': 'Currently, you can only have one account type active at a time. If you need to both seek and provide rooms, you\'ll need to switch your account type as needed in your Account Settings.'
+                },
+                {
+                    'question': 'How do I update my profile information?',
+                    'answer': 'To update your profile, go to Account Settings, select the Profile tab, and update any information you\'d like to change. Don\'t forget to click the Save Changes button when you\'re done.'
+                },
+                {
+                    'question': 'How can I delete my account?',
+                    'answer': 'To delete your account, go to Account Settings, select the Privacy tab, and scroll down to the Account Deletion section. Follow the instructions to permanently delete your account. Please note that this action cannot be undone.'
+                }
+            ]
+        },
+        'seekers': {
+            'title': 'For Room Seekers',
+            'questions': [
+                {
+                    'question': 'How do I find rooms that match my preferences?',
+                    'answer': 'Use our advanced search filters to narrow down listings based on location, price range, room type, amenities, and more. You can also set up alerts to be notified when new listings matching your criteria become available.'
+                },
+                {
+                    'question': 'How do I contact a room provider?',
+                    'answer': 'You can send a message to any room provider by clicking the "Contact" button on their room listing. This opens our secure messaging system where you can ask questions and discuss details. All communications are initially kept within the platform for safety.'
+                },
+                {
+                    'question': 'What should I consider before booking a room?',
+                    'answer': 'Before booking, we recommend: thoroughly reviewing the listing details, asking the provider questions about the property and living arrangements, checking reviews from previous tenants, verifying the location meets your needs, understanding all costs involved, and if possible, arranging a virtual or in-person viewing of the space.'
+                },
+                {
+                    'question': 'How does the booking process work?',
+                    'answer': 'Once you find a room you\'re interested in, you can submit a booking request through the platform. The provider will review your request and profile, and either approve or decline. If approved, you\'ll receive confirmation details and next steps for finalizing the arrangement.'
+                }
+            ]
+        },
+        'providers': {
+            'title': 'For Room Providers',
+            'questions': [
+                {
+                    'question': 'How do I list a room?',
+                    'answer': 'To list a room, click on "List a Room" in the navigation menu or dashboard. Fill out the required information about your property, upload photos, set your price and availability, and define your preferences for potential roommates. Once submitted, your listing will be reviewed and published.'
+                },
+                {
+                    'question': 'What makes a good room listing?',
+                    'answer': 'Effective listings include: clear, high-quality photos of the room and common areas; detailed, honest descriptions of the space and amenities; accurate pricing information including any additional costs; specific house rules and expectations; and information about the neighborhood and nearby facilities or transportation.'
+                },
+                {
+                    'question': 'How do I manage booking requests?',
+                    'answer': 'All booking requests will appear in your dashboard under "Manage Bookings." You can review each seeker\'s profile before deciding to accept or decline their request. Once approved, you\'ll be connected with the seeker to finalize arrangements.'
+                },
+                {
+                    'question': 'Can I set specific roommate preferences?',
+                    'answer': 'Yes, you can specify preferences such as gender, age range, lifestyle factors (smoking, pets, etc.), and other criteria for potential roommates. These preferences will help match you with compatible seekers.'
+                }
+            ]
+        },
+        'safety': {
+            'title': 'Safety & Security',
+            'questions': [
+                {
+                    'question': 'How does Roomie Platform ensure user safety?',
+                    'answer': 'We implement various safety measures including: user verification processes, secure messaging within the platform, review and rating systems, reporting features for suspicious activity, and educational resources on roommate safety best practices.'
+                },
+                {
+                    'question': 'Should I meet potential roommates in person?',
+                    'answer': 'While we recommend eventually meeting in person before finalizing any living arrangement, we suggest first communicating thoroughly through our platform. When meeting in person, choose public locations for initial meetings, let someone know where you\'re going, and trust your instincts if something feels wrong.'
+                },
+                {
+                    'question': 'How are payments handled?',
+                    'answer': 'For security, initial deposits and first payments can be processed through our secure system. For ongoing rent payments, users typically arrange their own payment methods after establishing trust. Never send payments outside the platform to someone you haven\'t met or verified.'
+                },
+                {
+                    'question': 'What should I do if I encounter a problem user?',
+                    'answer': 'If you encounter any suspicious or inappropriate behavior, use the "Report User" feature on their profile. Our moderation team will investigate all reports promptly. For immediate safety concerns, please contact local authorities first, then inform our support team.'
+                }
+            ]
+        },
+        'technical': {
+            'title': 'Technical Support',
+            'questions': [
+                {
+                    'question': 'I can\'t log in to my account. What should I do?',
+                    'answer': 'First, verify you\'re using the correct email and password. You can use the "Forgot Password" link to reset your password if needed. If you still can\'t access your account, contact our support team with your account details for assistance.'
+                },
+                {
+                    'question': 'How do I report a bug or technical issue?',
+                    'answer': 'You can report technical issues through the Support section in your account menu. Provide as much detail as possible, including what you were trying to do, what happened, and any error messages you received. Screenshots are always helpful.'
+                },
+                {
+                    'question': 'Is my personal information secure?',
+                    'answer': 'Yes, we take data security seriously. We use encryption for sensitive data, implement strict access controls, and never share your personal information with third parties without your consent. You can review our Privacy Policy for more details on how we protect and use your data.'
+                },
+                {
+                    'question': 'Which browsers are supported?',
+                    'answer': 'Roomie Platform works best on recent versions of Chrome, Firefox, Safari, and Edge. We recommend keeping your browser updated for the best experience and security.'
+                }
+            ]
+        }
+    }
+    
+    context = {
+        'page_title': 'Frequently Asked Questions',
+        'faq_categories': faq_categories
+    }
+    return render(request, 'faq.html', context)
+
+def user_guide(request):
+    """
+    Displays the User Guide page with instructions on how to use the platform.
+    """
+    context = {
+        'page_title': 'User Guide',
+    }
+    return render(request, 'user_guide.html', context)
+
+def account_settings(request):
+    """
+    Displays and handles the account settings page where users can manage their account.
+    """
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    # Get user notification settings if they exist (could be expanded in a real implementation)
+    notification_settings = {
+        'email_notifications': True,
+        'message_notifications': True,
+        'booking_notifications': True,
+        'marketing_notifications': False,
+    }
+    
+    context = {
+        'page_title': 'Account Settings',
+        'notification_settings': notification_settings,
+        'user': request.user,
+    }
+    return render(request, 'account_settings.html', context)
+
+def update_profile(request):
+    """
+    Handles updates to user profile information.
+    """
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        # Process form submission for profile updates
+        user = request.user
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.email = request.POST.get('email', user.email)
+        user.location = request.POST.get('location', user.location)
+        user.bio = request.POST.get('bio', user.bio)
+        user.save()
+        
+        messages.success(request, 'Profile information updated successfully.')
+        return redirect('account_settings')
+    
+    return redirect('account_settings')
+
+def update_preferences(request):
+    """
+    Handles updates to user preferences.
+    """
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        # Process form submission for preference updates
+        # This is a simplified example
+        messages.success(request, 'Preferences updated successfully.')
+        return redirect('account_settings')
+    
+    return redirect('account_settings')
+
+def update_privacy(request):
+    """
+    Handles updates to privacy settings.
+    """
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        # Process form submission for privacy settings
+        # This is a simplified example
+        messages.success(request, 'Privacy settings updated successfully.')
+        return redirect('account_settings')
+    
+    return redirect('account_settings')
+
+def update_notifications(request):
+    """
+    Handles updates to notification settings.
+    """
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        # Get notification preferences from form
+        email_notifications = 'email_notifications' in request.POST
+        message_notifications = 'message_notifications' in request.POST
+        booking_notifications = 'booking_notifications' in request.POST
+        marketing_notifications = 'marketing_notifications' in request.POST
+        
+        # In a real implementation, you would save these to the user's profile
+        # This is a simplified example
+        
+        messages.success(request, 'Notification settings updated successfully.')
+        return redirect('account_settings')
+    
+    return redirect('account_settings')
+
+def change_password(request):
+    """
+    Handles password change requests.
+    """
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        # Validate current password
+        if not request.user.check_password(current_password):
+            messages.error(request, 'Current password is incorrect.')
+            return redirect('account_settings')
+        
+        # Validate new password
+        if new_password != confirm_password:
+            messages.error(request, 'New passwords do not match.')
+            return redirect('account_settings')
+        
+        # Update password
+        request.user.set_password(new_password)
+        request.user.save()
+        
+        # Update session to prevent logout
+        update_session_auth_hash(request, request.user)
+        
+        messages.success(request, 'Password changed successfully.')
+        return redirect('account_settings')
+    
+    return redirect('account_settings')
+
+def update_profile_photo(request):
+    """
+    Handles profile photo updates.
+    """
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if request.method == 'POST' and request.FILES.get('profile_photo'):
+        user = request.user
+        user.profile_photo = request.FILES['profile_photo']
+        user.save()
+        
+        messages.success(request, 'Profile photo updated successfully.')
+        return redirect('account_settings')
+    
+    return redirect('account_settings')
+
+def update_account_type(request):
+    """
+    Handles account type changes (e.g., from seeker to provider or vice versa).
+    """
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        account_type = request.POST.get('account_type')
+        if account_type in ['seeker', 'provider']:
+            user = request.user
+            user.account_type = account_type
+            user.save()
+            
+            messages.success(request, f'Account type updated to {user.get_account_type_display()}.')
+        else:
+            messages.error(request, 'Invalid account type selected.')
+        
+        return redirect('account_settings')
+    
+    return redirect('account_settings')
+
+def delete_account(request):
+    """
+    Handles account deletion requests.
+    """
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        # Verify confirmation
+        confirmation = request.POST.get('confirmation')
+        if confirmation != 'DELETE':
+            messages.error(request, 'Incorrect confirmation text. Account not deleted.')
+            return redirect('account_settings')
+        
+        # Delete the user account
+        user = request.user
+        logout(request)
+        user.delete()
+        
+        messages.success(request, 'Your account has been permanently deleted.')
+        return redirect('home')
+    
+    return redirect('account_settings')

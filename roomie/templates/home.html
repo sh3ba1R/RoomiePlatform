@@ -5,20 +5,20 @@
 <div class="container">
   {% if user.is_authenticated %}
   <!-- Logged-in User Content -->
-  <div class="text-center mb-5">
-    <h1 class="display-4 mb-3">Welcome, {{ user.username }}!</h1>
+  <div class="text-center mb-5 slide-up">
+    <h1 class="display-4 mb-3 fw-bold gradient-text">Welcome, {{ user.username }}!</h1>
     <p class="lead mb-4">
       Manage your profile, explore rooms, and connect with potential roommates today.
     </p>
-    <div class="d-flex gap-3 justify-content-center">
-      <a href="{% url 'user_profile' user.id %}" class="btn btn-primary btn-lg">
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="{% url 'user_profile' user.id %}" class="btn btn-primary btn-lg animated-btn">
         <i class="fas fa-user me-2"></i> View Profile
       </a>
-      <a href="{% url 'messages' user.id %}" class="btn btn-outline-primary btn-lg">
+      <a href="{% url 'messages' user.id %}" class="btn btn-outline-primary btn-lg animated-btn">
         <i class="fas fa-envelope me-2"></i> Messages
       </a>
       {% if user.account_type == 'seeker' %}
-      <a href="{% url 'subscription_plans' %}" class="btn btn-success btn-lg">
+      <a href="{% url 'subscription_plans' %}" class="btn btn-success btn-lg animated-btn">
         <i class="fas fa-star me-2"></i> Subscription Plans
       </a>
       {% endif %}
@@ -26,16 +26,16 @@
   </div>
   {% else %}
   <!-- Non-Logged-in User Content -->
-  <div class="text-center mb-5 py-5">
-    <h1 class="display-4 fw-bold mb-3">Find Your Perfect Roommate</h1>
+  <div class="text-center mb-5 py-5 hero-section slide-up">
+    <h1 class="display-4 fw-bold mb-3 gradient-text">Find Your Perfect Roommate</h1>
     <p class="lead col-md-8 mx-auto mb-5">
       Connect with like-minded roommates, discover affordable housing options, and make your living experience better with Roomie.
     </p>
-    <div class="d-flex gap-3 justify-content-center">
-      <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 py-2">
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 py-2 animated-btn">
         <i class="fas fa-user-plus me-2"></i> Get Started
       </a>
-      <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-4 py-2">
+      <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-4 py-2 animated-btn">
         <i class="fas fa-sign-in-alt me-2"></i> Login
       </a>
     </div>
@@ -43,20 +43,20 @@
   {% endif %}
 
   <!-- Featured Rooms Section -->
-  <section class="mb-5">
+  <section class="mb-5 slide-up" style="animation-delay: 0.1s;">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="mb-0">
+      <h2 class="mb-0 section-title">
         <i class="fas fa-home text-primary me-2"></i> Featured Rooms
       </h2>
-      <a href="{% url 'filter_rooms' %}" class="btn btn-sm btn-outline-primary">
-        View All
+      <a href="{% url 'filter_rooms' %}" class="btn btn-sm btn-outline-primary view-all-btn">
+        View All <i class="fas fa-arrow-right ms-1"></i>
       </a>
     </div>
     <div class="row g-4">
       {% for room in featured_rooms %}
-      <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-          <div class="position-relative">
+      <div class="col-md-4 stagger-item">
+        <div class="card h-100 shadow-sm hover-scale">
+          <div class="position-relative card-image-container">
             {% if room.image %}
             <img src="{{ room.image.url }}" class="card-img-top" alt="{{ room.title }}" style="height: 200px; object-fit: cover" />
             {% else %}
@@ -73,22 +73,22 @@
               <strong>Bedrooms:</strong> {{ room.bedrooms }}
             </p>
             <p class="card-text mb-3">
-              <span class="badge bg-light text-dark me-2">{{ room.get_room_type_display }}</span>
+              <span class="badge rounded-pill bg-light text-dark me-2">{{ room.get_room_type_display }}</span>
               {% if room.is_available %}
-              <span class="badge bg-success">Available</span>
+              <span class="badge rounded-pill bg-success">Available</span>
               {% else %}
-              <span class="badge bg-secondary">Unavailable</span>
+              <span class="badge rounded-pill bg-secondary">Unavailable</span>
               {% endif %}
             </p>
             <div class="d-grid">
-              <a href="{% url 'room_detail' room.room_id %}" class="btn btn-primary">View Details</a>
+              <a href="{% url 'room_detail' room.room_id %}" class="btn btn-primary animated-btn">View Details</a>
             </div>
           </div>
         </div>
       </div>
       {% empty %}
       <div class="col-12">
-        <div class="alert alert-info text-center py-4">
+        <div class="alert alert-info text-center py-4 fade-in">
           <i class="fas fa-info-circle me-2"></i> No featured rooms available at the moment. Check back soon!
         </div>
       </div>
@@ -97,25 +97,27 @@
   </section>
 
   <!-- Meet Our Roommates Section -->
-  <section class="mb-5">
+  <section class="mb-5 slide-up" style="animation-delay: 0.2s;">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="mb-0">
+      <h2 class="mb-0 section-title">
         <i class="fas fa-users text-primary me-2"></i> Meet Our Roommates
       </h2>
-      <a href="{% url 'find_roommate' %}" class="btn btn-sm btn-outline-primary">
-        View All
+      <a href="{% url 'find_roommate' %}" class="btn btn-sm btn-outline-primary view-all-btn">
+        View All <i class="fas fa-arrow-right ms-1"></i>
       </a>
     </div>
     <div class="row g-4">
       {% for roommate in roommates %}
-      <div class="col-md-3">
-        <div class="card h-100 shadow-sm roommate-card">
-          {% if roommate.profile_photo %}
-          <img src="{{ roommate.profile_photo.url }}" class="rounded-circle roommate-image" alt="{{ roommate.username }}" />
-          {% else %}
-          <img src="/media/profile_photos/default_user.jpg" class="rounded-circle roommate-image" alt="Default Roommate Image" />
-          {% endif %}
-          <div class="card-body p-0">
+      <div class="col-md-3 stagger-item">
+        <div class="card h-100 shadow-sm roommate-card hover-scale">
+          <div class="card-img-top d-flex justify-content-center pt-4">
+            {% if roommate.profile_photo %}
+            <img src="{{ roommate.profile_photo.url }}" class="rounded-circle roommate-image" alt="{{ roommate.username }}" />
+            {% else %}
+            <img src="/media/profile_photos/default_user.jpg" class="rounded-circle roommate-image" alt="Default Roommate Image" />
+            {% endif %}
+          </div>
+          <div class="card-body text-center p-3">
             <h5 class="card-title mb-1">{{ roommate.username }}</h5>
             <p class="card-text text-muted mb-3">
               <i class="fas fa-map-marker-alt me-1"></i>
@@ -130,7 +132,7 @@
       </div>
       {% empty %}
       <div class="col-12">
-        <div class="alert alert-info text-center py-4">
+        <div class="alert alert-info text-center py-4 fade-in">
           <i class="fas fa-info-circle me-2"></i> No roommates available at the moment. Be the first to join!
         </div>
       </div>
@@ -139,44 +141,44 @@
   </section>
 
   <!-- How It Works Section -->
-  <section class="my-5 pt-3">
-    <h2 class="text-center mb-4">
+  <section class="my-5 pt-3 slide-up" style="animation-delay: 0.3s;">
+    <h2 class="text-center mb-4 section-title">
       <i class="fas fa-info-circle text-primary me-2"></i> How Roomie Works
     </h2>
     <div class="row g-4 mt-2">
-      <div class="col-md-4">
-        <div class="card h-100 text-center p-4 shadow-sm">
+      <div class="col-md-4 stagger-item">
+        <div class="card h-100 text-center p-4 shadow-sm hover-card">
           <div class="card-body">
-            <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px">
+            <div class="icon-circle mx-auto mb-3">
               <i class="fas fa-user-plus fa-2x text-primary"></i>
             </div>
-            <h4>Create Profile</h4>
+            <h4 class="fw-bold">Create Profile</h4>
             <p class="text-muted">
               Sign up and create your detailed profile to help find the perfect match.
             </p>
           </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="card h-100 text-center p-4 shadow-sm">
+      <div class="col-md-4 stagger-item">
+        <div class="card h-100 text-center p-4 shadow-sm hover-card">
           <div class="card-body">
-            <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px">
+            <div class="icon-circle mx-auto mb-3">
               <i class="fas fa-search fa-2x text-primary"></i>
             </div>
-            <h4>Browse Options</h4>
+            <h4 class="fw-bold">Browse Options</h4>
             <p class="text-muted">
               Browse through available rooms or potential roommates based on your preferences.
             </p>
           </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="card h-100 text-center p-4 shadow-sm">
+      <div class="col-md-4 stagger-item">
+        <div class="card h-100 text-center p-4 shadow-sm hover-card">
           <div class="card-body">
-            <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px">
+            <div class="icon-circle mx-auto mb-3">
               <i class="fas fa-comments fa-2x text-primary"></i>
             </div>
-            <h4>Connect</h4>
+            <h4 class="fw-bold">Connect</h4>
             <p class="text-muted">
               Message potential matches and arrange to meet before making your decision.
             </p>
@@ -187,20 +189,222 @@
   </section>
 
   <!-- Support Section -->
-  <section class="my-5 pt-3">
-    <h2 class="text-center mb-4">
-      <i class="fas fa-headset text-primary me-2"></i> Need Help?
-    </h2>
-    <div class="row justify-content-center">
-      <div class="col-md-8 text-center">
-        <p class="lead mb-4">
-          Our support team is here to assist you with any questions or issues you might encounter.
-        </p>
-        <a href="{% url 'faq_page' %}" class="btn btn-primary btn-lg">
-          <i class="fas fa-ticket-alt me-2"></i> Get Support
-        </a>
+  <section class="my-5 pt-3 slide-up" style="animation-delay: 0.4s;">
+    <div class="support-section rounded-4 p-5 text-center">
+      <h2 class="text-center mb-4 section-title text-white">
+        <i class="fas fa-headset me-2"></i> Need Help?
+      </h2>
+      <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+          <p class="lead mb-4 text-white">
+            Our support team is here to assist you with any questions or issues you might encounter.
+          </p>
+          <a href="{% url 'faq' %}" class="btn btn-light btn-lg px-4 animated-btn">
+            <i class="fas fa-ticket-alt me-2"></i> Get Support
+          </a>
+        </div>
       </div>
     </div>
   </section>
 </div>
+
+<style>
+  /* Improved card styling */
+  .card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+  
+  /* Room price tag */
+  .room-price {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: rgba(var(--bs-primary-rgb), 0.9);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  /* Roommate image */
+  .roommate-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .roommate-card:hover .roommate-image {
+    transform: scale(1.05);
+  }
+  
+  /* Icon circles */
+  .icon-circle {
+    width: 90px;
+    height: 90px;
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  
+  .hover-card:hover .icon-circle {
+    transform: scale(1.1);
+    background-color: rgba(var(--bs-primary-rgb), 0.2);
+  }
+  
+  /* Support section with gradient background */
+  .support-section {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, #6366f1 100%);
+    box-shadow: 0 10px 25px rgba(var(--bs-primary-rgb), 0.2);
+  }
+  
+  /* Section titles with animated underline */
+  .section-title {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 5px;
+  }
+  
+  .section-title::after {
+    content: '';
+    position: absolute;
+    width: 60%;
+    height: 3px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--bs-primary);
+    transform: scaleX(0);
+    transform-origin: bottom left;
+    transition: transform 0.3s ease;
+  }
+  
+  .section-title:hover::after {
+    transform: scaleX(1);
+  }
+  
+  /* Animated buttons */
+  .animated-btn {
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .animated-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 14px rgba(0,0,0,0.1), 0 3px 6px rgba(0,0,0,0.1);
+  }
+  
+  .animated-btn:active {
+    transform: translateY(-1px);
+  }
+  
+  /* View all button animation */
+  .view-all-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .view-all-btn i {
+    transition: transform 0.3s ease;
+  }
+  
+  .view-all-btn:hover i {
+    transform: translateX(4px);
+  }
+  
+  /* Card image container with hover effect */
+  .card-image-container {
+    overflow: hidden;
+  }
+  
+  .card-image-container img {
+    transition: transform 0.5s ease;
+  }
+  
+  .card:hover .card-image-container img {
+    transform: scale(1.05);
+  }
+  
+  /* Gradient text for headers */
+  .gradient-text {
+    background: linear-gradient(90deg, var(--bs-primary) 0%, #6366f1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+  
+  /* Hero section for non-logged-in users */
+  .hero-section {
+    padding: 3rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--bs-primary-rgb), 0.1) 0%, rgba(var(--bs-primary-rgb), 0) 70%);
+    z-index: -1;
+  }
+  
+  .hero-section::after {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    left: -100px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--bs-primary-rgb), 0.1) 0%, rgba(var(--bs-primary-rgb), 0) 70%);
+    z-index: -1;
+  }
+  
+  /* Dark mode specific enhancements */
+  [data-bs-theme="dark"] .icon-circle {
+    background-color: rgba(var(--bs-primary-rgb), 0.2);
+  }
+  
+  [data-bs-theme="dark"] .hover-card:hover .icon-circle {
+    background-color: rgba(var(--bs-primary-rgb), 0.3);
+  }
+  
+  [data-bs-theme="dark"] .badge.bg-light {
+    background-color: #3a3b3c !important;
+    color: #e4e6eb !important;
+  }
+  
+  [data-bs-theme="dark"] .roommate-image {
+    border-color: #242526;
+  }
+  
+  [data-bs-theme="dark"] .support-section {
+    background: linear-gradient(135deg, #4f59b8 0%, #38397a 100%);
+  }
+  
+  [data-bs-theme="dark"] .gradient-text {
+    background: linear-gradient(90deg, #5d9aff 0%, #8a84ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* Hover scale animation adjusted for dark mode */
+  [data-bs-theme="dark"] .hover-scale:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3) !important;
+  }
+</style>
 {% endblock %}

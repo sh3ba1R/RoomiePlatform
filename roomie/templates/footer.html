@@ -2,79 +2,83 @@
 <footer class="bg-light text-center py-4 mt-5">
   <div class="container">
     <div class="row">
-      <div class="col-md-3 mb-3 mb-md-0">
+      <div class="col-md-3 mb-3 mb-md-0 slide-up" style="animation-delay: 0.1s">
         <h5 class="text-primary">Roomie</h5>
         <p class="text-muted small">
           Find your perfect roommate match with our user-friendly platform.
         </p>
       </div>
-      <div class="col-md-3 mb-3 mb-md-0">
+      <div class="col-md-3 mb-3 mb-md-0 slide-up" style="animation-delay: 0.2s">
         <h5 class="text-primary">Quick Links</h5>
         <ul class="list-unstyled">
-          <li>
-            <a href="{% url 'home' %}" class="text-decoration-none">Home</a>
+          <li class="mb-2">
+            <a href="{% url 'home' %}" class="text-decoration-none hover-link">
+              <i class="fas fa-chevron-right fa-xs me-1"></i>Home
+            </a>
           </li>
-          <li>
-            <a href="{% url 'find_roommate' %}" class="text-decoration-none"
-              >Find Roommate</a
-            >
+          <li class="mb-2">
+            <a href="{% url 'find_roommate' %}" class="text-decoration-none hover-link">
+              <i class="fas fa-chevron-right fa-xs me-1"></i>Find Roommate
+            </a>
           </li>
           {% if user.is_authenticated and user.account_type == 'provider' %}
-          <li>
-            <a href="{% url 'list_room' %}" class="text-decoration-none"
-              >List Room</a
-            >
+          <li class="mb-2">
+            <a href="{% url 'list_room' %}" class="text-decoration-none hover-link">
+              <i class="fas fa-chevron-right fa-xs me-1"></i>List Room
+            </a>
           </li>
           {% endif %}
         </ul>
       </div>
-      <div class="col-md-3 mb-3 mb-md-0">
+      <div class="col-md-3 mb-3 mb-md-0 slide-up" style="animation-delay: 0.3s">
         <h5 class="text-primary">Support</h5>
         <ul class="list-unstyled">
-          <li>
+          <li class="mb-2">
             {% if user.is_authenticated %}
-            <a href="{% url 'support_home' %}" class="text-decoration-none">Help Center</a>
+            <a href="{% url 'support_home' %}" class="text-decoration-none hover-link">
+              <i class="fas fa-chevron-right fa-xs me-1"></i>Help Center
+            </a>
             {% else %}
-            <a href="{% url 'faq_page' %}" class="text-decoration-none">Help Center</a>
+            <a href="{% url 'faq' %}" class="text-decoration-none hover-link">
+              <i class="fas fa-chevron-right fa-xs me-1"></i>Help Center
+            </a>
             {% endif %}
           </li>
-          <li>
+          <li class="mb-2">
             {% if user.is_authenticated %}
-            <a
-              href="{% url 'submit_support_ticket' %}?type=general"
-              class="text-decoration-none"
-              >Contact Support</a
-            >
+            <a href="{% url 'submit_support_ticket' %}?type=general" class="text-decoration-none hover-link">
+              <i class="fas fa-chevron-right fa-xs me-1"></i>Contact Support
+            </a>
             {% else %}
-            <a href="{% url 'faq_page' %}" class="text-decoration-none">Contact Support</a>
+            <a href="{% url 'faq' %}" class="text-decoration-none hover-link">
+              <i class="fas fa-chevron-right fa-xs me-1"></i>Contact Support
+            </a>
             {% endif %}
           </li>
           {% if user.is_authenticated %}
-          <li>
-            <a
-              href="{% url 'view_support_tickets' %}"
-              class="text-decoration-none"
-              >My Support Tickets</a
-            >
+          <li class="mb-2">
+            <a href="{% url 'view_support_tickets' %}" class="text-decoration-none hover-link">
+              <i class="fas fa-chevron-right fa-xs me-1"></i>My Support Tickets
+            </a>
           </li>
           {% endif %}
         </ul>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-3 slide-up" style="animation-delay: 0.4s">
         <h5 class="text-primary">Connect</h5>
         <div class="d-flex justify-content-center">
-          <a href="#" class="text-decoration-none mx-2"
-            ><i class="fab fa-facebook fa-lg"></i
-          ></a>
-          <a href="#" class="text-decoration-none mx-2"
-            ><i class="fab fa-twitter fa-lg"></i
-          ></a>
-          <a href="#" class="text-decoration-none mx-2"
-            ><i class="fab fa-instagram fa-lg"></i
-          ></a>
-          <a href="#" class="text-decoration-none mx-2"
-            ><i class="fab fa-linkedin fa-lg"></i
-          ></a>
+          <a href="#" class="text-decoration-none mx-2 social-icon">
+            <i class="fab fa-facebook fa-lg"></i>
+          </a>
+          <a href="#" class="text-decoration-none mx-2 social-icon">
+            <i class="fab fa-twitter fa-lg"></i>
+          </a>
+          <a href="#" class="text-decoration-none mx-2 social-icon">
+            <i class="fab fa-instagram fa-lg"></i>
+          </a>
+          <a href="#" class="text-decoration-none mx-2 social-icon">
+            <i class="fab fa-linkedin fa-lg"></i>
+          </a>
         </div>
       </div>
     </div>
@@ -82,3 +86,67 @@
     <p class="mb-0 small">© 2025 Roomie. All rights reserved.</p>
   </div>
 </footer>
+
+<style>
+  /* Footer Styles */
+  footer a {
+    transition: color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .social-icon:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.2);
+    transform: translateY(-3px);
+  }
+  
+  .hover-link {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .hover-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: var(--bs-primary);
+    transition: width 0.3s ease;
+  }
+  
+  .hover-link:hover::after {
+    width: 100%;
+  }
+  
+  /* Dark mode specific footer styles */
+  [data-bs-theme="dark"] footer.bg-light {
+    background-color: #242526 !important;
+  }
+  
+  [data-bs-theme="dark"] footer hr {
+    border-color: #3a3b3c;
+  }
+  
+  [data-bs-theme="dark"] footer a {
+    color: #e4e6eb;
+  }
+  
+  [data-bs-theme="dark"] .social-icon {
+    background-color: rgba(var(--bs-primary-rgb), 0.2);
+  }
+  
+  [data-bs-theme="dark"] .social-icon:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.3);
+  }
+</style>
