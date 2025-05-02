@@ -42,16 +42,7 @@ urlpatterns = [
     path('support/tickets/<int:ticket_id>/respond/', views.add_ticket_response, name='add_ticket_response'),
     path('support/tickets/<int:ticket_id>/close/', views.close_ticket, name='close_ticket'),
     path('support/tickets/<int:ticket_id>/reopen/', views.reopen_ticket, name='reopen_ticket'),
-    path('contact-and-faq/', views.contact_and_faq, name='contact_and_faq'),
 
     # Dashboard URL
     path('dashboard/', views.dashboard, name='dashboard'),
-
-
-    path('booking/<int:booking_id>/review/', views.leave_review, name='leave_review'),
-
-    path('contract/<int:contract_id>/pdf/', views.generate_contract_pdf, name='generate_contract_pdf'),
-    path('booking/<int:booking_id>/approve/', views.approve_booking, name='approve_booking'),
-    path('booking/<int:booking_id>/review/', views.leave_review, name='leave_review'),
-
 ]

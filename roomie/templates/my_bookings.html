@@ -1,9 +1,9 @@
-<!-- filepath: c:\Users\saaud\Documents\GitHub\RoomiePlatform\roomie\templates\my_bookings.html -->
+<!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\my_bookings.html -->
 {% extends 'base.html' %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center mb-4">My Bookings</h2>
+    <h2 class="text-center">My Bookings</h2>
 
     <!-- Display Notifications -->
     {% if messages %}
@@ -20,39 +20,17 @@
     <div class="list-group mt-4">
         {% for booking in bookings %}
         <div class="list-group-item">
-            <h5 class="mb-2">{{ booking.room.title }}</h5>
-            <p class="mb-1">
-                <strong>Status:</strong> 
-                <span class="{% if booking.status == 'approved' %}text-success{% elif booking.status == 'rejected' %}text-danger{% else %}text-warning{% endif %}">
+            <h5>{{ booking.room.title }}</h5>
+            <p>Status: 
+                <strong class="{% if booking.status == 'approved' %}text-success{% elif booking.status == 'rejected' %}text-danger{% else %}text-warning{% endif %}">
                     {{ booking.status|capfirst }}
-                </span>
+                </strong>
             </p>
-            <p class="mb-1"><strong>Start Date:</strong> {{ booking.start_date }}</p>
-            <p class="mb-1"><strong>End Date:</strong> {{ booking.end_date }}</p>
-
-            <!-- Download Contract -->
-            {% if booking.status == 'approved' and booking.contract %}
-            <a href="{% url 'generate_contract_pdf' booking.contract.id %}" class="btn btn-primary btn-sm mt-2">
-                <i class="fas fa-file-pdf me-1"></i> Download Contract
-            </a>
-            {% endif %}
-
-            <!-- Leave Review for Seeker -->
-            {% if booking.status == 'approved' and user == booking.seeker %}
-            <a href="{% url 'leave_review' booking.id %}" class="btn btn-success btn-sm mt-2">
-                <i class="fas fa-star me-1"></i> Leave Review for Provider
-            </a>
-            {% endif %}
-
-            <!-- Leave Review for Provider -->
-            {% if booking.status == 'approved' and user == booking.room.provider %}
-            <a href="{% url 'leave_review' booking.id %}" class="btn btn-success btn-sm mt-2">
-                <i class="fas fa-star me-1"></i> Leave Review for Seeker
-            </a>
-            {% endif %}
+            <p>Start Date: {{ booking.start_date }}</p>
+            <p>End Date: {{ booking.end_date }}</p>
         </div>
         {% empty %}
-        <p class="text-center text-muted mt-4">You have not made any bookings yet.</p>
+        <p class="text-center">You have not made any bookings yet.</p>
         {% endfor %}
     </div>
 </div>

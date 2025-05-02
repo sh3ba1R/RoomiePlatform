@@ -63,7 +63,7 @@ class Room(models.Model):
         upload_to='images/',
         blank=True,
         null=True,
-        default='images/default_room.jpg'  # Set default room image
+        default='/media/images/default_room.jpg'  # Set default room image
         )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -84,7 +84,6 @@ class RoomBooking(models.Model):
     ], default='pending')
     timestamp = models.DateTimeField(auto_now_add=True)
     notification_sent = models.BooleanField(default=False)  # Track if the seeker has been notified
-    contract = models.OneToOneField('RoomContract', on_delete=models.SET_NULL, null=True, blank=True, related_name='booking')
 
 
     def __str__(self):
