@@ -1,0 +1,22 @@
+<!-- filepath: c:\Users\saaud\Documents\GitHub\RoomiePlatform\roomie\templates\approve_booking.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Manage Booking</h2>
+    <div class="card shadow-sm p-4">
+        <h5 class="mb-3">Booking Details</h5>
+        <p><strong>Room:</strong> {{ booking.room.title }}</p>
+        <p><strong>Seeker:</strong> {{ booking.seeker.username }}</p>
+        <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
+        <p><strong>End Date:</strong> {{ booking.end_date }}</p>
+        <p><strong>Status:</strong> {{ booking.status|capfirst }}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="action" value="approve" class="btn btn-success">Approve</button>
+            <button type="submit" name="action" value="reject" class="btn btn-danger">Reject</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

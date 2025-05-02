@@ -1,0 +1,107 @@
+<!-- filepath: c:\Users\saaud\Documents\GitHub\RoomiePlatform\roomie\templates\contact_and_faq.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body text-center p-5">
+          <i class="fas fa-headset display-1 text-primary mb-4"></i>
+          <h1 class="display-5 fw-bold mb-3">Contact Us</h1>
+          <p class="lead text-muted mb-4">
+            Have questions or need assistance? Our support team is here to help.
+          </p>
+          <a href="mailto:support@roomieplatform.com" class="btn btn-primary btn-lg px-4">
+            <i class="fas fa-envelope me-2"></i> Email Us
+          </a>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h2 class="h5 mb-0">
+            <i class="fas fa-question-circle text-primary me-2"></i> Frequently Asked Questions
+          </h2>
+        </div>
+        <div class="card-body p-4">
+          <div class="accordion" id="faqAccordion">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingOne">
+                <button
+                  class="accordion-button"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseOne"
+                  aria-expanded="true"
+                  aria-controls="collapseOne"
+                >
+                  How do I create an account?
+                </button>
+              </h2>
+              <div
+                id="collapseOne"
+                class="accordion-collapse collapse show"
+                aria-labelledby="headingOne"
+                data-bs-parent="#faqAccordion"
+              >
+                <div class="accordion-body">
+                  To create an account, click on the "Register" button on the homepage and fill out the required information.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingTwo">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseTwo"
+                  aria-expanded="false"
+                  aria-controls="collapseTwo"
+                >
+                  How do I contact a room provider?
+                </button>
+              </h2>
+              <div
+                id="collapseTwo"
+                class="accordion-collapse collapse"
+                aria-labelledby="headingTwo"
+                data-bs-parent="#faqAccordion"
+              >
+                <div class="accordion-body">
+                  You can contact a room provider by visiting their room listing and clicking the "Contact Provider" button.
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingThree">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseThree"
+                  aria-expanded="false"
+                  aria-controls="collapseThree"
+                >
+                  How do I reset my password?
+                </button>
+              </h2>
+              <div
+                id="collapseThree"
+                class="accordion-collapse collapse"
+                aria-labelledby="headingThree"
+                data-bs-parent="#faqAccordion"
+              >
+                <div class="accordion-body">
+                  To reset your password, click on the "Forgot Password" link on the login page and follow the instructions.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
