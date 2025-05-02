@@ -6,8 +6,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.core.paginator import Paginator
-from core.models import Room, Message, RoomBooking, SupportTicket, TicketResponse
+from core.models import Room, Message, RoomBooking, SupportTicket, TicketResponse,RoomReview, UserReview
 from django.db.models import Count, Q, F
+from reportlab.pdfgen import canvas
+from core.models import RoomContract
 
 from .forms import RoomieFormFactory, RoomieForms
 
@@ -565,3 +567,109 @@ def reopen_ticket(request, ticket_id):
         messages.success(request, "Ticket has been reopened.")
     
     return redirect('view_support_ticket_detail', ticket_id=ticket.id)
+
+def contact_and_faq(request):
+    """
+    View to display the Contact Us and FAQ page for non-logged-in users.
+    """
+    return render(request, 'contact_and_faq.html')
+
+@login_required
+def generate_contract_pdf(request, contract_id):
+    """
+    Generate a PDF for the room contract.
+    """
+    contract = get_object_or_404(RoomContract, id=contract_id)
+
+    # Ensure only the seeker or provider can access the contract
+    if request.user != contract.seeker and request.user != contract.provider:
+        return HttpResponse("You are not authorized to view this contract.", status=403)
+
+    # Create the PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="contract_{contract.id}.pdf"'
+
+    # Generate the PDF
+    p = canvas.Canvas(response)
+    p.setFont("Helvetica", 12)
+
+    # Add contract details
+    p.drawString(100, 800, "Room Rental Contract")
+    p.drawString(100, 780, f"Contract ID: {contract.id}")
+    p.drawString(100, 760, f"Room: {contract.room.title}")
+    p.drawString(100, 740, f"Provider: {contract.provider.username}")
+    p.drawString(100, 720, f"Seeker: {contract.seeker.username}")
+    p.drawString(100, 700, f"Start Date: {contract.start_date}")
+    p.drawString(100, 680, f"End Date: {contract.end_date}")
+    p.drawString(100, 660, f"Rent Amount: ${contract.rent_amount}")
+    p.drawString(100, 640, f"Status: {contract.get_status_display()}")
+
+    # Footer
+    p.drawString(100, 600, "This contract is legally binding between the provider and the seeker.")
+    p.drawString(100, 580, "Please contact support for any disputes or issues.")
+
+    # Finalize the PDF
+    p.showPage()
+    p.save()
+
+    return response
+
+
+@login_required
+def approve_booking(request, booking_id):
+    """
+    Approve or reject a booking.
+    """
+    booking = get_object_or_404(RoomBooking, id=booking_id)
+
+    # Ensure only the provider can approve/reject the booking
+    if request.user != booking.room.provider:
+        messages.error(request, "You are not authorized to manage this booking.")
+        return redirect('manage_bookings')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'approve':
+            booking.status = 'approved'
+            booking.save()
+            messages.success(request, f"Booking for {booking.room.title} has been approved.")
+        elif action == 'reject':
+            booking.status = 'rejected'
+            booking.save()
+            messages.error(request, f"Booking for {booking.room.title} has been rejected.")
+        return redirect('manage_bookings')
+
+    return render(request, 'approve_booking.html', {'booking': booking})
+
+
+
+
+@login_required
+def leave_review(request, booking_id):
+    booking = get_object_or_404(RoomBooking, id=booking_id)
+
+    # Ensure the booking is approved
+    if booking.status != 'approved':
+        return redirect('manage_bookings')
+
+    # Determine if the user is the provider or seeker
+    if request.user == booking.room.provider:
+        reviewee = booking.seeker
+    elif request.user == booking.seeker:
+        reviewee = booking.room.provider
+    else:
+        return redirect('manage_bookings')
+
+    # Handle the review form
+    review_form = RoomieForms.UserReviewForm(request.POST or None)
+    if request.method == 'POST' and review_form.is_valid():
+        review = review_form.save(commit=False)
+        review.reviewer = request.user
+        review.reviewee = reviewee
+        review.save()
+        return redirect('manage_bookings')
+
+    return render(request, 'leave_review.html', {
+        'booking': booking,
+        'review_form': review_form,
+    })
