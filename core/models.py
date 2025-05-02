@@ -40,6 +40,7 @@ class User(AbstractUser):
         default='profile_photos/default_user.jpg'  # Set default profile photo
     )
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default='seeker')
+    is_available = models.BooleanField(default=True, help_text="Whether the user is currently available as a roommate")
 
     def __str__(self):
         return self.username

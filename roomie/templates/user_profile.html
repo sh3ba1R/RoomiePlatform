@@ -36,7 +36,13 @@
           {% endif %}
         </div>
 
-        {% if request.user.is_authenticated and request.user.id == user.id %}
+        <!-- Availability Status Badge -->
+        {% if user.is_available %}
+        <span class="badge bg-success mb-3">Available as Roommate</span>
+        {% else %}
+        <span class="badge bg-secondary mb-3">Not Available</span>
+        {% endif %} {% if request.user.is_authenticated and request.user.id ==
+        user.id %}
         <div class="mt-3">
           <a href="#" class="btn btn-light btn-sm">
             <i class="fas fa-edit me-1"></i> Edit Profile

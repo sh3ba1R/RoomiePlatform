@@ -183,14 +183,20 @@ def find_roommate(request):
     max_budget = request.GET.get('max_budget', '')
     
     if min_budget:
-        roommates = roommates.filter(budget__gte=min_budget)
+        # Only apply if budget field exists
+        if 'budget' in [f.name for f in User._meta.get_fields()]:
+            roommates = roommates.filter(budget__gte=min_budget)
     if max_budget:
-        roommates = roommates.filter(budget__lte=max_budget)
+        # Only apply if budget field exists
+        if 'budget' in [f.name for f in User._meta.get_fields()]:
+            roommates = roommates.filter(budget__lte=max_budget)
     
     # Filter by interests or lifestyle
     lifestyle = request.GET.get('lifestyle', '')
     if lifestyle:
-        roommates = roommates.filter(lifestyle_preferences__icontains=lifestyle)
+        # Only apply if lifestyle_preferences field exists
+        if 'lifestyle_preferences' in [f.name for f in User._meta.get_fields()]:
+            roommates = roommates.filter(lifestyle_preferences__icontains=lifestyle)
     
     # Filter by availability
     is_available = request.GET.get('is_available', '')
