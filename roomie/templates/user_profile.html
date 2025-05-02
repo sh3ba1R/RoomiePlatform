@@ -41,14 +41,19 @@
         <span class="badge bg-success mb-3">Available as Roommate</span>
         {% else %}
         <span class="badge bg-secondary mb-3">Not Available</span>
-        {% endif %} {% if request.user.is_authenticated and request.user.id ==
-        user.id %}
+        {% endif %}
+
+        <!-- Edit profile buttons (only for the profile owner) -->
+        {% if request.user.is_authenticated and request.user.id == user.id %}
         <div class="mt-3">
           <a href="#" class="btn btn-light btn-sm">
             <i class="fas fa-edit me-1"></i> Edit Profile
           </a>
           <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm ms-2">
             <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+          </a>
+          <a href="#" class="btn btn-light btn-sm ms-2 toggle-availability">
+            <i class="fas fa-toggle-on me-1"></i> Toggle Availability
           </a>
         </div>
         {% endif %}
@@ -86,9 +91,9 @@
               </div>
               <div class="text-center">
                 <div class="h5 mb-1">
-                  {% if user.date_joined %} {{
-                  user.date_joined|date:"Y"|add:"-2023" }} {% else %} 0 {% endif
-                  %}
+                  {% if user.date_joined %} {% now "Y" as current_year %} {{
+                  user.date_joined|date:"Y"|default:current_year|add:"-"|add:current_year
+                  }} {% else %} 0 {% endif %}
                 </div>
                 <div class="small text-muted">Years</div>
               </div>
@@ -458,33 +463,34 @@
                     >
                       <i class="fas fa-plus me-1"></i> List Your First Room
                     </a>
-                    {% endfor %}
+                    {% endif %}
                   </div>
+                  {% endfor %}
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Reviews Tab -->
-            <div
-              class="tab-pane fade"
-              id="reviews"
-              role="tabpanel"
-              aria-labelledby="reviews-tab"
-            >
-              <div class="card shadow-sm">
-                <div class="card-body p-4">
-                  <h5 class="card-title border-bottom pb-3 mb-4">
-                    <i class="fas fa-star text-primary me-2"></i> Reviews &
-                    Ratings
-                  </h5>
+          <!-- Reviews Tab -->
+          <div
+            class="tab-pane fade"
+            id="reviews"
+            role="tabpanel"
+            aria-labelledby="reviews-tab"
+          >
+            <div class="card shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="card-title border-bottom pb-3 mb-4">
+                  <i class="fas fa-star text-primary me-2"></i> Reviews &
+                  Ratings
+                </h5>
 
-                  <div class="text-center py-5">
-                    <i class="fas fa-star fa-3x text-muted mb-3"></i>
-                    <h5>No Reviews Yet</h5>
-                    <p class="text-muted">
-                      This user hasn't received any reviews yet.
-                    </p>
-                  </div>
+                <div class="text-center py-5">
+                  <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                  <h5>No Reviews Yet</h5>
+                  <p class="text-muted">
+                    This user hasn't received any reviews yet.
+                  </p>
                 </div>
               </div>
             </div>
@@ -493,302 +499,301 @@
       </div>
     </div>
   </div>
+</div>
 
-  <!-- CSS for Enhanced Profile -->
-  <style>
-    /* Profile cover area */
-    .profile-cover-container {
-      margin-top: -3rem;
-      margin-bottom: 3rem;
+<!-- CSS for Enhanced Profile -->
+<style>
+  /* Profile cover area */
+  .profile-cover-container {
+    margin-top: -3rem;
+    margin-bottom: 3rem;
+  }
+
+  .profile-cover-bg {
+    height: 220px;
+    background-color: var(--bs-primary);
+    background-image: linear-gradient(
+      135deg,
+      var(--bs-primary) 0%,
+      #2a78e4 100%
+    );
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Add subtle pattern overlay to the cover */
+  .profile-cover-bg:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  .profile-header {
+    padding-top: 140px;
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: -70px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .profile-avatar-wrapper {
+    position: relative;
+    margin-right: 2rem;
+  }
+
+  .profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    object-fit: cover;
+    background-color: white;
+    transition: all 0.3s ease;
+  }
+
+  .profile-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Add animation for cards */
+  .profile-card,
+  .card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    animation: fadeInUp 0.5s ease-out;
+    overflow: hidden;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
     }
-
-    .profile-cover-bg {
-      height: 220px;
-      background-color: var(--bs-primary);
-      background-image: linear-gradient(
-        135deg,
-        var(--bs-primary) 0%,
-        #2a78e4 100%
-      );
-      border-radius: 0 0 20px 20px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      position: relative;
-      overflow: hidden;
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
+  }
 
-    /* Add subtle pattern overlay to the cover */
-    .profile-cover-bg:before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
-      opacity: 0.4;
+  /* Enhanced room cards */
+  .room-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    animation-delay: calc(var(--animation-order) * 0.1s);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .room-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Improved tabs styling */
+  .profile-tabs .nav-link {
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 500;
+    color: #495057;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .profile-tabs .nav-link:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+  }
+
+  .profile-tabs .nav-link.active {
+    font-weight: 600;
+    background-color: var(--bs-primary);
+    color: white;
+  }
+
+  .profile-tabs .nav-link.active::before {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    margin-left: -8px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid var(--bs-primary);
+    z-index: 1;
+  }
+
+  /* Profile elements styling */
+  .profile-card {
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .profile-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ccc;
+  }
+
+  .profile-status.online {
+    background-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+  }
+
+  /* Verification list */
+  .verification-list .list-group-item {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Preference items */
+  .preference-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(13, 110, 253, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-primary);
+  }
+
+  /* Room image container */
+  .room-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .room-image {
+    height: 180px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .room-card:hover .room-image {
+    transform: scale(1.1);
+  }
+
+  .room-price-badge {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: var(--bs-primary);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .room-status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .room-status-badge.available {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .room-status-badge.unavailable {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .room-features {
+    margin-top: 0.5rem;
+  }
+
+  /* Tab content */
+  .tab-pane {
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
     }
+    to {
+      opacity: 1;
+    }
+  }
 
+  /* Responsive adjustments */
+  @media (max-width: 991.98px) {
     .profile-header {
-      padding-top: 140px;
-      display: flex;
-      align-items: flex-end;
-      margin-bottom: -70px;
-      position: relative;
-      z-index: 1;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-top: 120px;
     }
 
     .profile-avatar-wrapper {
-      position: relative;
-      margin-right: 2rem;
+      margin-right: 0;
+      margin-bottom: 1.5rem;
     }
 
     .profile-avatar {
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      border: 5px solid white;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-      object-fit: cover;
-      background-color: white;
-      transition: all 0.3s ease;
+      width: 130px;
+      height: 130px;
     }
 
-    .profile-avatar:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    .profile-info-container {
+      text-align: center;
+      margin-bottom: 1rem;
     }
+  }
 
-    /* Add animation for cards */
-    .profile-card,
-    .card {
-      transition: all 0.3s ease;
-      border-radius: 12px;
-      border: none;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-      animation: fadeInUp 0.5s ease-out;
-      overflow: hidden;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Enhanced room cards */
-    .room-card {
-      transition: all 0.3s ease;
-      border: none;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      animation-delay: calc(var(--animation-order) * 0.1s);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .room-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Improved tabs styling */
-    .profile-tabs .nav-link {
-      border-radius: 10px;
-      padding: 12px;
-      font-weight: 500;
-      color: #495057;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .profile-tabs .nav-link:hover {
-      background-color: rgba(13, 110, 253, 0.05);
-    }
-
-    .profile-tabs .nav-link.active {
-      font-weight: 600;
-      background-color: var(--bs-primary);
-      color: white;
-    }
-
-    .profile-tabs .nav-link.active::before {
-      content: "";
-      position: absolute;
-      bottom: -8px;
-      left: 50%;
-      margin-left: -8px;
-      width: 0;
-      height: 0;
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-top: 8px solid var(--bs-primary);
-      z-index: 1;
-    }
-
-    /* Profile elements styling */
-    .profile-card {
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .profile-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    .profile-status {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background-color: #ccc;
-    }
-
-    .profile-status.online {
-      background-color: #28a745;
-      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
-    }
-
-    /* Verification list */
-    .verification-list .list-group-item {
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    /* Preference items */
-    .preference-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: rgba(13, 110, 253, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--bs-primary);
-    }
-
-    /* Room image container */
-    .room-image-container {
-      position: relative;
-      overflow: hidden;
-      border-radius: 12px 12px 0 0;
-    }
-
-    .room-image {
+  @media (max-width: 575.98px) {
+    .profile-cover-bg {
       height: 180px;
-      object-fit: cover;
-      transition: transform 0.5s ease;
     }
 
-    .room-card:hover .room-image {
-      transform: scale(1.1);
+    .profile-header {
+      padding-top: 100px;
     }
 
-    .room-price-badge {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      background-color: var(--bs-primary);
-      color: white;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-weight: 500;
-      font-size: 14px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    .profile-avatar {
+      width: 110px;
+      height: 110px;
+      border-width: 4px;
     }
 
-    .room-status-badge {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-weight: 500;
-      font-size: 12px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    .profile-tabs .nav-link {
+      font-size: 0.9rem;
+      padding: 10px 5px;
     }
 
-    .room-status-badge.available {
-      background-color: #28a745;
-      color: white;
+    .card-body {
+      padding: 1.25rem;
     }
-
-    .room-status-badge.unavailable {
-      background-color: #6c757d;
-      color: white;
-    }
-
-    .room-features {
-      margin-top: 0.5rem;
-    }
-
-    /* Tab content */
-    .tab-pane {
-      animation: fadeIn 0.5s ease;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 991.98px) {
-      .profile-header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding-top: 120px;
-      }
-
-      .profile-avatar-wrapper {
-        margin-right: 0;
-        margin-bottom: 1.5rem;
-      }
-
-      .profile-avatar {
-        width: 130px;
-        height: 130px;
-      }
-
-      .profile-info-container {
-        text-align: center;
-        margin-bottom: 1rem;
-      }
-    }
-
-    @media (max-width: 575.98px) {
-      .profile-cover-bg {
-        height: 180px;
-      }
-
-      .profile-header {
-        padding-top: 100px;
-      }
-
-      .profile-avatar {
-        width: 110px;
-        height: 110px;
-        border-width: 4px;
-      }
-
-      .profile-tabs .nav-link {
-        font-size: 0.9rem;
-        padding: 10px 5px;
-      }
-
-      .card-body {
-        padding: 1.25rem;
-      }
-    }
-  </style>
-  {% endblock %}
-</div>
+  }
+</style>
 {% endblock %}
