@@ -149,7 +149,59 @@ def list_room(request):
     return render(request, 'list_room.html', {'form': form, 'provider': request.user})
 
 def find_roommate(request):
-    roommates = User.objects.filter(account_type='seeker')  # Fetch only seekers
+    """
+    View to search and filter potential roommates based on user preferences.
+    """
+    # Start with all users
+    roommates = User.objects.all()
+    
+    # Filter by account type
+    account_type = request.GET.get('account_type', '')
+    if account_type:
+        roommates = roommates.filter(account_type=account_type)
+    else:
+        # Default to showing seekers if no specific filter is applied
+        roommates = roommates.filter(account_type='seeker')
+    
+    # Search by name, username, or bio
+    search_query = request.GET.get('search', '')
+    if search_query:
+        roommates = roommates.filter(
+            Q(username__icontains=search_query) | 
+            Q(first_name__icontains=search_query) | 
+            Q(last_name__icontains=search_query) | 
+            Q(bio__icontains=search_query)
+        )
+    
+    # Filter by location
+    location = request.GET.get('location', '')
+    if location:
+        roommates = roommates.filter(location__icontains=location)
+    
+    # Filter by budget range if provided
+    min_budget = request.GET.get('min_budget', '')
+    max_budget = request.GET.get('max_budget', '')
+    
+    if min_budget:
+        roommates = roommates.filter(budget__gte=min_budget)
+    if max_budget:
+        roommates = roommates.filter(budget__lte=max_budget)
+    
+    # Filter by interests or lifestyle
+    lifestyle = request.GET.get('lifestyle', '')
+    if lifestyle:
+        roommates = roommates.filter(lifestyle_preferences__icontains=lifestyle)
+    
+    # Filter by availability
+    is_available = request.GET.get('is_available', '')
+    if is_available:
+        roommates = roommates.filter(is_available=is_available == 'true')
+    
+    # Pagination
+    paginator = Paginator(roommates, 9)  # Show 9 roommates per page
+    page = request.GET.get('page')
+    roommates = paginator.get_page(page)
+    
     return render(request, "find_roommate.html", {'roommates': roommates})
 
 def send_message(request, user_id):

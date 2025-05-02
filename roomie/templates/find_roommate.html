@@ -18,13 +18,13 @@
         <h5 class="card-title mb-0">
           <i class="fas fa-filter text-primary me-2"></i> Search & Filter
         </h5>
-        <!-- Add Help Button -->
-        <a href="{% url 'submit_support_ticket' %}?type=general" class="btn btn-sm btn-outline-secondary">
-          <i class="fas fa-headset me-1"></i> Need Help?
-        </a>
+        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters" aria-expanded="false">
+          <i class="fas fa-sliders-h me-1"></i> Advanced Filters
+        </button>
       </div>
+      
       <form id="roommate-filter-form" method="GET" class="row g-3">
-        <!-- Search bar -->
+        <!-- Basic Search Options -->
         <div class="col-md-4">
           <div class="input-group">
             <span class="input-group-text bg-light">
@@ -68,9 +68,54 @@
             </option>
           </select>
         </div>
+        
+        <!-- Advanced Filters (Collapsible) -->
+        <div class="col-12 collapse" id="advancedFilters">
+          <div class="card card-body mt-3">
+            <div class="row g-3">
+              <!-- Budget Range -->
+              <div class="col-md-6">
+                <label class="form-label">Budget Range ($)</label>
+                <div class="row">
+                  <div class="col-6">
+                    <input type="number" class="form-control" name="min_budget" placeholder="Min" value="{{ request.GET.min_budget }}">
+                  </div>
+                  <div class="col-6">
+                    <input type="number" class="form-control" name="max_budget" placeholder="Max" value="{{ request.GET.max_budget }}">
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Lifestyle Preferences -->
+              <div class="col-md-6">
+                <label class="form-label">Lifestyle</label>
+                <select name="lifestyle" class="form-select">
+                  <option value="">Any Lifestyle</option>
+                  <option value="quiet" {% if request.GET.lifestyle == 'quiet' %}selected{% endif %}>Quiet/Studious</option>
+                  <option value="social" {% if request.GET.lifestyle == 'social' %}selected{% endif %}>Social/Outgoing</option>
+                  <option value="neat" {% if request.GET.lifestyle == 'neat' %}selected{% endif %}>Neat/Organized</option>
+                  <option value="relaxed" {% if request.GET.lifestyle == 'relaxed' %}selected{% endif %}>Relaxed/Laid-back</option>
+                </select>
+              </div>
+              
+              <!-- Availability Status -->
+              <div class="col-md-6">
+                <label class="form-label">Availability Status</label>
+                <select name="is_available" class="form-select">
+                  <option value="">Any Status</option>
+                  <option value="true" {% if request.GET.is_available == 'true' %}selected{% endif %}>Available Now</option>
+                  <option value="false" {% if request.GET.is_available == 'false' %}selected{% endif %}>Not Available</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <!-- Submit button -->
-        <div class="col-12 text-end">
+        <!-- Submit and Reset Buttons -->
+        <div class="col-12 d-flex justify-content-between">
+          <a href="{% url 'find_roommate' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-redo me-1"></i> Reset
+          </a>
           <button type="submit" class="btn btn-primary">
             <i class="fas fa-search me-1"></i> Search
           </button>
@@ -79,11 +124,26 @@
     </div>
   </div>
 
+  <!-- Search Results Stats -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <p class="mb-0">
+      <strong>{{ roommates.paginator.count }}</strong> roommates found
+      {% if request.GET.search or request.GET.location or request.GET.account_type %}
+        matching your criteria
+      {% endif %}
+    </p>
+    <div>
+      <a href="{% url 'support_home' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-headset me-1"></i> Need Help?
+      </a>
+    </div>
+  </div>
+
   <!-- Roommate Profiles Section -->
   <div class="row g-4">
     {% for roommate in roommates %}
     <div class="col-md-4">
-      <div class="card h-100 shadow-sm">
+      <div class="card h-100 shadow-sm hover-card">
         <!-- Profile Photo -->
         {% if roommate.profile_photo %}
         <img
@@ -108,6 +168,20 @@
             <i class="fas fa-map-marker-alt me-1"></i>
             {{ roommate.location|default:"Location not provided" }}
           </p>
+          
+          <!-- Additional Profile Details -->
+          {% if roommate.budget %}
+          <p class="card-text mb-1 small">
+            <i class="fas fa-dollar-sign me-1 text-success"></i> Budget: ${{ roommate.budget }}/month
+          </p>
+          {% endif %}
+          
+          {% if roommate.lifestyle_preferences %}
+          <p class="card-text mb-1 small">
+            <i class="fas fa-user-friends me-1 text-primary"></i> Lifestyle: {{ roommate.lifestyle_preferences }}
+          </p>
+          {% endif %}
+          
           <p class="card-text small mb-3">
             {% if roommate.bio %}
               {{ roommate.bio|truncatechars:60 }}
@@ -138,8 +212,11 @@
     <div class="col-12 text-center">
       <div class="alert alert-info py-4">
         <i class="fas fa-info-circle me-2"></i>
-        No roommate profiles found at the moment. Check back soon or be the first to create a profile!
+        No roommate profiles found matching your search criteria. Try adjusting your filters.
       </div>
+      <a href="{% url 'find_roommate' %}" class="btn btn-outline-primary mt-3">
+        <i class="fas fa-redo me-1"></i> Reset Search
+      </a>
     </div>
     {% endfor %}
   </div>
@@ -150,7 +227,7 @@
     <ul class="pagination justify-content-center">
       {% if roommates.has_previous %}
       <li class="page-item">
-        <a class="page-link" href="?page={{ roommates.previous_page_number }}">
+        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ roommates.previous_page_number }}">
           &laquo; Previous
         </a>
       </li>
@@ -167,14 +244,14 @@
       </li>
       {% else %}
       <li class="page-item">
-        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ i }}">{{ i }}</a>
       </li>
       {% endif %}
       {% endfor %}
 
       {% if roommates.has_next %}
       <li class="page-item">
-        <a class="page-link" href="?page={{ roommates.next_page_number }}">
+        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ roommates.next_page_number }}">
           Next &raquo;
         </a>
       </li>
@@ -186,5 +263,16 @@
     </ul>
   </nav>
   {% endif %}
+  
+  <!-- Extra CSS for card hover effect -->
+  <style>
+    .hover-card {
+      transition: transform 0.3s ease;
+    }
+    .hover-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+  </style>
 </div>
 {% endblock %}
