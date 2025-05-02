@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Display messages if any -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+      
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white py-3">
+          <h2 class="card-title mb-0 text-center">
+            <i class="fas fa-user-edit me-2"></i> Edit Your Profile
+          </h2>
+        </div>
+        <div class="card-body p-4">
+          <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <!-- Profile Photo -->
+            <div class="mb-4 text-center">
+              <div class="mb-3">
+                {% if user.profile_photo %}
+                <img src="{{ user.profile_photo.url }}" class="rounded-circle edit-profile-img" alt="{{ user.username }}">
+                {% else %}
+                <img src="/media/profile_photos/default_user.jpg" class="rounded-circle edit-profile-img" alt="Default Profile">
+                {% endif %}
+              </div>
+              <div class="mb-3">
+                <label for="profile_photo" class="form-label">Update Profile Photo</label>
+                <input type="file" class="form-control" id="profile_photo" name="profile_photo">
+              </div>
+            </div>
+
+            <!-- Basic Information -->
+            <h4 class="mb-3 border-bottom pb-2">
+              <i class="fas fa-info-circle text-primary me-2"></i> Basic Information
+            </h4>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" readonly>
+                <div class="form-text">Username cannot be changed</div>
+              </div>
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="first_name" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}">
+              </div>
+              <div class="col-md-6">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="gender" class="form-label">Gender</label>
+                <select class="form-select" id="gender" name="gender">
+                  <option value="">Prefer not to say</option>
+                  <option value="male" {% if user.gender == 'male' %}selected{% endif %}>Male</option>
+                  <option value="female" {% if user.gender == 'female' %}selected{% endif %}>Female</option>
+                  <option value="other" {% if user.gender == 'other' %}selected{% endif %}>Other</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="birthdate" class="form-label">Birthdate</label>
+                <input type="date" class="form-control" id="birthdate" name="birthdate" value="{{ user.birthdate|date:'Y-m-d' }}">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="location" class="form-label">Location</label>
+              <input type="text" class="form-control" id="location" name="location" value="{{ user.location }}" placeholder="e.g., City, State">
+            </div>
+
+            <!-- Bio -->
+            <div class="mb-4">
+              <label for="bio" class="form-label">Bio</label>
+              <textarea class="form-control" id="bio" name="bio" rows="5" placeholder="Tell others about yourself...">{{ user.bio }}</textarea>
+            </div>
+
+            <!-- Account Preferences -->
+            <h4 class="mb-3 border-bottom pb-2">
+              <i class="fas fa-cog text-primary me-2"></i> Account Preferences
+            </h4>
+
+            <div class="mb-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="is_available" name="is_available" {% if user.is_available %}checked{% endif %}>
+                <label class="form-check-label" for="is_available">Available as a Roommate</label>
+              </div>
+              <div class="form-text">Let others know if you're currently looking for roommates</div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+              <a href="{% url 'user_profile' user.id %}" class="btn btn-outline-secondary me-md-2">
+                <i class="fas fa-times me-1"></i> Cancel
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .edit-profile-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border: 5px solid rgba(13, 110, 253, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+</style>
+{% endblock %}

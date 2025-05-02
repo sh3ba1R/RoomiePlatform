@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'room_detail' room.room_id %}">{{ room.title }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Reviews</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-star text-warning me-2"></i> Reviews for {{ room.title }}
+                        </h3>
+                        <span class="badge bg-primary rounded-pill">{{ review_count }} Reviews</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if reviews %}
+                    <!-- Review Summary Section -->
+                    <div class="review-summary mb-4 p-3 bg-light rounded">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center border-end">
+                                <div class="overall-rating">
+                                    <div class="average-rating display-4 fw-bold">{{ average_rating|floatformat:1 }}</div>
+                                    <div class="rating-stars mb-2">
+                                        {% for i in "12345" %}
+                                        <i class="fas fa-star {% if forloop.counter <= average_rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="total-reviews text-muted small">Based on {{ review_count }} review{{ review_count|pluralize }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="rating-breakdown">
+                                    <div class="rating-bar-container mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rating-label me-2">5 <i class="fas fa-star text-warning"></i></div>
+                                            <div class="progress flex-grow-1" style="height: 8px;">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ rating_percentages.5 }}%" aria-valuenow="{{ rating_percentages.5 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="rating-count ms-2 text-muted small">{{ rating_counts.5 }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="rating-bar-container mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rating-label me-2">4 <i class="fas fa-star text-warning"></i></div>
+                                            <div class="progress flex-grow-1" style="height: 8px;">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ rating_percentages.4 }}%" aria-valuenow="{{ rating_percentages.4 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="rating-count ms-2 text-muted small">{{ rating_counts.4 }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="rating-bar-container mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rating-label me-2">3 <i class="fas fa-star text-warning"></i></div>
+                                            <div class="progress flex-grow-1" style="height: 8px;">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ rating_percentages.3 }}%" aria-valuenow="{{ rating_percentages.3 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="rating-count ms-2 text-muted small">{{ rating_counts.3 }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="rating-bar-container mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rating-label me-2">2 <i class="fas fa-star text-warning"></i></div>
+                                            <div class="progress flex-grow-1" style="height: 8px;">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ rating_percentages.2 }}%" aria-valuenow="{{ rating_percentages.2 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="rating-count ms-2 text-muted small">{{ rating_counts.2 }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="rating-bar-container">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rating-label me-2">1 <i class="fas fa-star text-warning"></i></div>
+                                            <div class="progress flex-grow-1" style="height: 8px;">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ rating_percentages.1 }}%" aria-valuenow="{{ rating_percentages.1 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="rating-count ms-2 text-muted small">{{ rating_counts.1 }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Review List -->
+                    <div class="review-list">
+                        {% for review in reviews %}
+                        <div class="review-item mb-4 {% if not forloop.last %}pb-4 border-bottom{% endif %}">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    {% if review.reviewer.profile_photo %}
+                                    <img src="{{ review.reviewer.profile_photo.url }}" class="rounded-circle review-avatar" alt="{{ review.reviewer.username }}">
+                                    {% else %}
+                                    <img src="/media/profile_photos/default_user.jpg" class="rounded-circle review-avatar" alt="Default Profile">
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0 fw-bold">{{ review.reviewer.username }}</h6>
+                                        <small class="text-muted">{{ review.created_at|date:"F j, Y" }}</small>
+                                    </div>
+                                    <div class="rating-stars my-2">
+                                        {% for i in "12345" %}
+                                        <i class="fas fa-star {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                        {% endfor %}
+                                    </div>
+                                    <p class="mb-3 review-text">{{ review.comment }}</p>
+                                    
+                                    {% if user.id == review.reviewer.id or user.id == room.owner.id %}
+                                    <div class="review-actions mb-3">
+                                        {% if user.id == review.reviewer.id %}
+                                        <a href="{% url 'edit_review' review.review_id %}" class="btn btn-sm btn-outline-secondary me-2">
+                                            <i class="fas fa-edit me-1"></i> Edit
+                                        </a>
+                                        <a href="{% url 'delete_review' review.review_id %}" class="btn btn-sm btn-outline-danger me-2">
+                                            <i class="fas fa-trash-alt me-1"></i> Delete
+                                        </a>
+                                        {% endif %}
+                                        {% if user.id == room.owner.id and not review.reply %}
+                                        <a href="{% url 'reply_to_review' review.review_id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-reply me-1"></i> Reply
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if review.reply %}
+                                    <div class="review-reply mt-3 ms-3 p-3 bg-light rounded">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                {% if room.owner.profile_photo %}
+                                                <img src="{{ room.owner.profile_photo.url }}" class="rounded-circle review-reply-avatar" alt="{{ room.owner.username }}">
+                                                {% else %}
+                                                <img src="/media/profile_photos/default_user.jpg" class="rounded-circle review-reply-avatar" alt="Default Profile">
+                                                {% endif %}
+                                            </div>
+                                            <div class="flex-grow-1 ms-2">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="mb-0 small fw-bold">{{ room.owner.username }} 
+                                                        <span class="badge bg-success ms-1">Owner</span>
+                                                    </h6>
+                                                    <small class="text-muted">{{ review.reply.created_at|date:"F j, Y" }}</small>
+                                                </div>
+                                                <p class="mb-0 small mt-1">{{ review.reply.content }}</p>
+                                                
+                                                {% if user.id == room.owner.id %}
+                                                <div class="mt-2">
+                                                    <a href="{% url 'edit_review_reply' review.reply.reply_id %}" class="btn btn-sm btn-outline-secondary me-1">
+                                                        <i class="fas fa-edit me-1"></i> Edit
+                                                    </a>
+                                                    <a href="{% url 'delete_review_reply' review.reply.reply_id %}" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash-alt me-1"></i> Delete
+                                                    </a>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if reviews.has_other_pages %}
+                    <nav aria-label="Review pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if reviews.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ reviews.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&laquo;</span>
+                            </li>
+                            {% endif %}
+                            
+                            {% for page_num in reviews.paginator.page_range %}
+                                {% if reviews.number == page_num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                                {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if reviews.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ reviews.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&raquo;</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-5 empty-reviews">
+                        <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Reviews Yet</h5>
+                        <p class="text-muted mb-0">This room hasn't received any reviews yet.</p>
+                        {% if user.is_authenticated and user.id != room.owner.id %}
+                        <div class="mt-3">
+                            <a href="{% url 'submit_room_review' room.room_id %}" class="btn btn-primary">
+                                <i class="fas fa-star me-1"></i> Be the first to review
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Room Details Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-home text-primary me-2"></i> Room Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <img src="{% if room.image %}{{ room.image.url }}{% else %}/media/images/default_room.jpg{% endif %}" class="img-fluid rounded mb-3 w-100 room-main-image" alt="{{ room.title }}">
+                    
+                    <h5 class="mb-2">{{ room.title }}</h5>
+                    <p class="text-muted mb-3"><i class="fas fa-map-marker-alt me-1"></i> {{ room.location }}</p>
+                    
+                    <hr>
+                    
+                    <div class="room-features mb-3">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-money-bill-wave text-success me-2"></i>
+                                    <span>${{ room.rent }}/month</span>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-home text-primary me-2"></i>
+                                    <span>{{ room.get_room_type_display }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-ruler-combined text-secondary me-2"></i>
+                                    <span>{{ room.size }} sq ft</span>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-bed text-info me-2"></i>
+                                    <span>{{ room.bedrooms }} bedroom{% if room.bedrooms > 1 %}s{% endif %}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="mb-2">Amenities:</h6>
+                        <ul class="list-unstyled row">
+                            {% if room.has_wifi %}
+                            <li class="col-6 mb-1"><i class="fas fa-wifi text-primary me-2"></i> WiFi</li>
+                            {% endif %}
+                            {% if room.has_ac %}
+                            <li class="col-6 mb-1"><i class="fas fa-snowflake text-primary me-2"></i> AC</li>
+                            {% endif %}
+                            {% if room.has_heating %}
+                            <li class="col-6 mb-1"><i class="fas fa-temperature-high text-primary me-2"></i> Heating</li>
+                            {% endif %}
+                            {% if room.has_laundry %}
+                            <li class="col-6 mb-1"><i class="fas fa-tshirt text-primary me-2"></i> Laundry</li>
+                            {% endif %}
+                            {% if room.has_parking %}
+                            <li class="col-6 mb-1"><i class="fas fa-parking text-primary me-2"></i> Parking</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'room_detail' room.room_id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle me-1"></i> View Full Details
+                        </a>
+                        
+                        {% if user.is_authenticated and user.id != room.owner.id %}
+                        <a href="{% url 'book_room' room.room_id %}" class="btn btn-primary">
+                            <i class="fas fa-book me-1"></i> Book Room
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Room Owner Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user text-primary me-2"></i> Room Provider
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            {% if room.owner.profile_photo %}
+                            <img src="{{ room.owner.profile_photo.url }}" class="rounded-circle owner-avatar me-3" alt="{{ room.owner.username }}">
+                            {% else %}
+                            <img src="/media/profile_photos/default_user.jpg" class="rounded-circle owner-avatar me-3" alt="Default Profile">
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">{{ room.owner.username }}</h6>
+                            <p class="text-muted mb-0 small">Member since {{ room.owner.date_joined|date:"F Y" }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if room.owner.bio %}
+                    <p class="mb-3 small">{{ room.owner.bio|truncatewords:20 }}</p>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'user_profile' room.owner.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-user me-1"></i> View Profile
+                        </a>
+                        
+                        {% if user.is_authenticated and user.id != room.owner.id %}
+                        <a href="{% url 'send_message' room.owner.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-envelope me-1"></i> Contact
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Review Guidelines -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle text-primary me-2"></i> Review Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="review-guidelines ps-3">
+                        <li class="mb-2">Share your personal experience with this room</li>
+                        <li class="mb-2">Mention what you liked and didn't like about the room</li>
+                        <li class="mb-2">Comment on the accuracy of the listing description</li>
+                        <li class="mb-2">Provide constructive feedback</li>
+                        <li class="mb-2">Be respectful and honest in your reviews</li>
+                    </ul>
+                    <div class="d-grid gap-2 mt-3">
+                        {% if user.is_authenticated and user.id != room.owner.id %}
+                        <a href="{% url 'submit_room_review' room.room_id %}" class="btn btn-primary">
+                            <i class="fas fa-pen me-1"></i> Write a Review
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .review-avatar {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+    }
+    
+    .review-reply-avatar {
+        width: 30px;
+        height: 30px;
+        object-fit: cover;
+    }
+    
+    .owner-avatar {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+    }
+    
+    .room-main-image {
+        height: 220px;
+        object-fit: cover;
+    }
+    
+    .review-guidelines li {
+        font-size: 0.9rem;
+        color: #555;
+    }
+    
+    .empty-reviews {
+        color: #6c757d;
+    }
+    
+    @media (max-width: 576px) {
+        .review-summary .col-md-3 {
+            border-right: none !important;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+    }
+</style>
+{% endblock %}

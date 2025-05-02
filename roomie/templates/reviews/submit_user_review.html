@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load form_tags %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'user_profile' user_profile.id %}">{{ user_profile.username }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Submit Review</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-star text-warning me-2"></i> Review for {{ user_profile.username }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="user-preview d-flex mb-4 p-3 bg-light rounded">
+                        <div class="flex-shrink-0">
+                            {% if user_profile.profile_photo %}
+                            <img src="{{ user_profile.profile_photo.url }}" class="rounded-circle user-thumbnail" alt="{{ user_profile.username }}">
+                            {% else %}
+                            <img src="/media/profile_photos/default_user.jpg" class="rounded-circle user-thumbnail" alt="Default Profile">
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-1">{{ user_profile.username }}</h5>
+                            <p class="text-muted mb-2">
+                                {% if user_profile.account_type == 'provider' %}
+                                <span class="badge bg-success me-1">Provider</span>
+                                {% else %}
+                                <span class="badge bg-info me-1">Seeker</span>
+                                {% endif %}
+                                Member since {{ user_profile.date_joined|date:"F Y" }}
+                            </p>
+                            {% if user_profile.location %}
+                            <p class="text-muted mb-0"><i class="fas fa-map-marker-alt me-1"></i> {{ user_profile.location }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <form method="post" class="review-form" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="rating-selection mb-4">
+                            <label class="form-label fw-bold mb-3">How would you rate your experience with {{ user_profile.username }}?</label>
+                            <div class="star-rating">
+                                <div class="rating-group">
+                                    <input class="rating__input rating__input--none" checked name="rating" id="rating-0" value="0" type="radio">
+                                    {% for i in "12345" %}
+                                    <label aria-label="{{ i }} star" class="rating__label" for="rating-{{ i }}">
+                                        <i class="rating__icon rating__icon--star fa fa-star"></i>
+                                    </label>
+                                    <input class="rating__input" name="rating" id="rating-{{ i }}" value="{{ i }}" type="radio" {% if form.rating.value == i|add:"0" %}checked{% endif %}>
+                                    {% endfor %}
+                                </div>
+                                {% for error in form.rating.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.comment.id_for_label }}" class="form-label fw-bold">Your Review</label>
+                            <textarea 
+                                name="{{ form.comment.name }}" 
+                                id="{{ form.comment.id_for_label }}" 
+                                class="form-control {% if form.comment.errors %}is-invalid{% endif %}" 
+                                rows="5" 
+                                placeholder="Share your experience with {{ user_profile.username }}..."
+                            >{{ form.comment.value|default_if_none:'' }}</textarea>
+                            {% for error in form.comment.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">Be honest and detailed about your interaction with {{ user_profile.username }}.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'user_profile' user_profile.id %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i> Submit Review
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle text-primary me-2"></i> Review Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="review-tips">
+                        <h6 class="mb-3">Tips for a helpful user review:</h6>
+                        <ul class="review-guidelines ps-3">
+                            {% if user_profile.account_type == 'provider' %}
+                            <li class="mb-2">Share your experience with the room provider</li>
+                            <li class="mb-2">Comment on their communication and responsiveness</li>
+                            <li class="mb-2">Mention how they handled any issues or concerns</li>
+                            <li class="mb-2">Describe their professionalism and reliability</li>
+                            {% else %}
+                            <li class="mb-2">Share your experience with the room seeker</li>
+                            <li class="mb-2">Comment on their communication and politeness</li>
+                            <li class="mb-2">Describe their reliability during the viewing/booking process</li>
+                            {% endif %}
+                            <li class="mb-2">Be honest, but respectful and constructive</li>
+                            <li class="mb-2">Avoid personal attacks or offensive language</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-thumbnail {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+    
+    .review-guidelines li {
+        font-size: 0.9rem;
+        color: #555;
+    }
+    
+    /* Star Rating Styles */
+    .rating-group {
+        display: inline-flex;
+    }
+    
+    .rating__icon {
+        pointer-events: none;
+    }
+    
+    .rating__input {
+        position: absolute !important;
+        left: -9999px !important;
+    }
+    
+    .rating__input--none {
+        display: none;
+    }
+    
+    .rating__label {
+        cursor: pointer;
+        padding: 0 0.1em;
+        font-size: 2rem;
+    }
+    
+    .rating__icon--star {
+        color: #ddd;
+    }
+    
+    .rating__input:checked ~ .rating__label .rating__icon--star {
+        color: #ddd;
+    }
+    
+    .rating-group:hover .rating__label .rating__icon--star {
+        color: #ffb400;
+    }
+    
+    .rating__input:hover ~ .rating__label .rating__icon--star {
+        color: #ddd;
+    }
+    
+    .rating-group .rating__label .rating__icon--star {
+        transition: color 0.2s ease-in-out;
+    }
+    
+    .rating-group .rating__input:checked + .rating__label .rating__icon--star {
+        color: #ffb400;
+    }
+    
+    .rating-group:hover .rating__input:checked + .rating__label .rating__icon--star {
+        color: #ffb400;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize star rating
+        const ratingInputs = document.querySelectorAll('.rating__input');
+        ratingInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const ratingValue = this.value;
+                // Update any UI elements if needed based on the selected rating
+            });
+        });
+    });
+</script>
+{% endblock %}

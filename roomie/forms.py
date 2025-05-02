@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from core.models import Room, User, RoomBooking, RoomContract, SupportTicket, Subscription, RoomReview, UserReview, Message
+from core.models import Room, User, RoomBooking, RoomContract, SupportTicket, Subscription, Message
+from roomie.models import Review, ReviewReply
 
 class RoomieForms:
     """
@@ -137,28 +138,64 @@ class RoomieForms:
             model = Subscription
             fields = ['user', 'plan', 'end_date', 'is_active']
 
-    class RoomReviewForm(forms.ModelForm):
+    class ReviewForm(forms.ModelForm):
+        """
+        Form for submitting reviews for rooms or users.
+        """
+        comment = forms.CharField(
+            widget=forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Share your experience... What did you like or dislike?'
+            }),
+            required=True
+        )
+        
         class Meta:
-            model = RoomReview
-            fields = ['booking', 'rating', 'comment']
+            model = Review
+            fields = ['rating', 'comment']
+            widgets = {
+                'rating': forms.RadioSelect(attrs={'class': 'rating-input'})
+            }
+            
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['rating'].required = True
+            self.fields['rating'].label = "Your Rating"
+            self.fields['comment'].label = "Your Review"
 
-    class UserReviewForm(forms.ModelForm):
+    class ReviewReplyForm(forms.ModelForm):
+        """
+        Form for replying to reviews.
+        """
+        content = forms.CharField(
+            widget=forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Write your response to this review...'
+            }),
+            required=True
+        )
+        
         class Meta:
-            model = UserReview
-            fields = ['reviewer', 'reviewee', 'rating', 'comment']    
+            model = ReviewReply
+            fields = ['content']
+            
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['content'].label = "Your Response"
 
-   # class MessageForm(forms.ModelForm):
+    class MessageForm(forms.ModelForm):
         """
         Form for sending messages to other users.
-        
-        Allows communication between roommates, tenants, and landlords.
         """
-        #class Meta:
-            #model = Message
-            #fields = ['recipient', 'content']
-            #widgets = {
-            #'content': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Type your message here...'}),
-        #}
+        class Meta:
+            model = Message
+            fields = ['subject', 'body']
+            widgets = {
+                'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter subject'}),
+                'body': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Type your message here...'}),
+        }
 
     class LoginForm(AuthenticationForm):
         """
@@ -184,17 +221,6 @@ class RoomieForms:
                 'placeholder': 'Enter your password'
             })
 
-    class MessageForm(forms.ModelForm):
-        """
-        Form for sending messages to other users.
-        """
-        class Meta:
-            model = Message
-            fields = ['subject', 'body']
-            widgets = {
-                'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter subject'}),
-                'body': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Type your message here...'}),
-        }
 
 class RoomieFormFactory:
     """
@@ -295,9 +321,9 @@ class RoomieFormFactory:
         """
         return RoomieForms.SubscriptionForm(data=data, instance=instance)
     
-    def create_User_review_form(self, data=None, instance=None):
+    def create_review_form(self, data=None, instance=None):
         """
-        Creates a form for reviews.
+        Creates a form for submitting reviews.
         
         Args:
             data: Form data for binding (optional)
@@ -306,31 +332,17 @@ class RoomieFormFactory:
         Returns:
             An instance of the Review form
         """
-        return RoomieForms.UserReviewForm(data=data, instance=instance)
+        return RoomieForms.ReviewForm(data=data, instance=instance)
     
-    def create_Room_review_form(self, data=None, instance=None):
+    def create_review_reply_form(self, data=None, instance=None):
         """
-        Creates a form for reviews.
+        Creates a form for replying to reviews.
         
         Args:
             data: Form data for binding (optional)
-            instance: Review instance to edit (optional)
+            instance: ReviewReply instance to edit (optional)
             
         Returns:
-            An instance of the Review form
+            An instance of the ReviewReply form
         """
-        return RoomieForms.RoomReviewForm(data=data, instance=instance)
-    
-    #def create_message_form(self, data=None, instance=None):
-        """
-        Creates a form for messages.
-        
-        Args:
-            data: Form data for binding (optional)
-            instance: Message instance to edit (optional)
-            
-        Returns:
-        
-            An instance of the Message form
-        """
-        #return RoomieForms.MessageForm(data=data, instance=instance)
+        return RoomieForms.ReviewReplyForm(data=data, instance=instance)

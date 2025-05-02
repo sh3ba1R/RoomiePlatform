@@ -45,4 +45,19 @@ urlpatterns = [
 
     # Dashboard URL
     path('dashboard/', views.dashboard, name='dashboard'),
+
+    # Review System URLs
+    path('submit-review/room/<int:room_id>/', views.submit_room_review, name='submit_room_review'),
+    path('submit-review/user/<int:user_id>/', views.submit_user_review, name='submit_user_review'),
+    path('reviews/room/<int:room_id>/', views.room_reviews, name='room_reviews'),
+    path('reviews/user/<int:user_id>/', views.user_reviews, name='user_reviews'),
+    path('review/edit/<uuid:review_id>/', views.edit_review, name='edit_review'),
+    path('review/delete/<uuid:review_id>/', views.delete_review, name='delete_review'),
+    path('review/reply/<uuid:review_id>/', views.reply_to_review, name='reply_to_review'),
+    path('review-reply/edit/<uuid:reply_id>/', views.edit_review_reply, name='edit_review_reply'),
+    path('review-reply/delete/<uuid:reply_id>/', views.delete_review_reply, name='delete_review_reply'),
+
+    # New Features
+    path('toggle-availability/', views.toggle_availability, name='toggle_availability'),
+    path('edit-profile/', views.edit_profile, name='edit_profile'),
 ]

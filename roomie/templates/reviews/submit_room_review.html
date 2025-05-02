@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load form_tags %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'room_detail' room.room_id %}">{{ room.title }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Submit Review</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-star text-warning me-2"></i> Review for {{ room.title }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="room-preview d-flex mb-4 p-3 bg-light rounded">
+                        <div class="flex-shrink-0">
+                            {% if room.image %}
+                            <img src="{{ room.image.url }}" class="img-thumbnail room-thumbnail" alt="{{ room.title }}">
+                            {% else %}
+                            <img src="/media/images/default_room.jpg" class="img-thumbnail room-thumbnail" alt="Default Room Image">
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-1">{{ room.title }}</h5>
+                            <p class="text-muted mb-2"><i class="fas fa-map-marker-alt me-1"></i> {{ room.location }}</p>
+                            <p class="text-muted mb-0">
+                                <span class="me-3"><i class="fas fa-home me-1"></i> {{ room.get_room_type_display }}</span>
+                                <span><i class="fas fa-dollar-sign me-1"></i> ${{ room.rent }}/month</span>
+                            </p>
+                            <p class="mt-2 mb-0">
+                                <span class="badge {% if room.is_available %}bg-success{% else %}bg-danger{% endif %}">
+                                    {% if room.is_available %}Available{% else %}Not Available{% endif %}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <form method="post" class="review-form" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="rating-selection mb-4">
+                            <label class="form-label fw-bold mb-3">How would you rate this room?</label>
+                            <div class="star-rating">
+                                <div class="rating-group">
+                                    <input class="rating__input rating__input--none" checked name="rating" id="rating-0" value="0" type="radio">
+                                    {% for i in "12345" %}
+                                    <label aria-label="{{ i }} star" class="rating__label" for="rating-{{ i }}">
+                                        <i class="rating__icon rating__icon--star fa fa-star"></i>
+                                    </label>
+                                    <input class="rating__input" name="rating" id="rating-{{ i }}" value="{{ i }}" type="radio" {% if form.rating.value == i|add:"0" %}checked{% endif %}>
+                                    {% endfor %}
+                                </div>
+                                {% for error in form.rating.errors %}
+                                <div class="text-danger mt-1 small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.comment.id_for_label }}" class="form-label fw-bold">Your Review</label>
+                            <textarea 
+                                name="{{ form.comment.name }}" 
+                                id="{{ form.comment.id_for_label }}" 
+                                class="form-control {% if form.comment.errors %}is-invalid{% endif %}" 
+                                rows="5" 
+                                placeholder="Share your experience with this room..."
+                            >{{ form.comment.value|default_if_none:'' }}</textarea>
+                            {% for error in form.comment.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">Be honest and detailed in your review to help others.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'room_detail' room.room_id %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i> Submit Review
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle text-primary me-2"></i> Review Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="review-tips">
+                        <h6 class="mb-3">Tips for a helpful review:</h6>
+                        <ul class="review-guidelines ps-3">
+                            <li class="mb-2">Be specific about your experience with the room</li>
+                            <li class="mb-2">Mention what you liked and didn't like about the room</li>
+                            <li class="mb-2">Comment on the accuracy of the room listing</li>
+                            <li class="mb-2">Include details about the location, cleanliness, and amenities</li>
+                            <li class="mb-2">Be honest, but respectful and constructive</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .room-thumbnail {
+        width: 120px;
+        height: 90px;
+        object-fit: cover;
+    }
+    
+    .review-guidelines li {
+        font-size: 0.9rem;
+        color: #555;
+    }
+    
+    /* Star Rating Styles */
+    .rating-group {
+        display: inline-flex;
+    }
+    
+    .rating__icon {
+        pointer-events: none;
+    }
+    
+    .rating__input {
+        position: absolute !important;
+        left: -9999px !important;
+    }
+    
+    .rating__input--none {
+        display: none;
+    }
+    
+    .rating__label {
+        cursor: pointer;
+        padding: 0 0.1em;
+        font-size: 2rem;
+    }
+    
+    .rating__icon--star {
+        color: #ddd;
+    }
+    
+    .rating__input:checked ~ .rating__label .rating__icon--star {
+        color: #ddd;
+    }
+    
+    .rating-group:hover .rating__label .rating__icon--star {
+        color: #ffb400;
+    }
+    
+    .rating__input:hover ~ .rating__label .rating__icon--star {
+        color: #ddd;
+    }
+    
+    .rating-group .rating__label .rating__icon--star {
+        transition: color 0.2s ease-in-out;
+    }
+    
+    .rating-group .rating__input:checked + .rating__label .rating__icon--star {
+        color: #ffb400;
+    }
+    
+    .rating-group:hover .rating__input:checked + .rating__label .rating__icon--star {
+        color: #ffb400;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize star rating
+        const ratingInputs = document.querySelectorAll('.rating__input');
+        ratingInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const ratingValue = this.value;
+                // Update any UI elements if needed based on the selected rating
+            });
+        });
+    });
+</script>
+{% endblock %}

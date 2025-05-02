@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+      {% if review.review_type == 'room' %}
+        <li class="breadcrumb-item"><a href="{% url 'filter_rooms' %}">Rooms</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'room_detail' room_id=review.reviewed_room.room_id %}">{{ review.reviewed_room.title }}</a></li>
+      {% else %}
+        <li class="breadcrumb-item"><a href="{% url 'find_roommate' %}">Roommates</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'user_profile' user_id=review.reviewed_user.id %}">{{ review.reviewed_user.username }}</a></li>
+      {% endif %}
+      <li class="breadcrumb-item active" aria-current="page">
+        {% if edit_mode %}Edit Reply{% else %}Reply to Review{% endif %}
+      </li>
+    </ol>
+  </nav>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+          <h2 class="card-title h4 mb-0">
+            {% if edit_mode %}
+              <i class="fas fa-edit text-primary me-2"></i> Edit Your Reply
+            {% else %}
+              <i class="fas fa-reply text-primary me-2"></i> Reply to Review
+            {% endif %}
+          </h2>
+        </div>
+        <div class="card-body p-4">
+          <!-- Original review display -->
+          <div class="original-review mb-4 p-3 bg-light rounded">
+            <div class="d-flex">
+              <div class="flex-shrink-0">
+                {% if review.reviewer.profile_photo %}
+                  <img src="{{ review.reviewer.profile_photo.url }}" class="rounded-circle review-avatar" alt="{{ review.reviewer.username }}">
+                {% else %}
+                  <img src="/media/profile_photos/default_user.jpg" class="rounded-circle review-avatar" alt="Default Profile">
+                {% endif %}
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0 fw-bold">{{ review.reviewer.username }}</h6>
+                  <small class="text-muted">{{ review.created_at|date:"F j, Y" }}</small>
+                </div>
+                <div class="rating-stars my-2">
+                  {% for i in "12345" %}
+                  <i class="fas fa-star {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                  {% endfor %}
+                </div>
+                <p class="mb-0 review-text">{{ review.comment }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reply Guidelines -->
+          <div class="reply-guidelines mb-4">
+            <h6><i class="fas fa-info-circle text-primary me-2"></i>Reply Guidelines:</h6>
+            <ul class="text-muted small">
+              <li>Thank the reviewer for their feedback.</li>
+              <li>Be professional and courteous in your response.</li>
+              <li>Address specific points mentioned in the review.</li>
+              <li>Avoid defensive language, even for negative reviews.</li>
+              <li>If there were issues, explain how you're addressing them.</li>
+            </ul>
+          </div>
+
+          <!-- Reply Form -->
+          <form method="POST" class="reply-form" id="replyForm">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+              <label for="id_content" class="form-label fw-bold">Your Reply:</label>
+              {{ form.content }}
+              <div class="form-text">This will be publicly visible. Be professional and constructive.</div>
+              {% if form.content.errors %}
+              <div class="text-danger">{{ form.content.errors }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+              {% if review.review_type == 'room' %}
+                <a href="{% url 'room_detail' room_id=review.reviewed_room.room_id %}" class="btn btn-outline-secondary">
+                  <i class="fas fa-times me-1"></i> Cancel
+                </a>
+              {% else %}
+                <a href="{% url 'user_profile' user_id=review.reviewed_user.id %}" class="btn btn-outline-secondary">
+                  <i class="fas fa-times me-1"></i> Cancel
+                </a>
+              {% endif %}
+              
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-reply me-1"></i> 
+                {% if edit_mode %}Update Reply{% else %}Submit Reply{% endif %}
+              </button>
+            </div>
+          </form>
+          
+          {% if edit_mode %}
+          <div class="mt-4 text-center">
+            <a href="{% url 'delete_review_reply' reply_id=reply.reply_id %}" class="text-danger">
+              <i class="fas fa-trash-alt me-1"></i> Delete this reply
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .review-avatar {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .rating-stars .fas {
+    font-size: 0.9rem;
+    margin-right: 1px;
+  }
+  
+  .review-text {
+    line-height: 1.6;
+    color: #555;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Character counter and validation for reply text
+    const contentField = document.querySelector('#id_content');
+    if (contentField) {
+      contentField.addEventListener('input', function() {
+        const minLength = 10;
+        const currentLength = this.value.length;
+        
+        if (currentLength < minLength) {
+          this.classList.add('is-invalid');
+          this.classList.remove('is-valid');
+        } else {
+          this.classList.remove('is-invalid');
+          this.classList.add('is-valid');
+        }
+      });
+    }
+    
+    // Form validation
+    const replyForm = document.getElementById('replyForm');
+    if (replyForm) {
+      replyForm.addEventListener('submit', function(event) {
+        const contentField = document.querySelector('#id_content');
+        
+        if (contentField && contentField.value.length < 10) {
+          event.preventDefault();
+          contentField.classList.add('is-invalid');
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

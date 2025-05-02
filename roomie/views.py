@@ -356,6 +356,81 @@ def delete_room(request, room_id):
     return render(request, 'confirm_delete_room.html', {'room': room})
 
 @login_required
+def toggle_availability(request):
+    """Toggle the availability status of a user."""
+    if request.method == 'POST':
+        import json
+        try:
+            data = json.loads(request.body)
+            user_id = data.get('user_id')
+            
+            # Ensure the user can only toggle their own availability
+            if str(request.user.id) != str(user_id):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'You can only toggle your own availability status.'
+                })
+            
+            # Toggle the availability status
+            request.user.is_available = not request.user.is_available
+            request.user.save()
+            
+            return JsonResponse({
+                'success': True,
+                'is_available': request.user.is_available,
+                'message': 'Your availability status has been updated.'
+            })
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False, 
+                'error': 'Invalid JSON data.'
+            })
+    
+    return JsonResponse({
+        'success': False,
+        'error': 'Invalid request method.'
+    })
+
+@login_required
+def edit_profile(request):
+    """Edit user profile information."""
+    if request.method == 'POST':
+        # Handle profile update
+        if 'profile_photo' in request.FILES:
+            request.user.profile_photo = request.FILES['profile_photo']
+        
+        # Update user fields
+        request.user.email = request.POST.get('email', request.user.email)
+        request.user.first_name = request.POST.get('first_name', request.user.first_name)
+        request.user.last_name = request.POST.get('last_name', request.user.last_name)
+        request.user.gender = request.POST.get('gender', request.user.gender)
+        request.user.location = request.POST.get('location', request.user.location)
+        request.user.bio = request.POST.get('bio', request.user.bio)
+        
+        # Parse birthdate if provided
+        birthdate = request.POST.get('birthdate')
+        if birthdate:
+            from datetime import datetime
+            try:
+                request.user.birthdate = datetime.strptime(birthdate, '%Y-%m-%d')
+            except ValueError:
+                pass
+        
+        # Update availability
+        request.user.is_available = 'is_available' in request.POST
+        
+        # Save user
+        request.user.save()
+        
+        # Redirect to profile page with success message
+        from django.contrib import messages
+        messages.success(request, 'Your profile has been updated successfully!')
+        return redirect('user_profile', user_id=request.user.id)
+    
+    # Display edit profile form
+    return render(request, 'edit_profile.html', {'user': request.user})
+
+@login_required
 def my_bookings(request):
     """
     Display all bookings submitted by the seeker.
@@ -565,3 +640,393 @@ def reopen_ticket(request, ticket_id):
         messages.success(request, "Ticket has been reopened.")
     
     return redirect('view_support_ticket_detail', ticket_id=ticket.id)
+
+@login_required
+def submit_room_review(request, room_id):
+    """
+    Allow users to submit a review for a room.
+    """
+    room = get_object_or_404(Room, room_id=room_id)
+    
+    # Check if the user has stayed in this room (has an approved booking)
+    has_booking = RoomBooking.objects.filter(
+        room=room,
+        seeker=request.user,
+        status='approved'
+    ).exists()
+    
+    if not has_booking:
+        messages.error(request, "You can only review rooms you have booked.")
+        return redirect('room_detail', room_id=room_id)
+    
+    # Check if user already reviewed this room
+    from .models import Review
+    existing_review = Review.objects.filter(
+        reviewer=request.user,
+        reviewed_room=room,
+        review_type='room'
+    ).first()
+    
+    if existing_review:
+        messages.info(request, "You have already reviewed this room. You can edit your existing review.")
+        return redirect('edit_review', review_id=existing_review.review_id)
+    
+    if request.method == 'POST':
+        form = RoomieForms.ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.reviewer = request.user
+            review.reviewed_room = room
+            review.reviewed_user = None
+            review.review_type = 'room'
+            review.save()
+            
+            messages.success(request, "Your review has been submitted successfully.")
+            return redirect('room_detail', room_id=room_id)
+    else:
+        form = RoomieForms.ReviewForm()
+    
+    return render(request, 'submit_review.html', {
+        'form': form,
+        'room': room,
+        'review_type': 'room'
+    })
+
+@login_required
+def submit_user_review(request, user_id):
+    """
+    Allow users to submit a review for another user.
+    """
+    user_to_review = get_object_or_404(User, id=user_id)
+    
+    # Don't allow users to review themselves
+    if request.user.id == user_id:
+        messages.error(request, "You cannot review yourself.")
+        return redirect('user_profile', user_id=user_id)
+    
+    # Check if there was an interaction (booking) between the users
+    interaction_exists = False
+    
+    if request.user.account_type == 'seeker':
+        # Seeker reviewing a provider
+        interaction_exists = RoomBooking.objects.filter(
+            seeker=request.user,
+            room__provider=user_to_review,
+            status='approved'
+        ).exists()
+    else:
+        # Provider reviewing a seeker
+        interaction_exists = RoomBooking.objects.filter(
+            seeker=user_to_review,
+            room__provider=request.user,
+            status='approved'
+        ).exists()
+    
+    if not interaction_exists:
+        messages.error(request, "You can only review users you have interacted with through bookings.")
+        return redirect('user_profile', user_id=user_id)
+    
+    # Check if user already reviewed this person
+    from .models import Review
+    review_type = 'provider' if user_to_review.account_type == 'provider' else 'seeker'
+    existing_review = Review.objects.filter(
+        reviewer=request.user,
+        reviewed_user=user_to_review,
+        review_type=review_type
+    ).first()
+    
+    if existing_review:
+        messages.info(request, "You have already reviewed this user. You can edit your existing review.")
+        return redirect('edit_review', review_id=existing_review.review_id)
+    
+    if request.method == 'POST':
+        form = RoomieForms.ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.reviewer = request.user
+            review.reviewed_user = user_to_review
+            review.reviewed_room = None
+            review.review_type = review_type
+            review.save()
+            
+            messages.success(request, "Your review has been submitted successfully.")
+            return redirect('user_profile', user_id=user_id)
+    else:
+        form = RoomieForms.ReviewForm()
+    
+    return render(request, 'submit_review.html', {
+        'form': form,
+        'user_to_review': user_to_review,
+        'review_type': 'user'
+    })
+
+@login_required
+def edit_review(request, review_id):
+    """
+    Allow users to edit their existing review.
+    """
+    from .models import Review
+    review = get_object_or_404(Review, review_id=review_id, reviewer=request.user)
+    
+    if request.method == 'POST':
+        form = RoomieForms.ReviewForm(request.POST, instance=review)
+        if form.is_valid():
+            form.save()
+            
+            if review.review_type == 'room':
+                messages.success(request, "Your room review has been updated successfully.")
+                return redirect('room_detail', room_id=review.reviewed_room.room_id)
+            else:
+                messages.success(request, "Your user review has been updated successfully.")
+                return redirect('user_profile', user_id=review.reviewed_user.id)
+    else:
+        form = RoomieForms.ReviewForm(instance=review)
+    
+    context = {
+        'form': form,
+        'review': review,
+        'edit_mode': True
+    }
+    
+    if review.review_type == 'room':
+        context['room'] = review.reviewed_room
+    else:
+        context['user_to_review'] = review.reviewed_user
+        
+    context['review_type'] = review.review_type
+    
+    return render(request, 'submit_review.html', context)
+
+@login_required
+def delete_review(request, review_id):
+    """
+    Allow users to delete their own reviews.
+    """
+    from .models import Review
+    review = get_object_or_404(Review, review_id=review_id, reviewer=request.user)
+    
+    if request.method == 'POST':
+        if review.review_type == 'room':
+            room_id = review.reviewed_room.room_id
+            review.delete()
+            messages.success(request, "Your review has been deleted successfully.")
+            return redirect('room_detail', room_id=room_id)
+        else:
+            user_id = review.reviewed_user.id
+            review.delete()
+            messages.success(request, "Your review has been deleted successfully.")
+            return redirect('user_profile', user_id=user_id)
+    
+    # Determine return URL based on review type
+    if review.review_type == 'room':
+        return_url = reverse('room_detail', args=[review.reviewed_room.room_id])
+    else:
+        return_url = reverse('user_profile', args=[review.reviewed_user.id])
+    
+    return render(request, 'confirm_delete_review.html', {
+        'review': review,
+        'return_url': return_url
+    })
+
+@login_required
+def reply_to_review(request, review_id):
+    """
+    Allow room providers or reviewed users to reply to reviews about them.
+    """
+    from .models import Review, ReviewReply
+    review = get_object_or_404(Review, review_id=review_id)
+    
+    # Verify the user is authorized to reply to this review
+    can_reply = False
+    if review.review_type == 'room':
+        # Only the room provider can reply to room reviews
+        can_reply = (request.user == review.reviewed_room.provider)
+    else:
+        # Only the reviewed user can reply to user reviews
+        can_reply = (request.user == review.reviewed_user)
+    
+    if not can_reply:
+        messages.error(request, "You are not authorized to reply to this review.")
+        return redirect('home')
+    
+    # Check if a reply already exists
+    existing_reply = ReviewReply.objects.filter(review=review).first()
+    if existing_reply:
+        messages.info(request, "You've already replied to this review. You can edit your existing reply.")
+        return redirect('edit_review_reply', reply_id=existing_reply.reply_id)
+    
+    if request.method == 'POST':
+        form = RoomieForms.ReviewReplyForm(request.POST)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.review = review
+            reply.author = request.user
+            reply.save()
+            
+            if review.review_type == 'room':
+                messages.success(request, "Your reply has been submitted successfully.")
+                return redirect('room_detail', room_id=review.reviewed_room.room_id)
+            else:
+                messages.success(request, "Your reply has been submitted successfully.")
+                return redirect('user_profile', user_id=review.reviewed_user.id)
+    else:
+        form = RoomieForms.ReviewReplyForm()
+    
+    return render(request, 'reply_to_review.html', {
+        'form': form,
+        'review': review
+    })
+
+@login_required
+def edit_review_reply(request, reply_id):
+    """
+    Allow users to edit their reply to a review.
+    """
+    from .models import ReviewReply
+    reply = get_object_or_404(ReviewReply, reply_id=reply_id, author=request.user)
+    review = reply.review
+    
+    if request.method == 'POST':
+        form = RoomieForms.ReviewReplyForm(request.POST, instance=reply)
+        if form.is_valid():
+            form.save()
+            
+            if review.review_type == 'room':
+                messages.success(request, "Your reply has been updated successfully.")
+                return redirect('room_detail', room_id=review.reviewed_room.room_id)
+            else:
+                messages.success(request, "Your reply has been updated successfully.")
+                return redirect('user_profile', user_id=review.reviewed_user.id)
+    else:
+        form = RoomieForms.ReviewReplyForm(instance=reply)
+    
+    return render(request, 'reply_to_review.html', {
+        'form': form,
+        'review': review,
+        'reply': reply,
+        'edit_mode': True
+    })
+
+@login_required
+def delete_review_reply(request, reply_id):
+    """
+    Allow users to delete their reply to a review.
+    """
+    from .models import ReviewReply
+    reply = get_object_or_404(ReviewReply, reply_id=reply_id, author=request.user)
+    review = reply.review
+    
+    if request.method == 'POST':
+        if review.review_type == 'room':
+            room_id = review.reviewed_room.room_id
+            reply.delete()
+            messages.success(request, "Your reply has been deleted successfully.")
+            return redirect('room_detail', room_id=room_id)
+        else:
+            user_id = review.reviewed_user.id
+            reply.delete()
+            messages.success(request, "Your reply has been deleted successfully.")
+            return redirect('user_profile', user_id=user_id)
+    
+    # Determine return URL based on review type
+    if review.review_type == 'room':
+        return_url = reverse('room_detail', args=[review.reviewed_room.room_id])
+    else:
+        return_url = reverse('user_profile', args=[review.reviewed_user.id])
+    
+    return render(request, 'confirm_delete_reply.html', {
+        'reply': reply,
+        'review': review,
+        'return_url': return_url
+    })
+
+def room_reviews(request, room_id):
+    """
+    Display all reviews for a specific room.
+    """
+    room = get_object_or_404(Room, room_id=room_id)
+    
+    from .models import Review
+    reviews = Review.objects.filter(reviewed_room=room, review_type='room').order_by('-created_at')
+    
+    # Pagination for reviews
+    paginator = Paginator(reviews, 10)  # Show 10 reviews per page
+    page = request.GET.get('page')
+    reviews = paginator.get_page(page)
+    
+    # Calculate review statistics
+    review_count = reviews.count()
+    average_rating = 0
+    rating_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    rating_percentages = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    
+    if review_count > 0:
+        # Calculate average rating
+        total_rating = sum(review.rating for review in reviews)
+        average_rating = total_rating / review_count
+        
+        # Count ratings by star level
+        for review in reviews:
+            if review.rating in rating_counts:
+                rating_counts[review.rating] += 1
+        
+        # Calculate percentages
+        for rating in rating_counts:
+            if review_count > 0:
+                rating_percentages[rating] = (rating_counts[rating] / review_count) * 100
+    
+    return render(request, 'reviews/room_reviews.html', {
+        'room': room,
+        'reviews': reviews,
+        'review_count': review_count,
+        'average_rating': average_rating,
+        'rating_counts': rating_counts,
+        'rating_percentages': rating_percentages
+    })
+
+def user_reviews(request, user_id):
+    """
+    Display all reviews for a specific user.
+    """
+    user = get_object_or_404(User, id=user_id)
+    
+    from .models import Review
+    # If the user is a provider, we want to show provider reviews
+    # If the user is a seeker, we want to show seeker reviews
+    review_type = 'provider' if user.account_type == 'provider' else 'seeker'
+    reviews = Review.objects.filter(reviewed_user=user, review_type=review_type).order_by('-created_at')
+    
+    # Pagination for reviews
+    paginator = Paginator(reviews, 10)  # Show 10 reviews per page
+    page = request.GET.get('page')
+    reviews = paginator.get_page(page)
+    
+    # Calculate review statistics
+    review_count = reviews.count()
+    average_rating = 0
+    rating_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    rating_percentages = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    
+    if review_count > 0:
+        # Calculate average rating
+        total_rating = sum(review.rating for review in reviews)
+        average_rating = total_rating / review_count
+        
+        # Count ratings by star level
+        for review in reviews:
+            if review.rating in rating_counts:
+                rating_counts[review.rating] += 1
+        
+        # Calculate percentages
+        for rating in rating_counts:
+            if review_count > 0:
+                rating_percentages[rating] = (rating_counts[rating] / review_count) * 100
+    
+    return render(request, 'reviews/user_reviews.html', {
+        'user_profile': user,
+        'reviews': reviews,
+        'review_count': review_count,
+        'average_rating': average_rating,
+        'rating_counts': rating_counts,
+        'rating_percentages': rating_percentages
+    })

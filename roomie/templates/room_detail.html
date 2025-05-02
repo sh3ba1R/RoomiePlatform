@@ -17,29 +17,41 @@
   <div class="row g-4">
     <!-- Room Image and Details -->
     <div class="col-lg-8">
-      <!-- Image Gallery -->
+      <!-- Image Gallery with Carousel -->
       <div class="card shadow-sm mb-4 overflow-hidden">
-        <div class="position-relative">
-          {% if room.image %}
-          <img
-            src="{{ room.image.url }}"
-            class="card-img-top room-detail-image"
-            alt="{{ room.title }}"
-          />
-          {% else %}
-          <img
-            src="/media/images/default_room.jpg"
-            class="card-img-top room-detail-image"
-            alt="Default Room Image"
-          />
-          {% endif %}
-
+        <div id="roomImageCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              {% if room.image %}
+              <img
+                src="{{ room.image.url }}"
+                class="d-block w-100 room-detail-image"
+                alt="{{ room.title }}"
+              />
+              {% else %}
+              <img
+                src="/media/images/default_room.jpg"
+                class="d-block w-100 room-detail-image"
+                alt="Default Room Image"
+              />
+              {% endif %}
+            </div>
+            <!-- More images would be here if available -->
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#roomImageCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#roomImageCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+          
           <!-- Availability badge -->
           <div
             class="room-availability-badge {% if room.is_available %}bg-success{% else %}bg-danger{% endif %}"
           >
-            {% if room.is_available %}Available{% else %}Not Available{% endif
-            %}
+            {% if room.is_available %}Available{% else %}Not Available{% endif %}
           </div>
 
           <!-- Price badge -->
@@ -52,9 +64,23 @@
 
       <!-- Room Details Card -->
       <div class="card shadow-sm mb-4">
-        <div class="card-header bg-transparent">
+        <div class="card-header bg-white">
           <div class="d-flex justify-content-between align-items-center">
-            <h2 class="card-title h3 mb-0">{{ room.title }}</h2>
+            <div>
+              <h2 class="card-title h3 mb-0">{{ room.title }}</h2>
+              {% if room.reviews.count > 0 %}
+              <div class="d-flex align-items-center mt-2">
+                <div class="rating-overview me-2">
+                  {% with avg_rating=room.get_average_rating|default:0 %}
+                  {% for i in "12345" %}
+                  <i class="fas fa-star {% if forloop.counter <= avg_rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                  {% endfor %}
+                  {% endwith %}
+                </div>
+                <span class="text-muted small">{{ room.reviews.count }} review{{ room.reviews.count|pluralize }}</span>
+              </div>
+              {% endif %}
+            </div>
             <a
               href="{% url 'user_profile' room.provider.id %}"
               class="provider-link"
@@ -73,7 +99,10 @@
                   alt="Default Profile"
                 />
                 {% endif %}
-                <span class="ms-2">{{ room.provider.username }}</span>
+                <div class="ms-2">
+                  <div class="provider-name">{{ room.provider.username }}</div>
+                  <div class="provider-type small text-muted">Room Provider</div>
+                </div>
               </div>
             </a>
           </div>
@@ -108,33 +137,277 @@
 
           <!-- Description -->
           <div class="mb-4">
-            <h5 class="border-bottom pb-2 mb-3">Description</h5>
-            <p>{{ room.description|linebreaks }}</p>
+            <h5 class="section-title">Description</h5>
+            <p class="room-description">{{ room.description|linebreaks }}</p>
           </div>
 
           <!-- Amenities -->
-          <h5 class="border-bottom pb-2 mb-3">Amenities</h5>
-          <div class="row">
-            <div class="col-md-6">
-              <ul class="amenities-list">
-                <li><i class="fas fa-wifi me-2"></i> Free WiFi</li>
-                <li><i class="fas fa-utensils me-2"></i> Kitchen</li>
-                <li><i class="fas fa-tv me-2"></i> TV</li>
-              </ul>
+          <div class="mb-4">
+            <h5 class="section-title">Amenities</h5>
+            <div class="amenities-grid">
+              <div class="amenity-item">
+                <div class="amenity-icon"><i class="fas fa-wifi"></i></div>
+                <span>Free WiFi</span>
+              </div>
+              <div class="amenity-item">
+                <div class="amenity-icon"><i class="fas fa-utensils"></i></div>
+                <span>Kitchen</span>
+              </div>
+              <div class="amenity-item">
+                <div class="amenity-icon"><i class="fas fa-tv"></i></div>
+                <span>TV</span>
+              </div>
+              <div class="amenity-item">
+                <div class="amenity-icon"><i class="fas fa-parking"></i></div>
+                <span>Parking</span>
+              </div>
+              <div class="amenity-item">
+                <div class="amenity-icon"><i class="fas fa-snowflake"></i></div>
+                <span>Air Conditioning</span>
+              </div>
+              <div class="amenity-item">
+                <div class="amenity-icon"><i class="fas fa-tshirt"></i></div>
+                <span>Laundry</span>
+              </div>
             </div>
-            <div class="col-md-6">
-              <ul class="amenities-list">
-                <li><i class="fas fa-parking me-2"></i> Parking</li>
-                <li><i class="fas fa-snowflake me-2"></i> Air Conditioning</li>
-                <li><i class="fas fa-tshirt me-2"></i> Laundry</li>
-              </ul>
+          </div>
+          
+          <!-- House Rules -->
+          <div class="mb-4">
+            <h5 class="section-title">House Rules</h5>
+            <div class="row">
+              <div class="col-md-6">
+                <ul class="rules-list">
+                  <li><i class="fas fa-smoking-ban me-2 text-danger"></i> No smoking</li>
+                  <li><i class="fas fa-volume-mute me-2 text-warning"></i> Quiet hours after 10 PM</li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <ul class="rules-list">
+                  <li><i class="fas fa-paw me-2 text-success"></i> Pets allowed</li>
+                  <li><i class="fas fa-users me-2 text-primary"></i> Guests welcome</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Google Map (placeholder) -->
+      <!-- Room Reviews -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-star text-primary me-2"></i> Room Reviews
+            </h5>
+            <span class="badge bg-primary rounded-pill">
+              {{ room.reviews.count|default:"0" }} Reviews
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Review Summary -->
+          {% if room.reviews.count > 0 %}
+          <div class="review-summary mb-4 p-3 bg-light rounded">
+            <div class="row align-items-center">
+              <div class="col-md-3 text-center border-end">
+                <div class="overall-rating">
+                  {% with avg_rating=room.get_average_rating|default:0 %}
+                  <div class="average-rating display-4 fw-bold">{{ avg_rating|floatformat:1 }}</div>
+                  <div class="rating-stars mb-2">
+                    {% for i in "12345" %}
+                    <i class="fas fa-star {% if forloop.counter <= avg_rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                    {% endfor %}
+                  </div>
+                  <div class="total-reviews text-muted small">Based on {{ room.reviews.count }} review{{ room.reviews.count|pluralize }}</div>
+                  {% endwith %}
+                </div>
+              </div>
+              <div class="col-md-9">
+                <div class="rating-breakdown">
+                  <div class="rating-bar-container mb-2">
+                    <div class="d-flex align-items-center">
+                      <div class="rating-label me-2">5 <i class="fas fa-star text-warning"></i></div>
+                      <div class="progress flex-grow-1" style="height: 8px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ room.get_rating_percentage.5 }}%" aria-valuenow="{{ room.get_rating_percentage.5 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                      <div class="rating-count ms-2 text-muted small">{{ room.get_rating_count.5 }}</div>
+                    </div>
+                  </div>
+                  <div class="rating-bar-container mb-2">
+                    <div class="d-flex align-items-center">
+                      <div class="rating-label me-2">4 <i class="fas fa-star text-warning"></i></div>
+                      <div class="progress flex-grow-1" style="height: 8px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ room.get_rating_percentage.4 }}%" aria-valuenow="{{ room.get_rating_percentage.4 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                      <div class="rating-count ms-2 text-muted small">{{ room.get_rating_count.4 }}</div>
+                    </div>
+                  </div>
+                  <div class="rating-bar-container mb-2">
+                    <div class="d-flex align-items-center">
+                      <div class="rating-label me-2">3 <i class="fas fa-star text-warning"></i></div>
+                      <div class="progress flex-grow-1" style="height: 8px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ room.get_rating_percentage.3 }}%" aria-valuenow="{{ room.get_rating_percentage.3 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                      <div class="rating-count ms-2 text-muted small">{{ room.get_rating_count.3 }}</div>
+                    </div>
+                  </div>
+                  <div class="rating-bar-container mb-2">
+                    <div class="d-flex align-items-center">
+                      <div class="rating-label me-2">2 <i class="fas fa-star text-warning"></i></div>
+                      <div class="progress flex-grow-1" style="height: 8px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ room.get_rating_percentage.2 }}%" aria-valuenow="{{ room.get_rating_percentage.2 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                      <div class="rating-count ms-2 text-muted small">{{ room.get_rating_count.2 }}</div>
+                    </div>
+                  </div>
+                  <div class="rating-bar-container">
+                    <div class="d-flex align-items-center">
+                      <div class="rating-label me-2">1 <i class="fas fa-star text-warning"></i></div>
+                      <div class="progress flex-grow-1" style="height: 8px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ room.get_rating_percentage.1 }}%" aria-valuenow="{{ room.get_rating_percentage.1 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                      <div class="rating-count ms-2 text-muted small">{{ room.get_rating_count.1 }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Add a Review Form -->
+          {% if user.is_authenticated and user.id != room.provider.id and user.account_type == 'seeker' %}
+          <div class="mb-4 pb-4 border-bottom">
+            <h6 class="mb-3">Share Your Experience</h6>
+            <form action="{% url 'submit_room_review' room_id=room.room_id %}" method="POST">
+              {% csrf_token %}
+              
+              <div class="mb-3">
+                <label class="form-label">Your Rating:</label>
+                <div class="interactive-stars">
+                  <div class="star-rating">
+                    <div class="rating-input">
+                      <input type="radio" id="room-star5" name="rating" value="5" required>
+                      <label for="room-star5"><i class="fas fa-star"></i></label>
+                      <input type="radio" id="room-star4" name="rating" value="4">
+                      <label for="room-star4"><i class="fas fa-star"></i></label>
+                      <input type="radio" id="room-star3" name="rating" value="3">
+                      <label for="room-star3"><i class="fas fa-star"></i></label>
+                      <input type="radio" id="room-star2" name="rating" value="2">
+                      <label for="room-star2"><i class="fas fa-star"></i></label>
+                      <input type="radio" id="room-star1" name="rating" value="1">
+                      <label for="room-star1"><i class="fas fa-star"></i></label>
+                    </div>
+                  </div>
+                  <div id="rating-text" class="rating-description mt-1 ms-2 text-muted small">Click to rate</div>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="room-comment" class="form-label">Your Review:</label>
+                <textarea id="room-comment" name="comment" class="form-control" rows="3" placeholder="Share your experience with this room... What did you like or dislike?" required></textarea>
+              </div>
+              
+              <div class="text-end">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-paper-plane me-1"></i> Submit Review
+                </button>
+              </div>
+            </form>
+          </div>
+          {% endif %}
+
+          <!-- Review listing -->
+          {% if room.reviews.all %}
+          <div class="review-list">
+            {% for review in room.reviews.all|slice:":3" %}
+            <div class="review-item mb-4 {% if not forloop.last %}pb-4 border-bottom{% endif %}">
+              <div class="d-flex">
+                <div class="flex-shrink-0">
+                  {% if review.reviewer.profile_photo %}
+                  <img src="{{ review.reviewer.profile_photo.url }}" class="rounded-circle review-avatar" alt="{{ review.reviewer.username }}">
+                  {% else %}
+                  <img src="/media/profile_photos/default_user.jpg" class="rounded-circle review-avatar" alt="Default Profile">
+                  {% endif %}
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold">{{ review.reviewer.username }}</h6>
+                    <small class="text-muted">{{ review.created_at|date:"F j, Y" }}</small>
+                  </div>
+                  <div class="rating-stars my-2">
+                    {% for i in "12345" %}
+                    <i class="fas fa-star {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                    {% endfor %}
+                  </div>
+                  <p class="mb-0 review-text">{{ review.comment }}</p>
+                  
+                  {% if user.id == review.reviewer.id or user.id == room.provider.id %}
+                  <div class="review-actions mt-2">
+                    {% if user.id == review.reviewer.id %}
+                    <a href="{% url 'edit_review' review.id %}" class="btn btn-sm btn-outline-secondary me-2">
+                      <i class="fas fa-edit me-1"></i> Edit
+                    </a>
+                    {% endif %}
+                    {% if user.id == room.provider.id %}
+                    <a href="{% url 'reply_to_review' review.id %}" class="btn btn-sm btn-outline-primary">
+                      <i class="fas fa-reply me-1"></i> Reply
+                    </a>
+                    {% endif %}
+                  </div>
+                  {% endif %}
+                  
+                  {% if review.reply %}
+                  <div class="review-reply mt-3 ms-3 p-3 bg-light rounded">
+                    <div class="d-flex">
+                      <div class="flex-shrink-0">
+                        {% if room.provider.profile_photo %}
+                        <img src="{{ room.provider.profile_photo.url }}" class="rounded-circle review-reply-avatar" alt="{{ room.provider.username }}">
+                        {% else %}
+                        <img src="/media/profile_photos/default_user.jpg" class="rounded-circle review-reply-avatar" alt="Default Profile">
+                        {% endif %}
+                      </div>
+                      <div class="flex-grow-1 ms-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <h6 class="mb-0 small fw-bold">{{ room.provider.username }} <span class="badge bg-primary ms-1">Provider</span></h6>
+                          <small class="text-muted">{{ review.reply.created_at|date:"F j, Y" }}</small>
+                        </div>
+                        <p class="mb-0 small mt-1">{{ review.reply.content }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-4 empty-reviews">
+            <i class="fas fa-star fa-2x text-muted mb-3"></i>
+            <h6>No reviews yet</h6>
+            <p class="text-muted mb-0">Be the first to share your experience with this room!</p>
+          </div>
+          {% endif %}
+          
+          {% if room.reviews.count > 3 %}
+          <div class="text-center mt-4">
+            <a href="{% url 'room_reviews' room_id=room.room_id %}" class="btn btn-outline-primary">
+              View All {{ room.reviews.count }} Reviews <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Google Map -->
       <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-map-marker-alt text-primary me-2"></i> Location
+          </h5>
+        </div>
         <div class="card-body p-0">
           <div class="map-placeholder">
             <i class="fas fa-map-marked-alt map-icon"></i>
@@ -147,67 +420,113 @@
     <!-- Booking Section & Contact -->
     <div class="col-lg-4">
       <!-- Booking Card -->
-      <div class="card shadow-sm mb-4">
+      <div class="card shadow-sm mb-4 sticky-top" style="top: 90px; z-index: 100;">
         <div class="card-header bg-primary text-white py-3">
           <h4 class="card-title mb-0 text-center">Book This Room</h4>
         </div>
         <div class="card-body">
           <div class="booking-price mb-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="mb-0">${{ room.rent }} / month</h5>
+              <h5 class="mb-0">${{ room.rent }} <span class="text-muted fs-6">/ month</span></h5>
               <span
                 class="badge {% if room.is_available %}bg-success{% else %}bg-danger{% endif %}"
               >
-                {% if room.is_available %}Available{% else %}Not Available{%
-                endif %}
+                {% if room.is_available %}Available{% else %}Not Available{% endif %}
               </span>
             </div>
+            {% if room.is_available %}
+            <div class="booking-dates mt-3">
+              <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                <input type="text" class="form-control" id="move-in-date" placeholder="Move-in date" readonly>
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                <input type="text" class="form-control" id="move-out-date" placeholder="Move-out date (optional)" readonly>
+              </div>
+            </div>
+            {% endif %}
           </div>
 
-          {% if user.is_authenticated and user.account_type == 'seeker' %} {% if
-          room.is_available %}
-          <a
-            href="{% url 'book_room' room.room_id %}"
-            class="btn btn-primary btn-lg w-100 mb-3"
-          >
-            <i class="fas fa-calendar-check me-2"></i> Book Now
-          </a>
-          {% else %}
-          <button class="btn btn-secondary btn-lg w-100 mb-3" disabled>
-            <i class="fas fa-ban me-2"></i> Not Available
-          </button>
-          {% endif %} {% else %}
+          {% if user.is_authenticated and user.account_type == 'seeker' %} 
+            {% if room.is_available %}
+            <a href="{% url 'book_room' room.room_id %}" class="btn btn-primary btn-lg w-100 mb-3">
+              <i class="fas fa-calendar-check me-2"></i> Book Now
+            </a>
+            {% else %}
+            <button class="btn btn-secondary btn-lg w-100 mb-3" disabled>
+              <i class="fas fa-ban me-2"></i> Not Available
+            </button>
+            {% endif %}
+          {% elif user.is_authenticated %}
           <div class="alert alert-info mb-3">
             <i class="fas fa-info-circle me-2"></i>
-            {% if user.is_authenticated %} You must be a seeker to book this
-            room. {% else %} Please
-            <a href="{% url 'login' %}" class="alert-link">log in</a> as a
-            seeker to book this room. {% endif %}
+            You must be a seeker to book this room.
+          </div>
+          {% else %}
+          <div class="alert alert-info mb-3">
+            <i class="fas fa-info-circle me-2"></i>
+            Please <a href="{% url 'login' %}" class="alert-link">log in</a> as a seeker to book this room.
           </div>
           {% endif %}
 
           <!-- Contact provider -->
           <div class="text-center">
             {% if user.is_authenticated and user.account_type == 'seeker' %}
-            <a
-              href="{% url 'send_message' room.provider.id %}"
-              class="btn btn-outline-primary w-100"
-            >
+            <a href="{% url 'send_message' room.provider.id %}" class="btn btn-outline-primary w-100">
               <i class="fas fa-envelope me-2"></i> Contact Provider
             </a>
             {% else %}
             <p class="text-muted small">
-              <i class="fas fa-lock me-1"></i> Log in as a seeker to contact the
-              provider
+              <i class="fas fa-lock me-1"></i> Log in as a seeker to contact the provider
             </p>
             {% endif %}
           </div>
         </div>
       </div>
 
+      <!-- Provider Info Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-user-circle text-primary me-2"></i> About the Provider
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            {% if room.provider.profile_photo %}
+            <img src="{{ room.provider.profile_photo.url }}" class="provider-info-photo me-3" alt="{{ room.provider.username }}">
+            {% else %}
+            <img src="/media/profile_photos/default_user.jpg" class="provider-info-photo me-3" alt="Default Profile">
+            {% endif %}
+            <div>
+              <h6 class="mb-0">{{ room.provider.username }}</h6>
+              <p class="text-muted small mb-0">Member since {{ room.provider.date_joined|date:"F Y" }}</p>
+            </div>
+          </div>
+          <div class="provider-stats d-flex justify-content-around mb-3">
+            <div class="text-center">
+              <div class="fw-bold">{{ room.provider.rooms.count }}</div>
+              <div class="text-muted small">Listings</div>
+            </div>
+            <div class="text-center">
+              <div class="fw-bold">{{ room.provider.get_response_rate|default:"New" }}</div>
+              <div class="text-muted small">Response Rate</div>
+            </div>
+            <div class="text-center">
+              <div class="fw-bold">{{ room.provider.get_average_rating|default:"N/A" }}</div>
+              <div class="text-muted small">Rating</div>
+            </div>
+          </div>
+          <a href="{% url 'user_profile' room.provider.id %}" class="btn btn-outline-primary btn-sm w-100">
+            <i class="fas fa-user me-1"></i> View Full Profile
+          </a>
+        </div>
+      </div>
+
       <!-- Help & Support -->
       <div class="card shadow-sm mb-4">
-        <div class="card-header bg-transparent">
+        <div class="card-header bg-white">
           <h5 class="card-title mb-0">
             <i class="fas fa-question-circle text-primary me-2"></i> Need Help?
           </h5>
@@ -217,10 +536,7 @@
             Have questions about this property or the booking process?
           </p>
           <div class="d-grid gap-2">
-            <a
-              href="{% url 'submit_support_ticket' %}?type=seeker"
-              class="btn btn-outline-secondary"
-            >
+            <a href="{% url 'submit_support_ticket' %}?type=seeker" class="btn btn-outline-secondary">
               <i class="fas fa-headset me-2"></i> Contact Support
             </a>
           </div>
@@ -229,7 +545,7 @@
 
       <!-- Safety Tips -->
       <div class="card shadow-sm">
-        <div class="card-header bg-transparent">
+        <div class="card-header bg-white">
           <h5 class="card-title mb-0">
             <i class="fas fa-shield-alt text-primary me-2"></i> Safety Tips
           </h5>
@@ -242,9 +558,45 @@
             <li>Review any contracts before signing</li>
             <li>Keep all communication on our platform</li>
           </ul>
-          <a href="#" class="btn btn-link btn-sm p-0"
-            >Learn more about safe booking</a
-          >
+          <a href="#" class="btn btn-link btn-sm p-0">Learn more about safe booking</a>
+        </div>
+      </div>
+      
+      <!-- Similar Rooms -->
+      <div class="card shadow-sm mt-4">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-home text-primary me-2"></i> Similar Rooms
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            {% for similar_room in similar_rooms|slice:":3" %}
+              {% if similar_room.id != room.id %}
+              <a href="{% url 'room_detail' similar_room.room_id %}" class="list-group-item list-group-item-action">
+                <div class="d-flex">
+                  <div class="flex-shrink-0">
+                    {% if similar_room.image %}
+                    <img src="{{ similar_room.image.url }}" class="similar-room-img" alt="{{ similar_room.title }}">
+                    {% else %}
+                    <img src="/media/images/default_room.jpg" class="similar-room-img" alt="Default Room Image">
+                    {% endif %}
+                  </div>
+                  <div class="flex-grow-1 ms-3">
+                    <h6 class="mb-0">{{ similar_room.title|truncatechars:25 }}</h6>
+                    <div class="text-primary fw-bold">${{ similar_room.rent }}/month</div>
+                    <div class="small text-muted">{{ similar_room.location|truncatechars:30 }}</div>
+                  </div>
+                </div>
+              </a>
+              {% endif %}
+            {% empty %}
+              <div class="list-group-item text-center py-4">
+                <i class="fas fa-home text-muted mb-2"></i>
+                <p class="mb-0 small">No similar rooms available</p>
+              </div>
+            {% endfor %}
+          </div>
         </div>
       </div>
     </div>
@@ -269,6 +621,7 @@
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 1px;
+    z-index: 10;
   }
 
   .room-price {
@@ -282,18 +635,63 @@
     font-weight: 600;
     text-align: center;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+  }
+  
+  .price-amount {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  
+  .price-period {
+    font-size: 0.8rem;
+    opacity: 0.9;
   }
 
   .provider-link {
     color: inherit;
     text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  
+  .provider-link:hover {
+    transform: translateY(-2px);
   }
 
   .provider-photo {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .provider-info-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .provider-name {
+    font-weight: 500;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .room-description {
+    line-height: 1.7;
+    color: #555;
   }
 
   .room-features {
@@ -312,7 +710,7 @@
     width: 40px;
     height: 40px;
     background-color: rgba(13, 110, 253, 0.1);
-    color: var(--primary-color);
+    color: var(--bs-primary);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -333,14 +731,48 @@
     margin-bottom: 0;
   }
 
-  .amenities-list {
+  /* Amenities grid styling */
+  .amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+  }
+  
+  .amenity-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+  
+  .amenity-item:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+  }
+  
+  .amenity-icon {
+    width: 30px;
+    height: 30px;
+    background-color: rgba(13, 110, 253, 0.1);
+    color: var(--bs-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+  }
+
+  .rules-list {
     list-style: none;
     padding-left: 0;
   }
 
-  .amenities-list li {
+  .rules-list li {
     margin-bottom: 10px;
     color: #495057;
+    font-weight: 500;
   }
 
   .safety-tips {
@@ -348,13 +780,13 @@
   }
 
   .safety-tips li {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     font-size: 0.9rem;
   }
 
   .map-placeholder {
     background-color: #f8f9fa;
-    height: 200px;
+    height: 250px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -364,13 +796,122 @@
 
   .map-icon {
     font-size: 3rem;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     opacity: 0.5;
+  }
+
+  /* Enhanced Review styling */
+  .review-summary {
+    border: 1px solid #e9ecef;
+  }
+  
+  .overall-rating {
+    padding: 10px;
+  }
+  
+  .average-rating {
+    font-size: 2.5rem;
+    color: #333;
+    font-weight: 700;
+    line-height: 1;
+  }
+  
+  .rating-label {
+    width: 30px;
+    text-align: center;
+  }
+  
+  .rating-count {
+    width: 30px;
+    text-align: right;
+  }
+  
+  .interactive-stars {
+    display: flex;
+    align-items: center;
+  }
+  
+  .review-avatar {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .review-reply-avatar {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    border: 1px solid #fff;
+  }
+  
+  .review-text {
+    line-height: 1.6;
+    color: #555;
+  }
+  
+  .empty-reviews {
+    padding: 30px 0;
+  }
+  
+  .star-rating {
+    display: flex;
+    align-items: center;
+  }
+  
+  .rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+  }
+  
+  .rating-input input {
+    display: none;
+  }
+  
+  .rating-input label {
+    cursor: pointer;
+    color: #ddd;
+    font-size: 1.8rem;
+    margin-right: 0.3rem;
+    transition: color 0.2s;
+  }
+  
+  .rating-input label:hover,
+  .rating-input label:hover ~ label,
+  .rating-input input:checked ~ label {
+    color: #ffb400;
+  }
+  
+  .rating-stars .fas {
+    font-size: 0.9rem;
+    margin-right: 1px;
+  }
+  
+  .rating-overview .fas {
+    font-size: 1rem;
+    margin-right: 1px;
+  }
+  
+  .similar-room-img {
+    width: 70px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
   }
 
   @media (max-width: 992px) {
     .room-features {
       grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .amenities-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .sticky-top {
+      position: relative;
+      top: 0 !important;
     }
   }
 
@@ -378,10 +919,59 @@
     .room-features {
       grid-template-columns: 1fr;
     }
-
+    
     .room-detail-image {
       height: 300px;
     }
+    
+    .amenities-grid {
+      grid-template-columns: repeat(1, 1fr);
+    }
+    
+    .review-summary .col-md-3 {
+      border-right: none !important;
+      border-bottom: 1px solid #dee2e6;
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
   }
 </style>
+
+<script>
+  // Star rating text display
+  document.addEventListener('DOMContentLoaded', function() {
+    const starInputs = document.querySelectorAll('.rating-input input');
+    const ratingText = document.getElementById('rating-text');
+    const ratingDescriptions = {
+      '5': 'Excellent - Highly Recommend',
+      '4': 'Very Good - Recommend',
+      '3': 'Average - Fair',
+      '2': 'Poor - Not Recommended',
+      '1': 'Terrible - Avoid'
+    };
+    
+    starInputs.forEach(input => {
+      input.addEventListener('change', function() {
+        ratingText.textContent = ratingDescriptions[this.value];
+      });
+    });
+    
+    // Initialize datepickers for booking (if available)
+    if (typeof flatpickr !== 'undefined') {
+      flatpickr("#move-in-date", {
+        minDate: "today",
+        altInput: true,
+        altFormat: "F j, Y",
+        dateFormat: "Y-m-d",
+      });
+      
+      flatpickr("#move-out-date", {
+        minDate: "today",
+        altInput: true,
+        altFormat: "F j, Y",
+        dateFormat: "Y-m-d",
+      });
+    }
+  });
+</script>
 {% endblock %}

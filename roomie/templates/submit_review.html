@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Breadcrumb navigation -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+      {% if review_type == 'room' %}
+        <li class="breadcrumb-item"><a href="{% url 'filter_rooms' %}">Rooms</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'room_detail' room_id=room.room_id %}">{{ room.title }}</a></li>
+      {% else %}
+        <li class="breadcrumb-item"><a href="{% url 'find_roommate' %}">Roommates</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'user_profile' user_id=user_to_review.id %}">{{ user_to_review.username }}</a></li>
+      {% endif %}
+      <li class="breadcrumb-item active" aria-current="page">
+        {% if edit_mode %}Edit Review{% else %}Write a Review{% endif %}
+      </li>
+    </ol>
+  </nav>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+          <h2 class="card-title h4 mb-0">
+            {% if edit_mode %}
+              <i class="fas fa-edit text-primary me-2"></i> Edit Your Review
+            {% else %}
+              <i class="fas fa-star text-primary me-2"></i> Write a Review
+            {% endif %}
+          </h2>
+        </div>
+        <div class="card-body p-4">
+          <!-- Subject information -->
+          <div class="review-subject mb-4 p-3 bg-light rounded">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0">
+                {% if review_type == 'room' %}
+                  {% if room.image %}
+                    <img src="{{ room.image.url }}" alt="{{ room.title }}" class="review-subject-img">
+                  {% else %}
+                    <img src="/media/images/default_room.jpg" alt="Default Room" class="review-subject-img">
+                  {% endif %}
+                {% else %}
+                  {% if user_to_review.profile_photo %}
+                    <img src="{{ user_to_review.profile_photo.url }}" alt="{{ user_to_review.username }}" class="review-subject-img rounded-circle">
+                  {% else %}
+                    <img src="/media/profile_photos/default_user.jpg" alt="Default Profile" class="review-subject-img rounded-circle">
+                  {% endif %}
+                {% endif %}
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h5 class="mb-1">
+                  {% if review_type == 'room' %}
+                    {{ room.title }}
+                  {% else %}
+                    {{ user_to_review.username }}
+                  {% endif %}
+                </h5>
+                <p class="text-muted mb-0">
+                  {% if review_type == 'room' %}
+                    <i class="fas fa-map-marker-alt me-1"></i> {{ room.location }}
+                  {% else %}
+                    <i class="fas fa-user me-1"></i> {{ user_to_review.get_account_type_display }}
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Review Guidelines -->
+          <div class="review-guidelines mb-4">
+            <h6><i class="fas fa-info-circle text-primary me-2"></i>Review Guidelines:</h6>
+            <ul class="text-muted small">
+              <li>Be honest and specific about your experience.</li>
+              <li>Focus on providing constructive feedback.</li>
+              <li>Avoid personal attacks or offensive language.</li>
+              <li>Include both positive aspects and areas for improvement.</li>
+            </ul>
+          </div>
+
+          <!-- Review Form -->
+          <form method="POST" class="review-form" id="reviewForm">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+              <label class="form-label fw-bold">Your Rating:</label>
+              <div class="rating-container">
+                <div class="star-rating">
+                  <div class="rating-input">
+                    <input type="radio" id="star5" name="rating" value="5" {% if form.instance.rating == 5 %}checked{% endif %} required>
+                    <label for="star5" title="5 stars - Excellent"><i class="fas fa-star"></i></label>
+                    
+                    <input type="radio" id="star4" name="rating" value="4" {% if form.instance.rating == 4 %}checked{% endif %}>
+                    <label for="star4" title="4 stars - Very Good"><i class="fas fa-star"></i></label>
+                    
+                    <input type="radio" id="star3" name="rating" value="3" {% if form.instance.rating == 3 %}checked{% endif %}>
+                    <label for="star3" title="3 stars - Good"><i class="fas fa-star"></i></label>
+                    
+                    <input type="radio" id="star2" name="rating" value="2" {% if form.instance.rating == 2 %}checked{% endif %}>
+                    <label for="star2" title="2 stars - Poor"><i class="fas fa-star"></i></label>
+                    
+                    <input type="radio" id="star1" name="rating" value="1" {% if form.instance.rating == 1 %}checked{% endif %}>
+                    <label for="star1" title="1 star - Terrible"><i class="fas fa-star"></i></label>
+                  </div>
+                </div>
+                <div id="rating-text" class="rating-description ms-3 text-muted">
+                  {% if form.instance.rating %}
+                    {% if form.instance.rating == 5 %}Excellent - Highly Recommend
+                    {% elif form.instance.rating == 4 %}Very Good - Recommend
+                    {% elif form.instance.rating == 3 %}Average - Fair
+                    {% elif form.instance.rating == 2 %}Poor - Not Recommended
+                    {% elif form.instance.rating == 1 %}Terrible - Avoid
+                    {% endif %}
+                  {% else %}
+                    Select a rating
+                  {% endif %}
+                </div>
+              </div>
+              {% if form.rating.errors %}
+              <div class="text-danger mt-1">{{ form.rating.errors }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="mb-4">
+              <label for="id_comment" class="form-label fw-bold">Your Review:</label>
+              {{ form.comment }}
+              <div class="form-text">Minimum 20 characters. Be specific and helpful to others.</div>
+              {% if form.comment.errors %}
+              <div class="text-danger">{{ form.comment.errors }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+              {% if review_type == 'room' %}
+                <a href="{% url 'room_detail' room_id=room.room_id %}" class="btn btn-outline-secondary">
+                  <i class="fas fa-times me-1"></i> Cancel
+                </a>
+              {% else %}
+                <a href="{% url 'user_profile' user_id=user_to_review.id %}" class="btn btn-outline-secondary">
+                  <i class="fas fa-times me-1"></i> Cancel
+                </a>
+              {% endif %}
+              
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane me-1"></i> 
+                {% if edit_mode %}Update Review{% else %}Submit Review{% endif %}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      {% if edit_mode %}
+      <div class="mt-4 text-center">
+        <a href="{% url 'delete_review' review_id=review.review_id %}" class="text-danger">
+          <i class="fas fa-trash-alt me-1"></i> Delete this review
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .review-subject-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 1px solid #dee2e6;
+  }
+  
+  .rating-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .star-rating {
+    display: flex;
+    align-items: center;
+  }
+  
+  .rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+  }
+  
+  .rating-input input {
+    display: none;
+  }
+  
+  .rating-input label {
+    cursor: pointer;
+    color: #ddd;
+    font-size: 2rem;
+    margin-right: 0.3rem;
+    transition: color 0.2s;
+  }
+  
+  .rating-input label:hover,
+  .rating-input label:hover ~ label,
+  .rating-input input:checked ~ label {
+    color: #ffb400;
+  }
+  
+  .rating-description {
+    font-size: 0.9rem;
+    min-width: 180px;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const starInputs = document.querySelectorAll('.rating-input input');
+    const ratingText = document.getElementById('rating-text');
+    const ratingDescriptions = {
+      '5': 'Excellent - Highly Recommend',
+      '4': 'Very Good - Recommend',
+      '3': 'Average - Fair', 
+      '2': 'Poor - Not Recommended',
+      '1': 'Terrible - Avoid'
+    };
+    
+    starInputs.forEach(input => {
+      input.addEventListener('change', function() {
+        ratingText.textContent = ratingDescriptions[this.value];
+      });
+    });
+    
+    // Character counter for review text
+    const commentField = document.querySelector('#id_comment');
+    if (commentField) {
+      commentField.addEventListener('input', function() {
+        const minLength = 20;
+        const currentLength = this.value.length;
+        
+        if (currentLength < minLength) {
+          this.classList.add('is-invalid');
+          this.classList.remove('is-valid');
+        } else {
+          this.classList.remove('is-invalid');
+          this.classList.add('is-valid');
+        }
+      });
+    }
+    
+    // Form validation
+    const reviewForm = document.getElementById('reviewForm');
+    if (reviewForm) {
+      reviewForm.addEventListener('submit', function(event) {
+        const commentField = document.querySelector('#id_comment');
+        const ratingSelected = document.querySelector('.rating-input input:checked');
+        
+        if (!ratingSelected) {
+          event.preventDefault();
+          ratingText.textContent = 'Please select a rating';
+          ratingText.classList.add('text-danger');
+        }
+        
+        if (commentField && commentField.value.length < 20) {
+          event.preventDefault();
+          commentField.classList.add('is-invalid');
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}
