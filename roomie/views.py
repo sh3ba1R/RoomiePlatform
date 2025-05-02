@@ -178,29 +178,23 @@ def find_roommate(request):
     if location:
         roommates = roommates.filter(location__icontains=location)
     
-    # Filter by budget range if provided
+    # Filter by budget range if provided - safely check if field exists
     min_budget = request.GET.get('min_budget', '')
     max_budget = request.GET.get('max_budget', '')
     
-    if min_budget:
-        # Only apply if budget field exists
-        if 'budget' in [f.name for f in User._meta.get_fields()]:
-            roommates = roommates.filter(budget__gte=min_budget)
-    if max_budget:
-        # Only apply if budget field exists
-        if 'budget' in [f.name for f in User._meta.get_fields()]:
-            roommates = roommates.filter(budget__lte=max_budget)
+    if min_budget and hasattr(User, 'budget'):
+        roommates = roommates.filter(budget__gte=min_budget)
+    if max_budget and hasattr(User, 'budget'):
+        roommates = roommates.filter(budget__lte=max_budget)
     
-    # Filter by interests or lifestyle
+    # Filter by interests or lifestyle - safely check if field exists
     lifestyle = request.GET.get('lifestyle', '')
-    if lifestyle:
-        # Only apply if lifestyle_preferences field exists
-        if 'lifestyle_preferences' in [f.name for f in User._meta.get_fields()]:
-            roommates = roommates.filter(lifestyle_preferences__icontains=lifestyle)
+    if lifestyle and hasattr(User, 'lifestyle_preferences'):
+        roommates = roommates.filter(lifestyle_preferences__icontains=lifestyle)
     
-    # Filter by availability
+    # Filter by availability - safely check if field exists
     is_available = request.GET.get('is_available', '')
-    if is_available:
+    if is_available and hasattr(User, 'is_available'):
         roommates = roommates.filter(is_available=is_available == 'true')
     
     # Pagination
