@@ -12,6 +12,7 @@ from reportlab.pdfgen import canvas
 from io import BytesIO
 from .forms import RoomieFormFactory, RoomieForms
 from django.urls import reverse
+from django.utils import timezone
 User = get_user_model()  # Get the custom user model
 
 def home(request):
@@ -1072,23 +1073,209 @@ def submit_review(request):
 
 @login_required
 def download_contract(request, contract_id):
-    contract = get_object_or_404(RoomContract, id=contract_id, seeker=request.user)
+    # Get contract and verify that either the seeker or provider is accessing it
+    contract = get_object_or_404(RoomContract, id=contract_id)
+    
+    # Security check - only the seeker or provider can access the contract
+    if request.user != contract.seeker and request.user != contract.provider:
+        messages.error(request, "You don't have permission to access this contract.")
+        return redirect('home')
 
+    # Get room and user information for the contract
+    room = contract.room
+    provider = contract.provider
+    seeker = contract.seeker
+    
+    # Format dates for display
+    start_date_str = contract.start_date.strftime("%B %d, %Y")
+    end_date_str = contract.end_date.strftime("%B %d, %Y")
+    today_str = timezone.now().strftime("%B %d, %Y")
+    
+    # Calculate contract duration in months
+    contract_duration = (contract.end_date.year - contract.start_date.year) * 12 + (contract.end_date.month - contract.start_date.month)
+    if contract_duration < 1:
+        contract_duration = "Less than 1 month"
+    else:
+        contract_duration = f"{contract_duration} month{'s' if contract_duration > 1 else ''}"
+    
+    # Calculate total rent amount for the entire period
+    total_rent = contract.rent_amount * int(contract.end_date.month - contract.start_date.month + (contract.end_date.year - contract.start_date.year) * 12)
+    
     # Generate PDF
     buffer = BytesIO()
-    pdf = canvas.Canvas(buffer)
-    pdf.drawString(100, 800, f"Room Contract")
-    pdf.drawString(100, 780, f"Room: {contract.room.title}")
-    pdf.drawString(100, 760, f"Seeker: {contract.seeker.username}")
-    pdf.drawString(100, 740, f"Provider: {contract.provider.username}")
-    pdf.drawString(100, 720, f"Start Date: {contract.start_date}")
-    pdf.drawString(100, 700, f"End Date: {contract.end_date}")
-    pdf.drawString(100, 680, f"Rent: ${contract.rent_amount}/month")
-    pdf.save()
-
+    
+    # Set up document with a professional look
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib import colors
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+    from reportlab.lib.units import inch
+    
+    # Create the PDF document
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=72,
+        leftMargin=72,
+        topMargin=72,
+        bottomMargin=72
+    )
+    
+    # Get styles
+    styles = getSampleStyleSheet()
+    
+    # Create custom styles
+    title_style = ParagraphStyle(
+        'Title',
+        parent=styles['Heading1'],
+        fontSize=16,
+        textColor=colors.darkblue,
+        spaceAfter=12,
+        alignment=1  # Center
+    )
+    
+    heading_style = ParagraphStyle(
+        'Heading',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.darkblue,
+        spaceAfter=6,
+        spaceBefore=12
+    )
+    
+    subheading_style = ParagraphStyle(
+        'Subheading',
+        parent=styles['Heading3'],
+        fontSize=12,
+        textColor=colors.darkblue,
+        spaceAfter=6,
+        spaceBefore=6
+    )
+    
+    normal_style = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontSize=10,
+        spaceAfter=6
+    )
+    
+    # Begin building the PDF content
+    elements = []
+    
+    # Logo or header could be added here if available
+    # elements.append(Image("path/to/logo.png", width=2*inch, height=0.5*inch))
+    
+    # Title
+    elements.append(Paragraph(f"ROOM RENTAL AGREEMENT", title_style))
+    elements.append(Spacer(1, 0.25*inch))
+    
+    # Contract ID and Date
+    elements.append(Paragraph(f"Contract ID: {contract.id}", normal_style))
+    elements.append(Paragraph(f"Date: {today_str}", normal_style))
+    elements.append(Spacer(1, 0.25*inch))
+    
+    # Parties Information
+    elements.append(Paragraph("PARTIES", heading_style))
+    elements.append(Paragraph(f"This Room Rental Agreement (\"Agreement\") is entered into between:", normal_style))
+    elements.append(Paragraph(f"<b>PROVIDER:</b> {provider.first_name} {provider.last_name} (\"Landlord\")", normal_style))
+    elements.append(Paragraph(f"<b>SEEKER:</b> {seeker.first_name} {seeker.last_name} (\"Tenant\")", normal_style))
+    elements.append(Spacer(1, 0.15*inch))
+    
+    # Property Details
+    elements.append(Paragraph("PROPERTY", heading_style))
+    elements.append(Paragraph(f"The Landlord agrees to rent to the Tenant, and the Tenant agrees to rent from the Landlord, the following property:", normal_style))
+    elements.append(Paragraph(f"<b>Property:</b> {room.title}", normal_style))
+    elements.append(Paragraph(f"<b>Address:</b> {room.location}", normal_style))
+    elements.append(Paragraph(f"<b>Room Type:</b> {room.get_room_type_display()}", normal_style))
+    elements.append(Paragraph(f"<b>Bedrooms:</b> {room.bedrooms}", normal_style))
+    elements.append(Spacer(1, 0.15*inch))
+    
+    # Term
+    elements.append(Paragraph("TERM", heading_style))
+    elements.append(Paragraph(f"The term of this Agreement shall begin on {start_date_str} and end on {end_date_str}, for a duration of {contract_duration}.", normal_style))
+    elements.append(Spacer(1, 0.15*inch))
+    
+    # Rent
+    elements.append(Paragraph("RENT", heading_style))
+    elements.append(Paragraph(f"The Tenant agrees to pay rent in the amount of ${contract.rent_amount} per month, payable on the 1st day of each month.", normal_style))
+    elements.append(Paragraph(f"The total rent for the entire term of this Agreement is ${total_rent}.", normal_style))
+    elements.append(Spacer(1, 0.15*inch))
+    
+    # Deposit
+    elements.append(Paragraph("SECURITY DEPOSIT", heading_style))
+    elements.append(Paragraph(f"The Tenant shall pay a security deposit of ${contract.rent_amount} upon signing this Agreement. This deposit will be returned within 30 days after the termination of this Agreement, less any deductions for damages beyond normal wear and tear.", normal_style))
+    elements.append(Spacer(1, 0.15*inch))
+    
+    # Utilities
+    elements.append(Paragraph("UTILITIES", heading_style))
+    elements.append(Paragraph("The following utilities are included in the rent:", normal_style))
+    elements.append(Paragraph("• Water", normal_style))
+    elements.append(Paragraph("• Electricity", normal_style))
+    elements.append(Paragraph("• Internet", normal_style))
+    elements.append(Paragraph("The Tenant is responsible for any additional utilities not listed above.", normal_style))
+    elements.append(Spacer(1, 0.15*inch))
+    
+    # House Rules
+    elements.append(Paragraph("HOUSE RULES", heading_style))
+    elements.append(Paragraph("The Tenant agrees to comply with all house rules, including but not limited to:", normal_style))
+    elements.append(Paragraph("• No smoking inside the property", normal_style))
+    elements.append(Paragraph("• Quiet hours from 10:00 PM to 7:00 AM", normal_style))
+    elements.append(Paragraph("• No unauthorized guests staying overnight for more than 3 consecutive nights", normal_style))
+    elements.append(Paragraph("• Keeping common areas clean and tidy", normal_style))
+    elements.append(Spacer(1, 0.15*inch))
+    
+    # Termination
+    elements.append(Paragraph("TERMINATION", heading_style))
+    elements.append(Paragraph("Either party may terminate this Agreement with 30 days' written notice. Early termination by the Tenant may result in forfeiture of the security deposit unless a replacement tenant is found.", normal_style))
+    elements.append(Spacer(1, 0.15*inch))
+    
+    # Signatures
+    elements.append(Paragraph("SIGNATURES", heading_style))
+    elements.append(Paragraph("By signing below, the parties acknowledge that they have read, understood, and agree to the terms of this Agreement.", normal_style))
+    elements.append(Spacer(1, 0.25*inch))
+    
+    # Create signature table
+    signature_data = [
+        [Paragraph("<b>Landlord:</b>", normal_style), Paragraph("<b>Tenant:</b>", normal_style)],
+        [Paragraph(f"{provider.first_name} {provider.last_name}", normal_style), Paragraph(f"{seeker.first_name} {seeker.last_name}", normal_style)],
+        ["_______________________", "_______________________"],
+        [Paragraph("Signature", normal_style), Paragraph("Signature", normal_style)],
+        ["_______________________", "_______________________"],
+        [Paragraph("Date", normal_style), Paragraph("Date", normal_style)],
+    ]
+    
+    signature_table = Table(signature_data, colWidths=[2.5*inch, 2.5*inch])
+    signature_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('GRID', (0, 0), (-1, -1), 0.25, colors.white),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    
+    elements.append(signature_table)
+    
+    # Legal Notice
+    elements.append(Spacer(1, 0.35*inch))
+    elements.append(Paragraph("LEGAL NOTICE", subheading_style))
+    elements.append(Paragraph("This document is a legally binding contract. If either party is unsure about any of the terms, they should seek legal advice before signing.", normal_style))
+    
+    # Add disclaimer about platform
+    elements.append(Spacer(1, 0.25*inch))
+    elements.append(Paragraph("This contract was generated by RoomiePlatform. RoomiePlatform is not responsible for the content of this agreement and does not provide legal advice.", ParagraphStyle(
+        'Disclaimer',
+        parent=styles['Normal'],
+        fontSize=8,
+        textColor=colors.gray,
+        alignment=1  # Center
+    )))
+    
+    # Build the PDF
+    doc.build(elements)
+    
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="contract_{contract.id}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="Rental_Agreement_{contract.id}.pdf"'
     return response
 
 @login_required
