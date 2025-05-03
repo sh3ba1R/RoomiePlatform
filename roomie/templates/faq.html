@@ -70,6 +70,21 @@
                             {% for item in category.questions %}
                                 <div class="accordion-item faq-item stagger-item" style="transition-delay: {{ forloop.counter }}00ms;">
                                     <h3 class="accordion-header" id="heading-{{ category_id }}-{{ forloop.counter }}">
+                                        <button class="accordion-button {% if forloop.first %}{% else %}collapsed{% endif %}" type="button" 
+                                                data-bs-toggle="collapse" data-bs-target="#collapse-{{ category_id }}-{{ forloop.counter }}" 
+                                                aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" 
+                                                aria-controls="collapse-{{ category_id }}-{{ forloop.counter }}">
+                                            {{ item.question }}
+                                        </button>
+                                    </h3>
+                                    <div id="collapse-{{ category_id }}-{{ forloop.counter }}" 
+                                         class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                                         aria-labelledby="heading-{{ category_id }}-{{ forloop.counter }}" 
+                                         data-bs-parent="#accordion-{{ category_id }}">
+                                        <div class="accordion-body">
+                                            {{ item.answer|safe }}
+                                        </div>
+                                    </div>
                                 </div>
                             {% endfor %}
                         </div>
@@ -80,19 +95,267 @@
     </div>
 </div>
 
+<!-- Styles for FAQ page with dark mode support -->
+<style>
+    /* Animation effects */
+    .slide-up {
+        animation: slideUp 0.5s ease forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    
+    @keyframes slideUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .stagger-item {
+        opacity: 0;
+        animation: fadeIn 0.5s ease forwards;
+    }
+    
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+        }
+    }
+    
+    /* Style for gradient text */
+    .gradient-text {
+        background: linear-gradient(45deg, var(--bs-primary) 0%, #4b81e7 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    body.dark-mode .gradient-text {
+        background: linear-gradient(45deg, var(--dark-accent) 0%, #6f9aef 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* Category header and navigation styling */
+    .category-header {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .category-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .category-link {
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+    }
+    
+    .category-link:hover, .category-link:focus {
+        border-left-color: var(--bs-primary);
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+    
+    body.dark-mode .category-link:hover, 
+    body.dark-mode .category-link:focus {
+        border-left-color: var(--dark-accent);
+        background-color: var(--dark-hover);
+    }
+    
+    /* FAQ Item styling */
+    .faq-item {
+        margin-bottom: 0.5rem;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .accordion-button {
+        font-weight: 500;
+        padding: 1rem 1.25rem;
+        border-radius: 0.5rem !important;
+        transition: all 0.3s ease;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: var(--bs-primary);
+        box-shadow: none;
+    }
+    
+    body.dark-mode .accordion-button:not(.collapsed) {
+        background-color: rgba(78, 149, 255, 0.15);
+        color: var(--dark-accent);
+    }
+    
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: rgba(13, 110, 253, 0.25);
+    }
+    
+    body.dark-mode .accordion-button:focus {
+        border-color: rgba(78, 149, 255, 0.25);
+    }
+    
+    .accordion-body {
+        padding: 1rem 1.25rem;
+        background-color: rgba(0, 0, 0, 0.01);
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+    }
+    
+    /* Help card hover effect */
+    .help-card {
+        transition: all 0.3s ease;
+    }
+    
+    .help-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Animated button */
+    .animated-btn {
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+    
+    .animated-btn:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: all 0.5s ease;
+        z-index: -1;
+    }
+    
+    .animated-btn:hover:before {
+        left: 100%;
+    }
+    
+    /* Dark mode specific styles */
+    body.dark-mode .bg-light {
+        background-color: var(--dark-card-bg) !important;
+    }
+    
+    body.dark-mode .lead {
+        color: var(--dark-text);
+    }
+    
+    body.dark-mode .card {
+        background-color: var(--dark-card-bg);
+        color: var(--dark-text);
+    }
+    
+    body.dark-mode .card-header {
+        background-color: var(--dark-accent) !important;
+        color: white;
+    }
+    
+    body.dark-mode .list-group-item {
+        background-color: var(--dark-card-bg);
+        color: var(--dark-text);
+        border-color: var(--dark-border);
+    }
+    
+    body.dark-mode .input-group-text {
+        background-color: var(--dark-input-bg);
+        color: var(--dark-text);
+        border-color: var(--dark-border);
+    }
+    
+    body.dark-mode .form-control {
+        background-color: var(--dark-input-bg);
+        color: var(--dark-text);
+        border-color: var(--dark-border);
+    }
+    
+    body.dark-mode .accordion-button {
+        background-color: var(--dark-card-bg);
+        color: var(--dark-text);
+    }
+    
+    body.dark-mode .accordion-body {
+        background-color: rgba(255, 255, 255, 0.01);
+        color: var(--dark-text);
+    }
+    
+    body.dark-mode .accordion-button::after {
+        filter: invert(1);
+    }
+</style>
+
 <script>
-    // Simple search functionality for FAQs
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize animations for staggered items
+        const staggerItems = document.querySelectorAll('.stagger-item');
+        staggerItems.forEach((item, index) => {
+            item.style.animationDelay = `${(index * 0.1) + 0.3}s`;
+        });
+        
+        // Category headers expand/collapse functionality
+        const categoryHeaders = document.querySelectorAll('.category-header');
+        categoryHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const icon = this.querySelector('.category-icon');
+                const bodyId = this.parentElement.id;
+                const accordionBody = document.querySelector(`#${bodyId} .card-body`);
+                
+                if (accordionBody.style.display === 'none') {
+                    accordionBody.style.display = 'block';
+                    icon.style.transform = 'rotate(90deg)';
+                } else {
+                    accordionBody.style.display = 'block';
+                    icon.style.transform = 'rotate(0)';
+                }
+            });
+        });
+        
+        // Smooth scroll for category links
+        const categoryLinks = document.querySelectorAll('.category-link');
+        categoryLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                window.scrollTo({
+                    top: targetElement.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    });
+
+    // Improved search functionality for FAQs
     function searchFAQ() {
         const searchTerm = document.getElementById('faqSearch').value.toLowerCase();
         const faqItems = document.querySelectorAll('.faq-item');
+        const categories = document.querySelectorAll('.faq-category-card');
         
         if (searchTerm.length < 2) {
             // Reset all items to visible if search term is too short
             faqItems.forEach(item => {
                 item.style.display = 'block';
             });
+            categories.forEach(category => {
+                category.style.display = 'block';
+            });
             return;
         }
+        
+        // Track if we found any matches
+        let foundResults = false;
+        
+        // Hide all categories initially
+        categories.forEach(category => {
+            category.style.display = 'none';
+        });
         
         // Search through all FAQ items
         faqItems.forEach(item => {
@@ -101,13 +364,34 @@
             
             if (question.includes(searchTerm) || answer.includes(searchTerm)) {
                 item.style.display = 'block';
+                
+                // Show the parent category
+                const categoryCard = item.closest('.faq-category-card');
+                categoryCard.style.display = 'block';
+                
                 // Auto-expand matching items
-                item.querySelector('.accordion-button').classList.remove('collapsed');
-                item.querySelector('.accordion-collapse').classList.add('show');
+                const accordionButton = item.querySelector('.accordion-button');
+                const accordionCollapse = item.querySelector('.accordion-collapse');
+                
+                accordionButton.classList.remove('collapsed');
+                accordionCollapse.classList.add('show');
+                
+                foundResults = true;
             } else {
                 item.style.display = 'none';
             }
         });
+        
+        // Show a message if no results found
+        const resultsInfo = document.getElementById('searchResults');
+        if (resultsInfo) {
+            if (!foundResults) {
+                resultsInfo.textContent = `No results found for "${searchTerm}"`;
+                resultsInfo.style.display = 'block';
+            } else {
+                resultsInfo.style.display = 'none';
+            }
+        }
     }
     
     // Enable search on Enter key press

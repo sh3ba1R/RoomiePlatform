@@ -1,7 +1,7 @@
 <!-- filepath: c:\Users\Saud\source\repos\Py_Django_Roomie\RoomiePlatform\roomie\templates\base.html -->
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -19,160 +19,15 @@
     />
     <!-- App Styles -->
     <link rel="stylesheet" href="{% static 'roomie/styles.css' %}" />
+    <!-- Dark Mode Styles -->
+    <link rel="stylesheet" href="{% static 'css/darkmode.css' %}" />
+    <!-- Animation Styles -->
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}" />
     <!-- Google Fonts -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    
-    <!-- Custom Dark Mode Styles -->
-    <style>
-      /* Dark Mode Styles */
-      [data-bs-theme="dark"] {
-        --bs-body-bg: #121212;
-        --bs-body-color: #e4e6eb;
-        --bs-body-secondary-color: #B0B3B8;
-        --bs-primary-rgb: 79, 130, 242;
-        color-scheme: dark;
-      }
-      
-      [data-bs-theme="dark"] .navbar-light {
-        background-color: #242526 !important;
-      }
-      
-      [data-bs-theme="dark"] .navbar-light .navbar-brand,
-      [data-bs-theme="dark"] .navbar-light .nav-link,
-      [data-bs-theme="dark"] .navbar-light .navbar-toggler-icon {
-        color: #e4e6eb !important;
-      }
-      
-      [data-bs-theme="dark"] .card,
-      [data-bs-theme="dark"] .modal-content {
-        background-color: #242526;
-        border-color: #3a3b3c;
-      }
-      
-      [data-bs-theme="dark"] .dropdown-menu {
-        background-color: #242526;
-        border-color: #3a3b3c;
-      }
-      
-      [data-bs-theme="dark"] .dropdown-item {
-        color: #e4e6eb;
-      }
-      
-      [data-bs-theme="dark"] .dropdown-item:hover {
-        background-color: #3a3b3c;
-      }
-      
-      [data-bs-theme="dark"] .text-muted,
-      [data-bs-theme="dark"] .text-secondary {
-        color: #B0B3B8 !important;
-      }
-      
-      [data-bs-theme="dark"] .bg-light {
-        background-color: #18191a !important;
-      }
-      
-      [data-bs-theme="dark"] .btn-outline-primary {
-        border-color: var(--bs-primary-rgb);
-        color: rgb(var(--bs-primary-rgb));
-      }
-      
-      /* Dark mode toggle button styles */
-      .theme-toggle-btn {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        margin-right: 10px;
-      }
-      
-      .theme-toggle-btn i {
-        transition: transform 0.5s ease;
-      }
-      
-      /* Animation Styles */
-      .page-transition {
-        opacity: 0;
-        animation: fadeIn 0.5s ease forwards;
-      }
-      
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      
-      .hover-scale {
-        transition: transform 0.3s ease;
-      }
-      
-      .hover-scale:hover {
-        transform: scale(1.03);
-      }
-      
-      .fade-in {
-        animation: fadeIn 0.5s ease forwards;
-      }
-      
-      .slide-up {
-        animation: slideUp 0.5s ease forwards;
-      }
-      
-      @keyframes slideUp {
-        from { 
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to { 
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
-      /* Staggered animations for lists */
-      .stagger-item {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      
-      /* Smooth scroll behavior */
-      html {
-        scroll-behavior: smooth;
-      }
-      
-      /* Improved Card Shadows */
-      .card {
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      }
-      
-      .card:hover {
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-      }
-      
-      [data-bs-theme="dark"] .card:hover {
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
-      }
-      
-      /* Dark mode transition */
-      body {
-        transition: background-color 0.3s ease, color 0.3s ease;
-      }
-      
-      /* Button hover animations */
-      .btn {
-        transition: all 0.3s ease;
-      }
-      
-      .btn:hover {
-        transform: translateY(-2px);
-      }
-    </style>
   </head>
 
   <body class="page-transition">
@@ -198,7 +53,7 @@
           <ul class="navbar-nav ms-auto">
             <!-- Dark Mode Toggle Button -->
             <li class="nav-item d-flex align-items-center">
-              <div class="theme-toggle-btn" id="themeToggle" title="Toggle Dark Mode">
+              <div class="theme-toggle-btn" id="themeToggle" title="Toggle Dark Mode" aria-label="Toggle Dark Mode">
                 <i class="fas fa-moon"></i>
               </div>
             </li>
@@ -331,42 +186,12 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Dark Mode Toggle Script -->
+    <!-- Dark Mode JS -->
+    <script src="{% static 'js/darkmode.js' %}"></script>
+    
+    <!-- Additional Scripts -->
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        // Get theme toggle button and icon
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = themeToggle.querySelector('i');
-        
-        // Check for saved theme preference or use user's system preference
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        // Apply the saved theme or user's preference
-        if (savedTheme === 'dark' || (!savedTheme && prefersDarkScheme)) {
-          document.documentElement.setAttribute('data-bs-theme', 'dark');
-          themeIcon.classList.replace('fa-moon', 'fa-sun');
-        }
-        
-        // Toggle theme when button is clicked
-        themeToggle.addEventListener('click', () => {
-          const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-          
-          // Update theme attribute
-          document.documentElement.setAttribute('data-bs-theme', newTheme);
-          
-          // Update icon
-          if (newTheme === 'dark') {
-            themeIcon.classList.replace('fa-moon', 'fa-sun');
-          } else {
-            themeIcon.classList.replace('fa-sun', 'fa-moon');
-          }
-          
-          // Save preference
-          localStorage.setItem('theme', newTheme);
-        });
-        
         // Animation for staggered items
         const staggerItems = document.querySelectorAll('.stagger-item');
         if (staggerItems.length > 0) {

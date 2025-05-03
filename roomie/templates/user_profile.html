@@ -1,7 +1,7 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
 <!-- Cover Photo/Banner Area -->
 <div class="profile-cover-container position-relative mb-5">
-  <div class="profile-cover-bg bg-primary"></div>
+  <div class="profile-cover-bg"></div>
   <div class="container position-relative">
     <div class="profile-header">
       <div class="profile-avatar-wrapper">
@@ -22,15 +22,15 @@
       <div class="profile-info-container">
         <h1 class="fw-bold mb-2 text-white">{{ user.username }}</h1>
         <div class="profile-badges mb-3">
-          <span class="badge bg-light text-primary fw-medium"
+          <span class="badge bg-light text-primary badge-account-type"
             >{{ user.get_account_type_display }}</span
           >
           {% if user.gender %}
-          <span class="badge bg-light text-primary fw-medium"
+          <span class="badge bg-light text-primary badge-gender"
             >{{ user.get_gender_display }}</span
           >
           {% endif %} {% if user.location %}
-          <span class="badge bg-light text-primary fw-medium">
+          <span class="badge bg-light text-primary badge-location">
             <i class="fas fa-map-marker-alt me-1"></i>{{ user.location }}
           </span>
           {% endif %}
@@ -46,13 +46,13 @@
         <!-- Edit profile buttons (only for the profile owner) -->
         {% if request.user.is_authenticated and request.user.id == user.id %}
         <div class="mt-3">
-          <a href="{% url 'edit_profile' %}" class="btn btn-light btn-sm">
+          <a href="{% url 'edit_profile' %}" class="btn btn-light btn-sm profile-edit-btn">
             <i class="fas fa-edit me-1"></i> Edit Profile
           </a>
-          <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm ms-2">
+          <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm ms-2 profile-dashboard-btn">
             <i class="fas fa-tachometer-alt me-1"></i> Dashboard
           </a>
-          <button id="toggleAvailabilityBtn" class="btn btn-light btn-sm ms-2">
+          <button id="toggleAvailabilityBtn" class="btn btn-light btn-sm ms-2 profile-toggle-btn">
             <i class="fas fa-toggle-{% if user.is_available %}on{% else %}off{% endif %} me-1"></i> 
             Toggle Availability
           </button>
@@ -595,7 +595,7 @@
   </div>
 </div>
 
-<!-- CSS for Enhanced Profile -->
+<!-- CSS for Enhanced Profile with Dark Mode Support -->
 <style>
   /* Profile cover area */
   .profile-cover-container {
@@ -654,9 +654,37 @@
     transition: all 0.3s ease;
   }
 
+  body.dark-mode .profile-avatar {
+    border-color: var(--dark-card-bg);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  }
+
   .profile-avatar:hover {
     transform: scale(1.05);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Badge styling with dark mode support */
+  body.dark-mode .badge-account-type,
+  body.dark-mode .badge-gender,
+  body.dark-mode .badge-location {
+    background-color: var(--dark-card-bg) !important;
+    color: var(--dark-accent) !important;
+  }
+
+  /* Profile buttons with dark mode support */
+  body.dark-mode .profile-edit-btn,
+  body.dark-mode .profile-dashboard-btn,
+  body.dark-mode .profile-toggle-btn {
+    background-color: var(--dark-card-bg);
+    color: var(--dark-text);
+    border-color: var(--dark-border);
+  }
+
+  body.dark-mode .profile-edit-btn:hover,
+  body.dark-mode .profile-dashboard-btn:hover,
+  body.dark-mode .profile-toggle-btn:hover {
+    background-color: var(--dark-hover);
   }
 
   /* Add animation for cards */
@@ -668,6 +696,13 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     animation: fadeInUp 0.5s ease-out;
     overflow: hidden;
+  }
+
+  body.dark-mode .card {
+    background-color: var(--dark-card-bg);
+    color: var(--dark-text);
+    border-color: var(--dark-border);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
 
   @keyframes fadeInUp {
@@ -696,7 +731,11 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   }
 
-  /* Improved tabs styling */
+  body.dark-mode .room-card:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Improved tabs styling with dark mode support */
   .profile-tabs .nav-link {
     border-radius: 10px;
     padding: 12px;
@@ -706,14 +745,26 @@
     position: relative;
   }
 
+  body.dark-mode .profile-tabs .nav-link {
+    color: var(--dark-text);
+  }
+
   .profile-tabs .nav-link:hover {
     background-color: rgba(13, 110, 253, 0.05);
+  }
+
+  body.dark-mode .profile-tabs .nav-link:hover {
+    background-color: var(--dark-hover);
   }
 
   .profile-tabs .nav-link.active {
     font-weight: 600;
     background-color: var(--bs-primary);
     color: white;
+  }
+
+  body.dark-mode .profile-tabs .nav-link.active {
+    background-color: var(--dark-accent);
   }
 
   .profile-tabs .nav-link.active::before {
@@ -730,6 +781,10 @@
     z-index: 1;
   }
 
+  body.dark-mode .profile-tabs .nav-link.active::before {
+    border-top-color: var(--dark-accent);
+  }
+
   /* Profile elements styling */
   .profile-card {
     overflow: hidden;
@@ -739,6 +794,10 @@
   .profile-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  body.dark-mode .profile-card:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3) !important;
   }
 
   .profile-status {
@@ -753,22 +812,38 @@
     box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
   }
 
+  /* Dark mode styles for text and borders */
+  body.dark-mode .card-title,
+  body.dark-mode h5,
+  body.dark-mode h6 {
+    color: var(--dark-text);
+  }
+
+  body.dark-mode .text-muted,
+  body.dark-mode .small {
+    color: var(--dark-text-secondary) !important;
+  }
+
+  body.dark-mode .border-bottom {
+    border-color: var(--dark-border) !important;
+  }
+
   /* Verification list */
   .verification-list .list-group-item {
     padding-left: 0;
     padding-right: 0;
   }
 
-  /* Preference items */
-  .preference-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: rgba(13, 110, 253, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--bs-primary);
+  body.dark-mode .list-group-item {
+    background-color: transparent;
+    color: var(--dark-text);
+    border-color: var(--dark-border);
+  }
+
+  /* Preference items dark mode */
+  body.dark-mode .preference-icon {
+    background-color: rgba(78, 149, 255, 0.15);
+    color: var(--dark-accent);
   }
 
   /* Room image container */
@@ -788,109 +863,35 @@
     transform: scale(1.1);
   }
 
-  .room-price-badge {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    background-color: var(--bs-primary);
-    color: white;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-weight: 500;
-    font-size: 14px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  /* Dark mode styling for tabs and forms */
+  body.dark-mode .tab-pane {
+    color: var(--dark-text);
   }
 
-  .room-status-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-weight: 500;
-    font-size: 12px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  body.dark-mode .form-control,
+  body.dark-mode .form-select,
+  body.dark-mode textarea {
+    background-color: var(--dark-input-bg);
+    color: var(--dark-text);
+    border-color: var(--dark-border);
   }
 
-  .room-status-badge.available {
-    background-color: #28a745;
-    color: white;
+  body.dark-mode .form-control:focus,
+  body.dark-mode .form-select:focus,
+  body.dark-mode textarea:focus {
+    border-color: var(--dark-accent);
+    box-shadow: 0 0 0 0.25rem rgba(78, 149, 255, 0.25);
   }
 
-  .room-status-badge.unavailable {
-    background-color: #6c757d;
-    color: white;
+  /* Dark mode styles for star rating */
+  body.dark-mode .rating-input label {
+    color: #444;
   }
 
-  .room-features {
-    margin-top: 0.5rem;
-  }
-
-  /* Tab content */
-  .tab-pane {
-    animation: fadeIn 0.5s ease;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  /* Review styling */
-  .review-avatar {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  
-  .review-item {
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-  }
-  
-  .review-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-  
-  .star-rating {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-  
-  .rating-input {
-    display: flex;
-    flex-direction: row-reverse;
-    margin-right: 0.5rem;
-  }
-  
-  .rating-input input {
-    display: none;
-  }
-  
-  .rating-input label {
-    cursor: pointer;
-    color: #ddd;
-    font-size: 1.5rem;
-    margin-right: 0.3rem;
-    transition: color 0.2s;
-  }
-  
-  .rating-input label:hover,
-  .rating-input label:hover ~ label,
-  .rating-input input:checked ~ label {
+  body.dark-mode .rating-input label:hover,
+  body.dark-mode .rating-input label:hover ~ label,
+  body.dark-mode .rating-input input:checked ~ label {
     color: #ffb400;
-  }
-  
-  .rating-stars .fas {
-    font-size: 0.8rem;
   }
 
   /* Responsive adjustments */
